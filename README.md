@@ -1,6 +1,6 @@
-# full-stack-project
+# dicey-chess-web
 
-A full stack TypeScript solo project.
+A full-stack TypeScript ReactJS website featuring a variation of the game of chess called "Dicey Chess"
 
 ## Getting Started
 
@@ -144,3 +144,9 @@ Below is an explanation of all included `npm` commands in the root `package.json
       - The `prepare` script is similar to `postinstall` — it is executed before `install`. Specifically for this project it is used to install `husky`.
    1. `deploy`
       - The `deploy` script is used to deploy the project by pushing the `main` branch to the `pub` branch, which triggers the GitHub Action that deploys the project.
+
+## Credits
+
+Chess Piece Icons: By Cburnett - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1499810
+
+By <a href="//commons.wikimedia.org/wiki/User:Cburnett" title="User:Cburnett">Cburnett</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="http://creativecommons.org/licenses/by-sa/3.0/" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=1496683">Link</a>

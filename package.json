@@ -1,8 +1,8 @@
 {
-  "name": "full-stack-project-template",
+  "name": "dicey-chess-web",
   "version": "2.0.0",
   "private": true,
-  "description": "A full stack TypeScript solo project.",
+  "description": "A full-stack TypeScript ReactJS website featuring a variation of the game of chess called 'Dicey Chess'",
   "type": "module",
   "scripts": {
     "start": "NODE_ENV=production npm start --prefix server",
