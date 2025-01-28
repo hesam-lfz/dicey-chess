@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { readServerData } from '../lib';
+import { getAIMove } from '../lib';
+import { Board } from '../components/Board';
+import './Game.css';
 
 import kingW from '../assets/king_w.svg';
 import kingB from '../assets/king_b.svg';
@@ -19,7 +21,7 @@ export function Game() {
 
   useEffect(() => {
     async function getServerData() {
-      setServerData(await readServerData());
+      setServerData(await getAIMove());
     }
     getServerData();
   }, []);
@@ -43,6 +45,7 @@ export function Game() {
         </a>
       </div>
       <h1>{serverData}</h1>
+      <Board />
     </>
   );
 }

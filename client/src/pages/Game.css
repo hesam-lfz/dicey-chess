@@ -1,0 +1,40 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #121212; /* Black-themed background */
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+/* Chessboard container */
+.chessboard {
+  display: grid;
+  grid-template-columns: repeat(8, 60px); /* 8 columns, each 60px wide */
+  grid-template-rows: repeat(8, 60px); /* 8 rows, each 60px tall */
+  border: 2px solid #444; /* Subtle border around the chessboard */
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Chessboard squares */
+.square {
+  width: 60px;
+  height: 60px;
+}
+
+/* Alternate square colors */
+.square:nth-child(odd) {
+  background-color: #b58863; /* Light square */
+}
+
+.square:nth-child(even) {
+  background-color: #4b4b4b; /* Dark square (dark theme adaptation) */
+}
+
+/* Row offset for alternating pattern */
+.chessboard div:nth-child(odd) .square:nth-child(even),
+.chessboard div:nth-child(even) .square:nth-child(odd) {
+  background-color: #b58863; /* Light square for offset pattern */
+}
