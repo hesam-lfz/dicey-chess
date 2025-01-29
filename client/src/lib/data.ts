@@ -29,14 +29,6 @@ export type Board = {
 };
 
 const allColors: Color[] = [Color.White, Color.Black];
-const allPieceTypes: PieceType[] = [
-  PieceType.King,
-  PieceType.Queen,
-  PieceType.Bishop,
-  PieceType.Knight,
-  PieceType.Rook,
-  PieceType.Pawn,
-];
 export const allSquares: { [key: string]: Square } = {};
 export const allPieces: { [key: string]: Piece } = {};
 export const allFiles: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h')[] = [
@@ -56,8 +48,6 @@ export const allRanks: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [
 for (const f of allFiles)
   for (const r of allRanks) allSquares[f + r] = { file: f, rank: r };
 
-console.log(allSquares);
-
 const initPositionPieceTypes: PieceType[] = [
   PieceType.Rook,
   PieceType.Knight,
@@ -68,6 +58,7 @@ const initPositionPieceTypes: PieceType[] = [
   PieceType.Knight,
   PieceType.Rook,
 ];
+
 for (const c of allColors) {
   const r = c == Color.White ? 1 : 8;
   for (const idx in allFiles) {
@@ -89,7 +80,3 @@ for (const c of allColors) {
 }
 
 export const board: Board = { squares: allSquares, pieces: allPieces };
-
-console.log(allPieceTypes);
-console.log(allPieces);
-console.log(board);

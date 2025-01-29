@@ -21,6 +21,16 @@
   height: 4vw;
   border-style: dashed;
   border-width: 0.5px;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.square:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.square.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
 /* Row offset for alternating pattern */
@@ -39,20 +49,4 @@
   display: block;
   position: absolute;
   height: 4vw;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.piece:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.piece.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .piece {
-    animation: piece-spin infinite 20s linear;
-  }
 }
