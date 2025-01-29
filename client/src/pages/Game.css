@@ -36,6 +36,7 @@
 }
 
 .piece {
+  display: block;
   position: absolute;
   height: 4vw;
   will-change: filter;

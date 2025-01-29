@@ -1,15 +1,15 @@
 export enum PieceType {
-  King,
-  Queen,
-  Bishop,
-  Knight,
-  Rook,
-  Pawn,
+  King = 'K',
+  Queen = 'Q',
+  Bishop = 'B',
+  Knight = 'N',
+  Rook = 'R',
+  Pawn = 'P',
 }
 
 export enum Color {
-  White,
-  Black,
+  White = 'White',
+  Black = 'Black',
 }
 
 export type Square = {
@@ -25,7 +25,7 @@ export type Piece = {
 
 export type Board = {
   squares: { [key: string]: Square };
-  pieces: Piece[];
+  pieces: { [key: string]: Piece };
 };
 
 const allColors: Color[] = [Color.White, Color.Black];
@@ -37,8 +37,8 @@ const allPieceTypes: PieceType[] = [
   PieceType.Rook,
   PieceType.Pawn,
 ];
-const allSquares: { [key: string]: Square } = {};
-const allPieces: Piece[] = [];
+export const allSquares: { [key: string]: Square } = {};
+export const allPieces: { [key: string]: Piece } = {};
 export const allFiles: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h')[] = [
   'a',
   'b',
@@ -58,55 +58,34 @@ for (const f of allFiles)
 
 console.log(allSquares);
 
+const initPositionPieceTypes: PieceType[] = [
+  PieceType.Rook,
+  PieceType.Knight,
+  PieceType.Bishop,
+  PieceType.Queen,
+  PieceType.King,
+  PieceType.Bishop,
+  PieceType.Knight,
+  PieceType.Rook,
+];
 for (const c of allColors) {
-  const r = 1;
-  console.log(c, r);
-  allPieces.push({
-    color: Color.White,
-    type: PieceType.Rook,
-    square: allSquares['a1'],
-  });
-  allPieces.push({
-    color: Color.White,
-    type: PieceType.Knight,
-    square: allSquares['b1'],
-  });
-  allPieces.push({
-    color: Color.White,
-    type: PieceType.Bishop,
-    square: allSquares['c1'],
-  });
-  allPieces.push({
-    color: Color.White,
-    type: PieceType.Queen,
-    square: allSquares['d1'],
-  });
-  allPieces.push({
-    color: Color.White,
-    type: PieceType.King,
-    square: allSquares['e1'],
-  });
-  allPieces.push({
-    color: Color.White,
-    type: PieceType.Bishop,
-    square: allSquares['f1'],
-  });
-  allPieces.push({
-    color: Color.White,
-    type: PieceType.Knight,
-    square: allSquares['g1'],
-  });
-  allPieces.push({
-    color: Color.White,
-    type: PieceType.Rook,
-    square: allSquares['h1'],
-  });
-  for (const f of allFiles)
-    allPieces.push({
-      color: Color.White,
+  const r = c == Color.White ? 1 : 8;
+  for (const idx in allFiles) {
+    const sq = allFiles[idx] + r;
+    allPieces[sq] = {
+      color: c,
+      type: initPositionPieceTypes[idx],
+      square: allSquares[sq],
+    };
+  }
+  for (const f of allFiles) {
+    const sq = f + (c == Color.White ? 2 : 7);
+    allPieces[sq] = {
+      color: c,
       type: PieceType.Pawn,
-      square: allSquares[f + 2],
-    });
+      square: allSquares[sq],
+    };
+  }
 }
 
 export const board: Board = { squares: allSquares, pieces: allPieces };
