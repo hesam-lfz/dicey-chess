@@ -1,0 +1,9 @@
+.main-panel {
+  display: flex;
+}
+
+.board-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

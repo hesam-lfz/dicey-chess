@@ -39,7 +39,7 @@ const allPieceTypes: PieceType[] = [
 ];
 const allSquares: { [key: string]: Square } = {};
 const allPieces: Piece[] = [];
-const allFiles: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h')[] = [
+export const allFiles: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h')[] = [
   'a',
   'b',
   'c',
@@ -49,7 +49,9 @@ const allFiles: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h')[] = [
   'g',
   'h',
 ];
-const allRanks: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [1, 2, 3, 4, 5, 6, 7, 8];
+export const allRanks: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [
+  1, 2, 3, 4, 5, 6, 7, 8,
+];
 
 for (const f of allFiles)
   for (const r of allRanks) allSquares[f + r] = { file: f, rank: r };

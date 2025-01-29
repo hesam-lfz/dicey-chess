@@ -1,20 +1,12 @@
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
-  background-color: #121212; /* Black-themed background */
-  color: white;
-  font-family: Arial, sans-serif;
-}
-
 /* Chessboard container */
+
 .chessboard {
   display: flex;
   flex-direction: column;
-  border: 2px solid #444; /* Subtle border around the chessboard */
+  border: 4px solid #444; /* Subtle border around the chessboard */
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  align-items: center;
+  width: 32vw;
 }
 
 .chessboard-row {
@@ -24,21 +16,12 @@ body {
 
 /* Chessboard squares */
 .square {
-  width: 60px;
-  height: 60px;
+  position: relative;
+  width: 4vw;
+  height: 4vw;
   border-style: dashed;
-  border-width: 1px;
+  border-width: 0.5px;
 }
-
-/*
-.square:nth-child(odd) {
-  background-color: #b58863;
-}
-
-.square:nth-child(even) {
-  background-color: #4b4b4b;
-}
-*/
 
 /* Row offset for alternating pattern */
 .chessboard div:nth-child(odd) .square:nth-child(even),
@@ -49,5 +32,26 @@ body {
 /* Row offset for alternating pattern */
 .chessboard div:nth-child(odd) .square:nth-child(odd),
 .chessboard div:nth-child(even) .square:nth-child(even) {
-  background-color: #b58863; /* Light square for offset pattern */
+  background-color: #508a4b; /* Light square for offset pattern */
+}
+
+.piece {
+  position: absolute;
+  height: 4vw;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.piece:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.piece.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .piece {
+    animation: piece-spin infinite 20s linear;
+  }
 }
