@@ -1,5 +1,3 @@
-/* Chessboard container */
-
 .board-panel {
   position: relative;
 }
@@ -7,7 +5,7 @@
 .chessboard {
   display: flex;
   flex-direction: column;
-  border: 4px solid #444; /* Subtle border around the chessboard */
+  border: 4px solid #444;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
   align-items: center;
   width: 32vw;
@@ -23,9 +21,11 @@
   flex-direction: column;
 }
 
-/* Chessboard squares */
 .square {
+  display: flex;
   position: relative;
+  justify-content: center;
+  align-items: center;
   width: 4vw;
   height: 4vw;
   border-style: dashed;
@@ -43,26 +43,23 @@
 }
 
 .highlighted-square {
-  border-color: #646cffaa;
-  border-style: solid;
-}
-
-.highlighted-square img {
-  filter: invert(50%) sepia(23%) saturate(1352%) hue-rotate(197deg)
-    brightness(119%) contrast(119%);
+  outline: none;
+  border: 0.25vw solid #c6c311aa;
+  box-shadow: 0 0 0.25vw #c6c311aa;
 }
 
 .chessboard-labels {
   position: absolute;
+  color: #757373;
 }
 
 .chessboard-file-labels {
-  bottom: -4vw;
+  bottom: -3vw;
 }
 
 .chessboard-rank-labels {
   left: -3vw;
-  top: 1.6vw;
+  top: 0.3vw;
 }
 
 .chessboard-labels .square {
