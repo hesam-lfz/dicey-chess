@@ -17,6 +17,10 @@
   color: #888;
 }
 
+nav {
+  height: 5vh;
+}
+
 nav ul {
   display: flex;
   flex-direction: row;

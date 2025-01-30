@@ -1,3 +1,3 @@
 export function FooterPanel() {
-  return <></>;
+  return <div className="footer"></div>;
 }

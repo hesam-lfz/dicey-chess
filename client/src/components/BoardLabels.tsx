@@ -15,6 +15,7 @@ export function BoardLabels() {
             {allLabels[idx].map((f_or_r) => {
               if (idx == 1) f_or_r = 9 - (f_or_r as number);
               const label = 'label-' + f_or_r;
+              console.log(label);
               return (
                 <span id={label} className="square" key={label}>
                   {f_or_r}
