@@ -10,10 +10,18 @@ import './App.css';
 export default function App() {
   return (
     <Routes>
-      <Route path="/dicey-chess-web/" element={<Header />}>
+      <Route
+        path={'/' + import.meta.env.VITE_APP_SUB_DOMAIN}
+        element={<Header />}>
         <Route index element={<Game />} />
-        <Route path="/dicey-chess-web/about" element={<About />} />
-        <Route path="/dicey-chess-web/credits" element={<Credits />} />
+        <Route
+          path={'/' + import.meta.env.VITE_APP_SUB_DOMAIN + 'about'}
+          element={<About />}
+        />
+        <Route
+          path={'/' + import.meta.env.VITE_APP_SUB_DOMAIN + 'credits'}
+          element={<Credits />}
+        />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
