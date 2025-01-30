@@ -1,7 +1,3 @@
-.board-panel {
-  position: relative;
-}
-
 .chessboard {
   display: flex;
   flex-direction: column;
