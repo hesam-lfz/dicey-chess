@@ -27,7 +27,7 @@ const pieceSVGs: { [key: string]: any } = {
   BlackP,
 };
 
-function renderPossiblePiece(piece?: Piece) {
+function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
   const color = String(piece.color);
   const type = String(piece.type);
@@ -37,21 +37,19 @@ function renderPossiblePiece(piece?: Piece) {
 
 export function Board() {
   return (
-    <div className="chessboard-and-pieces">
-      <div className="chessboard">
-        {allRanks.map((r) => (
-          <div className="chessboard-row" key={String(r)}>
-            {allFiles.map((f) => {
-              const sq = f + allRanks[8 - r];
-              return (
-                <div id={sq} className="square" key={sq}>
-                  {renderPossiblePiece(allPieces[sq])}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+    <div className="chessboard">
+      {allRanks.map((r) => (
+        <div className="chessboard-row" key={String(r)}>
+          {allFiles.map((f) => {
+            const sq = f + allRanks[8 - r];
+            return (
+              <div id={sq} className="square" key={sq}>
+                {renderOccupyingPiece(allPieces[sq])}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

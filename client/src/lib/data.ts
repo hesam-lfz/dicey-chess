@@ -80,3 +80,5 @@ for (const c of allColors) {
 }
 
 export const board: Board = { squares: allSquares, pieces: allPieces };
+
+console.log(board);

@@ -1,5 +1,9 @@
 /* Chessboard container */
 
+.board-panel {
+  position: relative;
+}
+
 .chessboard {
   display: flex;
   flex-direction: column;
@@ -12,6 +16,11 @@
 .chessboard-row {
   display: flex;
   flex-direction: row;
+}
+
+.chessboard-col {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Chessboard squares */
@@ -31,6 +40,23 @@
 
 .square.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+.chessboard-labels {
+  position: absolute;
+}
+
+.chessboard-file-labels {
+  bottom: -4vw;
+}
+
+.chessboard-rank-labels {
+  left: -3vw;
+  top: 1.6vw;
+}
+
+.chessboard-labels .square {
+  border-style: none;
 }
 
 /* Row offset for alternating pattern */

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { getAIMove } from '../lib';
 import { LeftPanel } from '../components/LeftPanel';
 import { RightPanel } from '../components/RightPanel';
-
 import { Board } from '../components/Board';
+import { BoardLabels } from '../components/BoardLabels';
 import './MainPanel.css';
 
 export function MainPanel() {
@@ -21,6 +21,7 @@ export function MainPanel() {
       <div className="main-panel">
         <LeftPanel />
         <div className="board-panel">
+          <BoardLabels />
           <Board />
         </div>
         <RightPanel />
