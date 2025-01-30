@@ -10,10 +10,10 @@ import './App.css';
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Header />}>
+      <Route path="/dicey-chess-web/" element={<Header />}>
         <Route index element={<Game />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/credits" element={<Credits />} />
+        <Route path="/dicey-chess-web/about" element={<About />} />
+        <Route path="/dicey-chess-web/credits" element={<Credits />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

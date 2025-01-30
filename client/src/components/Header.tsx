@@ -6,17 +6,17 @@ export function Header() {
       <nav className="px-4 text-white bg-gray-900">
         <ul>
           <li className="inline-block py-2 px-4">
-            <Link to="/" className="text-white">
+            <Link to="/dicey-chess-web/" className="text-white">
               Game
             </Link>
           </li>
           <li className="inline-block py-2 px-4">
-            <Link to="/about" className="text-white">
+            <Link to="/dicey-chess-web/about" className="text-white">
               About
             </Link>
           </li>
           <li className="inline-block py-2 px-4">
-            <Link to="/credits" className="text-white">
+            <Link to="/dicey-chess-web/credits" className="text-white">
               Credits
             </Link>
           </li>
