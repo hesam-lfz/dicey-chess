@@ -1,4 +1,7 @@
-import { allFiles, allRanks, allPieces, Piece } from '../lib';
+import { MouseEvent } from 'react';
+import { useState } from 'react';
+import { allFiles, allRanks, type Piece } from '../lib';
+
 import WhiteK from '../assets/king_w.svg';
 import BlackK from '../assets/king_b.svg';
 import WhiteQ from '../assets/queen_w.svg';
@@ -35,16 +38,39 @@ function renderOccupyingPiece(piece?: Piece) {
   return <img src={pieceSVGs[pieceName]} className="piece" alt={pieceName} />;
 }
 
-export function Board() {
+type Props = {
+  initPieces: { [key: string]: Piece };
+};
+
+export function Board({ initPieces }: Props) {
+  const [pieces /*, setPieces*/] = useState<{ [key: string]: Piece }>(
+    initPieces
+  );
+  const [movingFromSq, setMovingFromSq] = useState<string>('');
+
+  function squareClicked(e: MouseEvent<HTMLDivElement>) {
+    // find the square element which was clicked on so we can get the square coords:
+    let $clickedSq = e.target as HTMLElement;
+    if ($clickedSq.tagName === 'IMG')
+      $clickedSq = $clickedSq!.closest('.square') ?? $clickedSq;
+    const square = $clickedSq.id;
+    setMovingFromSq(square);
+  }
+
   return (
-    <div className="chessboard">
+    <div className="chessboard" onClick={(e) => squareClicked(e)}>
       {allRanks.map((r) => (
         <div className="chessboard-row" key={String(r)}>
           {allFiles.map((f) => {
             const sq = f + allRanks[8 - r];
             return (
-              <div id={sq} className="square" key={sq}>
-                {renderOccupyingPiece(allPieces[sq])}
+              <div
+                id={sq}
+                className={
+                  'square' + (movingFromSq === sq ? ' highlighted-square' : '')
+                }
+                key={sq}>
+                {renderOccupyingPiece(pieces[sq])}
               </div>
             );
           })}

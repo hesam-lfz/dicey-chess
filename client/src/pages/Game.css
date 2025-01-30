@@ -42,6 +42,16 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+.highlighted-square {
+  border-color: #646cffaa;
+  border-style: solid;
+}
+
+.highlighted-square img {
+  filter: invert(50%) sepia(23%) saturate(1352%) hue-rotate(197deg)
+    brightness(119%) contrast(119%);
+}
+
 .chessboard-labels {
   position: absolute;
 }

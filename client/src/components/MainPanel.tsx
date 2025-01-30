@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAIMove } from '../lib';
+import { allPieces, getAIMove } from '../lib';
 import { LeftPanel } from '../components/LeftPanel';
 import { RightPanel } from '../components/RightPanel';
 import { Board } from '../components/Board';
@@ -22,7 +22,7 @@ export function MainPanel() {
         <LeftPanel />
         <div className="board-panel">
           <BoardLabels />
-          <Board />
+          <Board initPieces={allPieces} />
         </div>
         <RightPanel />
       </div>
