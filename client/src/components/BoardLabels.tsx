@@ -11,11 +11,12 @@ export function BoardLabels() {
     <>
       {idxs.map((idx) => {
         return (
-          <div className={'chessboard-labels ' + classNames[idx]}>
+          <div
+            className={'chessboard-labels ' + classNames[idx]}
+            key={idx === 0 ? 'file-labels' : 'rank-labels'}>
             {allLabels[idx].map((f_or_r) => {
               if (idx == 1) f_or_r = 9 - (f_or_r as number);
               const label = 'label-' + f_or_r;
-              console.log(label);
               return (
                 <span id={label} className="square" key={label}>
                   {f_or_r}

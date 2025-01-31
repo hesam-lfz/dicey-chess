@@ -40,8 +40,18 @@
 
 .highlighted-square {
   outline: none;
-  border: 0.25vw solid #c6c311aa;
-  box-shadow: 0 0 0.25vw #c6c311aa;
+  border-width: 0.25vw;
+  border-style: solid;
+}
+
+.highlighted-square-from {
+  border-color: #c6c311aa;
+  box-shadow: 0 0 0.25vw 0.25vw #c6c311aa inset;
+}
+
+.highlighted-square-to {
+  border-color: #c945e1aa;
+  box-shadow: 0 0 0.25vw 0.25vw #c945e1aa inset;
 }
 
 .chessboard-labels {
@@ -78,4 +88,43 @@
   display: block;
   position: absolute;
   height: 4vw;
+}
+
+/*
+	Portrait Screen
+*/
+@media screen and (orientation: portrait) {
+  .chessboard {
+    width: calc(2.5 * 32vw);
+  }
+
+  .square {
+    width: calc(2.5 * 4vw);
+    height: calc(2.5 * 4vw);
+  }
+
+  .highlighted-square {
+    border-width: calc(2.5 * 0.25vw);
+  }
+
+  .highlighted-square-from {
+    box-shadow: 0 0 calc(2.5 * 0.25vw) calc(2.5 * 0.25vw) #c6c311aa inset;
+  }
+
+  .highlighted-square-to {
+    box-shadow: 0 0 calc(2.5 * 0.25vw) calc(2.5 * 0.25vw) #c945e1aa inset;
+  }
+
+  .piece {
+    height: calc(2.5 * 3vw);
+  }
+
+  .chessboard-file-labels {
+    bottom: calc(2.5 * -3vw);
+  }
+
+  .chessboard-rank-labels {
+    left: calc(2.5 * -3vw);
+    top: calc(2.5 * 0.3vw);
+  }
 }

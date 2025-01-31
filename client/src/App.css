@@ -3,7 +3,7 @@
 }
 
 #root {
-  max-width: 1280px;
+  max-width: 100vw;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -24,9 +24,19 @@ nav {
 nav ul {
   display: flex;
   flex-direction: row;
+  padding-inline-start: 0;
 }
 
 nav li {
   list-style-type: none;
-  padding: 0 50px;
+  padding: 0 5vw;
+}
+
+/*
+	Portrait Screen
+*/
+@media screen and (orientation: portrait) {
+  #root {
+    padding: 0;
+  }
 }

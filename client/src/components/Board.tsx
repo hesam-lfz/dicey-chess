@@ -1,6 +1,11 @@
-import { MouseEvent } from 'react';
-import { useState } from 'react';
-import { allFiles, allRanks, type Piece } from '../lib';
+import { useState, useEffect, useCallback, MouseEvent } from 'react';
+import {
+  allFiles,
+  allRanks,
+  allSquares,
+  validateMove,
+  type Piece,
+} from '../lib';
 
 import WhiteK from '../assets/king_w.svg';
 import BlackK from '../assets/king_b.svg';
@@ -43,10 +48,30 @@ type Props = {
 };
 
 export function Board({ initPieces }: Props) {
-  const [pieces /*, setPieces*/] = useState<{ [key: string]: Piece }>(
-    initPieces
-  );
+  const [pieces, setPieces] = useState<{ [key: string]: Piece }>(initPieces);
   const [movingFromSq, setMovingFromSq] = useState<string>('');
+  const [movingToSq, setMovingToSq] = useState<string>('');
+
+  const handleMove = useCallback(() => {
+    console.log('move', movingFromSq, movingToSq);
+    const piece = pieces[movingFromSq];
+    delete pieces[movingFromSq];
+    pieces[movingToSq] = piece;
+    piece.square = allSquares[movingToSq];
+    setMovingFromSq('');
+    setMovingToSq('');
+    setPieces(pieces);
+  }, [movingFromSq, movingToSq, pieces]);
+
+  useEffect(() => {
+    console.log('effect', movingFromSq, movingToSq);
+    if (
+      movingFromSq &&
+      movingToSq &&
+      validateMove(pieces[movingFromSq], allSquares[movingToSq])
+    )
+      setTimeout(handleMove, 200);
+  });
 
   function squareClicked(e: MouseEvent<HTMLDivElement>) {
     // find the square element which was clicked on so we can get the square coords:
@@ -54,7 +79,8 @@ export function Board({ initPieces }: Props) {
     if ($clickedSq.tagName === 'IMG')
       $clickedSq = $clickedSq!.closest('.square') ?? $clickedSq;
     const square = $clickedSq.id;
-    setMovingFromSq(square);
+    if (movingFromSq) setMovingToSq(square);
+    else if (pieces[square]) setMovingFromSq(square);
   }
 
   return (
@@ -67,7 +93,12 @@ export function Board({ initPieces }: Props) {
               <div
                 id={sq}
                 className={
-                  'square' + (movingFromSq === sq ? ' highlighted-square' : '')
+                  'square' +
+                  (movingFromSq === sq
+                    ? ' highlighted-square highlighted-square-from'
+                    : movingToSq === sq
+                    ? ' highlighted-square highlighted-square-to'
+                    : '')
                 }
                 key={sq}>
                 {renderOccupyingPiece(pieces[sq])}
