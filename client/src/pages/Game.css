@@ -24,6 +24,7 @@
   align-items: center;
   width: 4vw;
   height: 4vw;
+  cursor: pointer;
   border-style: dashed;
   border-width: 0.5px;
   will-change: filter;
@@ -88,6 +89,7 @@
   display: block;
   position: absolute;
   height: 4vw;
+  filter: drop-shadow(4px 1px 4px rgba(0, 0, 0, 0.5));
 }
 
 /*
@@ -116,7 +118,7 @@
   }
 
   .piece {
-    height: calc(2.5 * 3vw);
+    height: calc(2.5 * 4vw);
   }
 
   .chessboard-file-labels {

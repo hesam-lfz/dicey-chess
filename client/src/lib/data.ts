@@ -26,6 +26,7 @@ export type Piece = {
 export type Board = {
   squares: { [key: string]: Square };
   pieces: { [key: string]: Piece };
+  turn: Color;
 };
 
 const allColors: Color[] = [Color.White, Color.Black];
@@ -79,6 +80,10 @@ for (const c of allColors) {
   }
 }
 
-export const board: Board = { squares: allSquares, pieces: allPieces };
+export const board: Board = {
+  squares: allSquares,
+  pieces: allPieces,
+  turn: Color.White,
+};
 
 console.log(board);

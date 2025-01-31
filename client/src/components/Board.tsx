@@ -3,6 +3,7 @@ import {
   allFiles,
   allRanks,
   allSquares,
+  Color,
   validateMove,
   type Piece,
 } from '../lib';
@@ -45,9 +46,11 @@ function renderOccupyingPiece(piece?: Piece) {
 
 type Props = {
   initPieces: { [key: string]: Piece };
+  initTurn: Color;
 };
 
-export function Board({ initPieces }: Props) {
+export function Board({ initPieces, initTurn }: Props) {
+  const [turn, setTurn] = useState<Color>(initTurn);
   const [pieces, setPieces] = useState<{ [key: string]: Piece }>(initPieces);
   const [movingFromSq, setMovingFromSq] = useState<string>('');
   const [movingToSq, setMovingToSq] = useState<string>('');
@@ -61,7 +64,8 @@ export function Board({ initPieces }: Props) {
     setMovingFromSq('');
     setMovingToSq('');
     setPieces(pieces);
-  }, [movingFromSq, movingToSq, pieces]);
+    setTurn(turn === Color.White ? Color.Black : Color.White);
+  }, [movingFromSq, movingToSq, pieces, turn]);
 
   useEffect(() => {
     console.log('effect', movingFromSq, movingToSq);
@@ -79,8 +83,9 @@ export function Board({ initPieces }: Props) {
     if ($clickedSq.tagName === 'IMG')
       $clickedSq = $clickedSq!.closest('.square') ?? $clickedSq;
     const square = $clickedSq.id;
-    if (movingFromSq) setMovingToSq(square);
-    else if (pieces[square]) setMovingFromSq(square);
+    const clickedPiece = pieces[square];
+    if (clickedPiece && clickedPiece.color === turn) setMovingFromSq(square);
+    else if (movingFromSq) setMovingToSq(square);
   }
 
   return (
