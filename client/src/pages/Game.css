@@ -120,11 +120,11 @@
   }
 
   .highlighted-square-from {
-    box-shadow: 0 0 calc(2.5 * 0.25vw) calc(2.5 * 0.25vw) #c6c311aa inset;
+    box-shadow: 0 0 calc(2.5 * 0.25vw) calc(2.5 * 0.25vw) #c945e1aa inset;
   }
 
   .highlighted-square-to {
-    box-shadow: 0 0 calc(2.5 * 0.25vw) calc(2.5 * 0.25vw) #c945e1aa inset;
+    box-shadow: 0 0 calc(2.5 * 0.25vw) calc(2.5 * 0.25vw) orange inset;
   }
 
   .piece {
