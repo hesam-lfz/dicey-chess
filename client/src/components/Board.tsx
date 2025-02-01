@@ -54,6 +54,8 @@ export function Board({ initPieces, initTurn }: Props) {
   const [pieces, setPieces] = useState<{ [key: string]: Piece }>(initPieces);
   const [movingFromSq, setMovingFromSq] = useState<string>('');
   const [movingToSq, setMovingToSq] = useState<string>('');
+  const [prevMoveFromSq, setPrevMoveFromSq] = useState<string>('');
+  const [prevMoveToSq, setPrevMoveToSq] = useState<string>('');
 
   const handleMove = useCallback(() => {
     console.log('move', movingFromSq, movingToSq);
@@ -61,6 +63,8 @@ export function Board({ initPieces, initTurn }: Props) {
     delete pieces[movingFromSq];
     pieces[movingToSq] = piece;
     piece.square = allSquares[movingToSq];
+    setPrevMoveFromSq(movingFromSq);
+    setPrevMoveToSq(movingToSq);
     setMovingFromSq('');
     setMovingToSq('');
     setPieces(pieces);
@@ -94,18 +98,17 @@ export function Board({ initPieces, initTurn }: Props) {
         <div className="chessboard-row" key={String(r)}>
           {allFiles.map((f) => {
             const sq = f + allRanks[8 - r];
+            let squareClasses = 'square';
+            if (movingFromSq === sq)
+              squareClasses +=
+                ' border-highlighted-square highlighted-square-from';
+            else if (movingToSq === sq)
+              squareClasses +=
+                ' border-highlighted-square highlighted-square-to';
+            else if (prevMoveFromSq === sq || prevMoveToSq === sq)
+              squareClasses += ' highlighted-square-prev-move';
             return (
-              <div
-                id={sq}
-                className={
-                  'square' +
-                  (movingFromSq === sq
-                    ? ' highlighted-square highlighted-square-from'
-                    : movingToSq === sq
-                    ? ' highlighted-square highlighted-square-to'
-                    : '')
-                }
-                key={sq}>
+              <div id={sq} className={squareClasses} key={sq}>
                 {renderOccupyingPiece(pieces[sq])}
               </div>
             );

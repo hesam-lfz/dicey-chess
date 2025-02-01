@@ -1,7 +1,8 @@
 .chessboard {
   display: flex;
   flex-direction: column;
-  border: 4px solid #444;
+
+  /* border: 4px solid #444; */
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
   align-items: center;
   width: 32vw;
@@ -25,7 +26,8 @@
   width: 4vw;
   height: 4vw;
   cursor: pointer;
-  border-style: dashed;
+
+  /* border-style: dashed; */
   border-width: 0.5px;
   will-change: filter;
   transition: filter 300ms;
@@ -39,20 +41,28 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-.highlighted-square {
+.border-highlighted-square {
   outline: none;
   border-width: 0.25vw;
   border-style: solid;
 }
 
 .highlighted-square-from {
-  border-color: #c6c311aa;
-  box-shadow: 0 0 0.25vw 0.25vw #c6c311aa inset;
+  border-color: #c945e1aa;
+  box-shadow: 0 0 0.25vw 0.25vw #c945e1aa inset;
 }
 
 .highlighted-square-to {
-  border-color: #c945e1aa;
-  box-shadow: 0 0 0.25vw 0.25vw #c945e1aa inset;
+  border-color: orange;
+  box-shadow: 0 0 0.25vw 0.25vw orange inset;
+}
+
+.highlighted-square-prev-move {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 2px,
+    orange 5px 2px
+  );
 }
 
 .chessboard-labels {
@@ -105,7 +115,7 @@
     height: calc(2.5 * 4vw);
   }
 
-  .highlighted-square {
+  .border-highlighted-square {
     border-width: calc(2.5 * 0.25vw);
   }
 
