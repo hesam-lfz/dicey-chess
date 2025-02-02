@@ -52,6 +52,7 @@
 
 .header-logo-name {
   text-decoration: underline green 4px;
+  font-size: larger;
 }
 
 nav ul {
@@ -63,6 +64,8 @@ nav ul {
 nav li {
   list-style-type: none;
   padding: 0 2vw;
+  display: flex;
+  align-items: center;
 }
 
 /*

@@ -8,14 +8,13 @@ export function Header() {
         <div className="header-side header-left-side nav-bar">
           <nav>
             <ul>
-              <li className="inline-block header-logo-name">DICEY CHESS</li>
-              <li className="inline-block">
-                <Link to="/dicey-chess-web/" className="text-white">
-                  Game
+              <li className="inline-block header-logo-name">
+                <Link to="/dicey-chess-web/" className="">
+                  DICEY CHESS
                 </Link>
               </li>
               <li className="inline-block">
-                <Link to="/dicey-chess-web/about" className="text-white">
+                <Link to="/dicey-chess-web/about" className="">
                   About
                 </Link>
               </li>
