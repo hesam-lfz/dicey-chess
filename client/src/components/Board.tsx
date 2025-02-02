@@ -2,11 +2,19 @@ import { useState, useEffect, useCallback, MouseEvent } from 'react';
 import {
   allFiles,
   allRanks,
+  getSquarePiece,
   makeMove,
   validateMove,
   promptUserIfPromotionMove,
 } from '../lib';
-import { WHITE, BLACK, type Color, type Piece, type Square } from 'chess.js';
+import {
+  WHITE,
+  BLACK,
+  type Color,
+  type Piece,
+  type Square,
+  type Move,
+} from 'chess.js';
 
 import Icon_wk from '../assets/king_w.svg';
 import Icon_bk from '../assets/king_b.svg';
@@ -45,59 +53,61 @@ function renderOccupyingPiece(piece?: Piece) {
 }
 
 type Props = {
-  initPieces: { [key: string]: Piece };
   initTurn: Color;
+  initHistory: string[];
+  containerOnMove: () => void;
 };
 
-export function Board({ initPieces, initTurn }: Props) {
+export function Board({ initTurn, initHistory, containerOnMove }: Props) {
+  const [history, setHistory] = useState<string[]>(initHistory);
   const [turn, setTurn] = useState<Color>(initTurn);
-  const [pieces, setPieces] = useState<{ [key: string]: Piece }>(initPieces);
   const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
   const [movingToSq, setMovingToSq] = useState<Square | null>(null);
   const [prevMoveFromSq, setPrevMoveFromSq] = useState<Square | null>(null);
   const [prevMoveToSq, setPrevMoveToSq] = useState<Square | null>(null);
 
+  useEffect(() => {
+    if (movingFromSq && movingToSq) setTimeout(handleMove, 200);
+    console.log('rendered Board');
+  });
+
   const handleMove = useCallback(() => {
-    console.log('move', movingFromSq, movingToSq);
-    const piece = pieces[movingFromSq!];
-    delete pieces[movingFromSq!];
-    pieces[movingToSq!] = piece;
     setPrevMoveFromSq(movingFromSq);
     setPrevMoveToSq(movingToSq);
     setMovingFromSq(null);
     setMovingToSq(null);
-    setPieces(pieces);
     setTurn(turn === WHITE ? BLACK : WHITE);
-    makeMove(
+    const move: Move = makeMove(
       movingFromSq!,
       movingToSq!,
-      promptUserIfPromotionMove(piece, movingToSq!, turn)
+      promptUserIfPromotionMove(movingFromSq!, movingToSq!, turn)
     );
-  }, [movingFromSq, movingToSq, pieces, turn]);
+    history.push(move.san);
+    setHistory(history);
+    containerOnMove();
+  }, [movingFromSq, movingToSq, turn, history, containerOnMove]);
 
-  useEffect(() => {
-    console.log('effect', movingFromSq, movingToSq);
-    if (movingFromSq && movingToSq) setTimeout(handleMove, 200);
-  });
-
-  function squareClicked(e: MouseEvent<HTMLDivElement>) {
-    // find the square element which was clicked on so we can get the square coords:
-    let $clickedSq = e.target as HTMLElement;
-    if ($clickedSq.tagName === 'IMG')
-      $clickedSq = $clickedSq!.closest('.square') ?? $clickedSq;
-    const square = $clickedSq.id as Square;
-    const clickedPiece = pieces[square];
-    if (clickedPiece && clickedPiece.color === turn) setMovingFromSq(square);
-    else if (movingFromSq && validateMove(movingFromSq, square))
-      setMovingToSq(square);
-  }
+  const squareClicked = useCallback(
+    (e: MouseEvent<HTMLDivElement>) => {
+      // find the square element which was clicked on so we can get the square coords:
+      let $clickedSq = e.target as HTMLElement;
+      if ($clickedSq.tagName === 'IMG')
+        $clickedSq = $clickedSq!.closest('.square') ?? $clickedSq;
+      const square = $clickedSq.id as Square;
+      const clickedPiece = getSquarePiece(square);
+      if (clickedPiece && clickedPiece.color === turn) setMovingFromSq(square);
+      else if (movingFromSq && validateMove(movingFromSq, square))
+        setMovingToSq(square);
+    },
+    [movingFromSq, turn]
+  );
 
   return (
     <div className="chessboard" onClick={(e) => squareClicked(e)}>
       {allRanks.map((r) => (
         <div className="chessboard-row" key={String(r)}>
           {allFiles.map((f) => {
-            const sq = f + allRanks[8 - r];
+            const sq = (f + allRanks[8 - r]) as Square;
             let squareClasses = 'square';
             if (movingFromSq === sq)
               squareClasses +=
@@ -109,7 +119,7 @@ export function Board({ initPieces, initTurn }: Props) {
               squareClasses += ' highlighted-square-prev-move';
             return (
               <div id={sq} className={squareClasses} key={sq}>
-                {renderOccupyingPiece(pieces[sq])}
+                {renderOccupyingPiece(getSquarePiece(sq))}
               </div>
             );
           })}

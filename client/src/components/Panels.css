@@ -1,0 +1,34 @@
+.main-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  height: 100%;
+  width: 100%;
+}
+
+.board-panel {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+}
+
+.side-panel {
+  align-self: flex-start;
+  width: 100%;
+  padding: 5vw;
+}
+
+.left-panel li {
+  list-style-type: none;
+}
+
+.history-panel {
+  width: 100%;
+  height: 50vh;
+  display: flex;
+  border-style: dotted;
+  flex-direction: row;
+  justify-content: space-evenly;
+}

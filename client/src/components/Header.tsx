@@ -4,7 +4,7 @@ import LogoIcon from '../assets/dicey-chess-logo-c.png';
 export function Header() {
   return (
     <>
-      <div className="header">
+      <div className="header rainbow-colored">
         <div className="header-side header-left-side nav-bar">
           <nav>
             <ul>

@@ -21,6 +21,20 @@
   color: #888;
 }
 
+.rainbow-colored {
+  background: linear-gradient(
+    to right,
+    orange,
+    yellow,
+    green,
+    cyan,
+    blue,
+    violet
+  );
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .header {
   display: flex;
   justify-content: center;

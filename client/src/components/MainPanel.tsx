@@ -1,32 +1,33 @@
-import { useEffect, useState } from 'react';
-import { board, getAIMove } from '../lib';
+import { useState } from 'react';
+
+import { board } from '../lib';
 import { LeftPanel } from '../components/LeftPanel';
 import { RightPanel } from '../components/RightPanel';
 import { Board } from '../components/Board';
 import { BoardLabels } from '../components/BoardLabels';
-import './MainPanel.css';
+import './Panels.css';
 
 export function MainPanel() {
-  const [serverData, setServerData] = useState('');
+  const [history, setHistory] = useState<string[]>(board.history);
 
-  useEffect(() => {
-    async function getServerData() {
-      setServerData(await getAIMove());
-    }
-    getServerData();
-  }, []);
+  function onMove() {
+    setHistory([...history]);
+  }
 
   return (
     <>
       <div className="main-panel">
-        <LeftPanel />
+        <LeftPanel initHistory={history} />
         <div className="board-panel">
           <BoardLabels />
-          <Board initPieces={board.pieces} initTurn={board.turn} />
+          <Board
+            initTurn={board.turn}
+            initHistory={history}
+            containerOnMove={onMove}
+          />
         </div>
         <RightPanel />
       </div>
-      <h1>{serverData}</h1>
     </>
   );
 }
