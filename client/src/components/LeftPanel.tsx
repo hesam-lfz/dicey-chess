@@ -1,7 +1,7 @@
 import { HistoryPanel } from './HistoryPanel';
 
 type Props = {
-  initHistory: string[];
+  initHistory: string[][];
 };
 
 export function LeftPanel({ initHistory }: Props) {

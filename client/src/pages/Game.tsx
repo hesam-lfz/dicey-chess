@@ -1,11 +1,11 @@
 import './Game.css';
-import { MainPanel } from '../components/MainPanel';
+import { GamePanel } from '../components/GamePanel';
 import { FooterPanel } from '../components/FooterPanel';
 
 export function Game() {
   return (
     <>
-      <MainPanel />
+      <GamePanel />
       <FooterPanel />
     </>
   );

@@ -15,9 +15,13 @@
 }
 
 .side-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   align-self: flex-start;
   width: 100%;
   padding: 5vw;
+  overflow: scroll;
 }
 
 .left-panel li {
@@ -25,10 +29,16 @@
 }
 
 .history-panel {
-  width: 100%;
+  width: 50%;
   height: 50vh;
   display: flex;
   border-style: dotted;
   flex-direction: row;
   justify-content: space-evenly;
+  overflow: scroll;
+}
+
+.history-panel ul {
+  padding: 1vw;
+  width: 100%;
 }

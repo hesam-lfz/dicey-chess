@@ -5,16 +5,11 @@ import {
   getSquarePiece,
   makeMove,
   validateMove,
+  checkForMate,
   promptUserIfPromotionMove,
+  board,
 } from '../lib';
-import {
-  WHITE,
-  BLACK,
-  type Color,
-  type Piece,
-  type Square,
-  type Move,
-} from 'chess.js';
+import { type Color, type Piece, type Square } from 'chess.js';
 
 import Icon_wk from '../assets/king_w.svg';
 import Icon_bk from '../assets/king_b.svg';
@@ -54,12 +49,10 @@ function renderOccupyingPiece(piece?: Piece) {
 
 type Props = {
   initTurn: Color;
-  initHistory: string[];
   containerOnMove: () => void;
 };
 
-export function Board({ initTurn, initHistory, containerOnMove }: Props) {
-  const [history, setHistory] = useState<string[]>(initHistory);
+export function Board({ initTurn, containerOnMove }: Props) {
   const [turn, setTurn] = useState<Color>(initTurn);
   const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
   const [movingToSq, setMovingToSq] = useState<Square | null>(null);
@@ -68,7 +61,6 @@ export function Board({ initTurn, initHistory, containerOnMove }: Props) {
 
   useEffect(() => {
     if (movingFromSq && movingToSq) setTimeout(handleMove, 200);
-    console.log('rendered Board');
   });
 
   const handleMove = useCallback(() => {
@@ -76,19 +68,19 @@ export function Board({ initTurn, initHistory, containerOnMove }: Props) {
     setPrevMoveToSq(movingToSq);
     setMovingFromSq(null);
     setMovingToSq(null);
-    setTurn(turn === WHITE ? BLACK : WHITE);
-    const move: Move = makeMove(
+    makeMove(
       movingFromSq!,
       movingToSq!,
       promptUserIfPromotionMove(movingFromSq!, movingToSq!, turn)
     );
-    history.push(move.san);
-    setHistory(history);
+    setTurn(board.turn);
     containerOnMove();
-  }, [movingFromSq, movingToSq, turn, history, containerOnMove]);
+    board.gameOver = checkForMate();
+  }, [movingFromSq, movingToSq, turn, containerOnMove]);
 
   const squareClicked = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
+      if (board.gameOver) return;
       // find the square element which was clicked on so we can get the square coords:
       let $clickedSq = e.target as HTMLElement;
       if ($clickedSq.tagName === 'IMG')

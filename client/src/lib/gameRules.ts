@@ -11,8 +11,11 @@ import {
 
 export type Board = {
   initPositionFEN?: string;
-  history: string[];
+  history: string[][];
   turn: Color;
+  numMovesInTurn: number;
+  firstMoveInTurn: boolean;
+  gameOver: boolean;
 };
 
 export const allFiles: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h')[] = [
@@ -34,11 +37,14 @@ export const getSquareRank: (square: Square) => number = (square: Square) =>
 
 export const board: Board = {
   initPositionFEN: undefined,
-  history: [],
+  history: [[]],
   turn: WHITE,
+  numMovesInTurn: 3,
+  firstMoveInTurn: true,
+  gameOver: false,
 };
 
-export const boardEngine: Chess = new Chess(board.initPositionFEN);
+export let boardEngine: Chess = new Chess(board.initPositionFEN);
 
 console.log(board);
 
@@ -56,14 +62,29 @@ export function makeMove(
   fromSquare: Square,
   toSquare: Square,
   promotion?: string
-): Move {
+): string[][] {
+  console.log('before', boardEngine.fen(), 'turn', board.turn);
   const move: Move = boardEngine.move({
     from: fromSquare,
     to: toSquare,
     promotion: promotion,
   });
-  return move;
+  board.turn = boardEngine.turn();
+  board.history[board.history.length - 1].push(move.san);
+  board.numMovesInTurn -= 1;
+  if (board.numMovesInTurn === 0) {
+    board.numMovesInTurn = 3;
+    board.firstMoveInTurn = true;
+    board.history.push([]);
+  } else {
+    board.firstMoveInTurn = false;
+    swapTurn();
+  }
+  console.log(board.firstMoveInTurn, board.numMovesInTurn);
+  return board.history;
 }
+
+export const checkForMate: () => boolean = () => boardEngine.isCheckmate();
 
 export function promptUserIfPromotionMove(
   fromSquare: Square,
@@ -79,4 +100,14 @@ export function promptUserIfPromotionMove(
     }
   }
   return undefined;
+}
+
+function swapTurn(): void {
+  let fen = boardEngine.fen();
+  const fenA = fen.split(' ');
+  fenA[1] = fenA[1] === 'w' ? 'b' : 'w';
+  fen = fenA.join(' ');
+  console.log(fen);
+  boardEngine = new Chess(fen);
+  board.turn = boardEngine.turn();
 }
