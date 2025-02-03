@@ -5,20 +5,15 @@ type Props = {
 };
 
 export function HistoryPanel({ initHistory }: Props) {
-  const historyItemsRef = useRef<null | HTMLUListElement>(null);
+  const historyItemsRef = useRef<null | HTMLDivElement>(null);
 
   const [history] = useState<string[][]>(initHistory);
 
   // scroll to the bottom of the history:
   useEffect(() => {
-    // not working!
-    console.log(
-      historyItemsRef!.current!.scrollTop,
-      historyItemsRef!.current!.scrollHeight
-    );
     historyItemsRef!.current!.scrollTop =
       historyItemsRef!.current!.scrollHeight;
-  }, []);
+  });
 
   const allHistoryItems: ReactElement[] = [];
   let moveCtr = 1;
@@ -36,10 +31,8 @@ export function HistoryPanel({ initHistory }: Props) {
   });
 
   return (
-    <div className="history-panel">
-      <ul className="history-items" ref={historyItemsRef}>
-        {allHistoryItems}
-      </ul>
+    <div className="history-panel" ref={historyItemsRef}>
+      <ul className="history-items">{allHistoryItems}</ul>
     </div>
   );
 }

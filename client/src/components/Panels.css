@@ -29,7 +29,7 @@
 }
 
 .history-panel {
-  width: 50%;
+  width: 60%;
   height: 50vh;
   display: flex;
   border-style: dotted;
@@ -41,4 +41,17 @@
 .history-panel ul {
   padding: 1vw;
   width: 100%;
+}
+
+/*
+	Portrait Screen
+*/
+@media screen and (orientation: portrait) {
+  .main-panel {
+    flex-direction: column-reverse;
+  }
+
+  .history-panel {
+    height: 50vw;
+  }
 }

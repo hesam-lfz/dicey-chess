@@ -63,7 +63,6 @@ export function makeMove(
   toSquare: Square,
   promotion?: string
 ): string[][] {
-  console.log('before', boardEngine.fen(), 'turn', board.turn);
   const move: Move = boardEngine.move({
     from: fromSquare,
     to: toSquare,
@@ -80,7 +79,6 @@ export function makeMove(
     board.firstMoveInTurn = false;
     swapTurn();
   }
-  console.log(board.firstMoveInTurn, board.numMovesInTurn);
   return board.history;
 }
 
@@ -107,7 +105,6 @@ function swapTurn(): void {
   const fenA = fen.split(' ');
   fenA[1] = fenA[1] === 'w' ? 'b' : 'w';
   fen = fenA.join(' ');
-  console.log(fen);
   boardEngine = new Chess(fen);
   board.turn = boardEngine.turn();
 }
