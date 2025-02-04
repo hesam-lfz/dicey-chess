@@ -22,7 +22,9 @@ export function Header() {
           </nav>
         </div>
         <div className="header-logo-holder">
-          <img className="header-logo" src={LogoIcon} alt="logo"></img>
+          <Link to="/dicey-chess-web/" className="">
+            <img className="header-logo" src={LogoIcon} alt="logo"></img>
+          </Link>
         </div>
         <div className="header-side header-right-side"></div>
       </div>

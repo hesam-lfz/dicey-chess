@@ -6,11 +6,14 @@ export function About() {
           Dicey Chess
         </div>
         <h2>Rules</h2>
+        <div className="dotted-border">
+          Dicey Chess is a variation of the game of chess.
+        </div>
         <h2>About Creators</h2>
         <h2>Credits</h2>
         <p>
           <div className="">
-            Chess Piece Icons: By{' '}
+            Chess piece icons by{' '}
             <a
               href="//commons.wikimedia.org/wiki/User:Cburnett"
               title="User:Cburnett">
@@ -31,6 +34,17 @@ export function About() {
               Link
             </a>
           </div>
+        </p>
+        <p>
+          <div className="">
+            Dice graphics/lib by:{' '}
+            <a href="https://github.com/Upmostly/react-dice">
+              https://github.com/Upmostly/react-dice
+            </a>
+          </div>
+        </p>
+        <p>
+          <div className="">Logo by: ChatGPT</div>
         </p>
       </div>
     </div>

@@ -21,7 +21,7 @@
   align-self: flex-start;
   width: 100%;
   padding: 5vw;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .left-panel li {
@@ -35,7 +35,7 @@
   border-style: dotted;
   flex-direction: row;
   justify-content: space-evenly;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .history-panel ul {
