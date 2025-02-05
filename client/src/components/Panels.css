@@ -20,7 +20,7 @@
   align-items: center;
   align-self: flex-start;
   width: 100%;
-  padding: 5vw;
+  padding: 1vw 5vw;
   overflow: auto;
 }
 

@@ -95,6 +95,15 @@ nav li {
 }
 
 /*
+	Small Device Landscape Screen
+*/
+@media screen and (orientation: landscape) and (height <= 900px) {
+  .header-logo {
+    width: calc(1.5 * 10vw);
+  }
+}
+
+/*
 	Portrait Screen
 */
 @media screen and (orientation: portrait) {
