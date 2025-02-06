@@ -13,6 +13,18 @@ export function About() {
         <h2>Credits</h2>
         <p>
           <div className="">
+            Chess Rules API by:{' '}
+            <a href="https://github.com/jhlywa/chess.js">chess.js</a>
+          </div>
+        </p>
+        <p>
+          <div className="">
+            Chess AI Engine API by:{' '}
+            <a href="https://chess-api.com/">chess-api.com</a>
+          </div>
+        </p>
+        <p>
+          <div className="">
             Chess piece icons by{' '}
             <a
               href="//commons.wikimedia.org/wiki/User:Cburnett"

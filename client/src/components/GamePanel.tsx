@@ -5,13 +5,22 @@ import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Board } from './Board';
 import { BoardLabels } from './BoardLabels';
+import { type Color } from 'chess.js';
 import './Panels.css';
 
 export function GamePanel() {
-  const [numMoves, setNumMoves] = useState<number>(0);
+  const [turn, setTurn] = useState<Color>(board.turn);
+  const [diceRoll, setDiceRoll] = useState<number>(-1);
   const [history] = useState<string[][]>(board.history);
 
-  const onMove = useCallback(() => setNumMoves(numMoves + 1), [numMoves]);
+  const onMove = useCallback(() => setTurn(board.turn), []);
+  const onDiceRoll = useCallback(
+    (roll: number) => {
+      console.log('roll!', roll, 'prev', diceRoll);
+      setDiceRoll(roll);
+    },
+    [diceRoll]
+  );
 
   return (
     <>
@@ -21,7 +30,7 @@ export function GamePanel() {
           <BoardLabels />
           <Board initTurn={board.turn} containerOnMove={onMove} />
         </div>
-        <RightPanel />
+        <RightPanel turn={turn} containerOnDiceRoll={onDiceRoll} />
       </div>
     </>
   );
