@@ -1,3 +1,3 @@
 export function DicePanel() {
-  return <div className="dice-panel">2 Dice</div>;
+  return <div className="dice-panel">...</div>;
 }

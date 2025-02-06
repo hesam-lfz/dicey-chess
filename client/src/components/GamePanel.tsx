@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-import { board } from '../lib';
+import { board, swapTurn } from '../lib';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Board } from './Board';
@@ -14,13 +14,16 @@ export function GamePanel() {
   const [history] = useState<string[][]>(board.history);
 
   const onMove = useCallback(() => setTurn(board.turn), []);
-  const onDiceRoll = useCallback(
-    (roll: number) => {
-      console.log('roll!', roll, 'prev', diceRoll);
-      setDiceRoll(roll);
-    },
-    [diceRoll]
-  );
+  const onDiceRoll = useCallback((roll: number) => {
+    console.log('roll!', roll);
+    if (roll === 0) {
+      swapTurn();
+      roll = -1;
+    }
+    board.diceRoll = roll;
+    board.numMovesInTurn = roll;
+    setDiceRoll(roll);
+  }, []);
 
   return (
     <>
@@ -28,7 +31,11 @@ export function GamePanel() {
         <LeftPanel initHistory={history} />
         <div className="board-panel">
           <BoardLabels />
-          <Board initTurn={board.turn} containerOnMove={onMove} />
+          <Board
+            currTurn={board.turn}
+            currDiceRoll={diceRoll}
+            containerOnMove={onMove}
+          />
         </div>
         <RightPanel turn={turn} containerOnDiceRoll={onDiceRoll} />
       </div>

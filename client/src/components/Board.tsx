@@ -48,12 +48,15 @@ function renderOccupyingPiece(piece?: Piece) {
 }
 
 type Props = {
-  initTurn: Color;
+  currTurn: Color;
+  currDiceRoll: number;
   containerOnMove: () => void;
 };
 
-export function Board({ initTurn, containerOnMove }: Props) {
-  const [turn, setTurn] = useState<Color>(initTurn);
+export function Board({ currTurn, currDiceRoll, containerOnMove }: Props) {
+  console.log('currDiceRoll', currDiceRoll, board);
+  const [turn, setTurn] = useState<Color>(currTurn);
+  const [diceRoll] = useState<number>(currDiceRoll);
   const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
   const [movingToSq, setMovingToSq] = useState<Square | null>(null);
   const [prevMoveFromSq, setPrevMoveFromSq] = useState<Square | null>(null);
@@ -80,7 +83,8 @@ export function Board({ initTurn, containerOnMove }: Props) {
 
   const squareClicked = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      if (board.gameOver) return;
+      console.log('diceRoll', diceRoll, board.diceRoll);
+      if (board.diceRoll === -1 || board.gameOver) return;
       // find the square element which was clicked on so we can get the square coords:
       let $clickedSq = e.target as HTMLElement;
       if ($clickedSq.tagName === 'IMG')
@@ -91,7 +95,7 @@ export function Board({ initTurn, containerOnMove }: Props) {
       else if (movingFromSq && validateMove(movingFromSq, square))
         setMovingToSq(square);
     },
-    [movingFromSq, turn]
+    [movingFromSq, turn, diceRoll]
   );
 
   return (

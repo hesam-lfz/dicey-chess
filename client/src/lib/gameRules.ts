@@ -13,6 +13,7 @@ export type Board = {
   initPositionFEN?: string;
   history: string[][];
   turn: Color;
+  diceRoll: number;
   numMovesInTurn: number;
   firstMoveInTurn: boolean;
   gameOver: boolean;
@@ -39,7 +40,8 @@ export const board: Board = {
   initPositionFEN: undefined,
   history: [[]],
   turn: WHITE,
-  numMovesInTurn: 3,
+  diceRoll: -1,
+  numMovesInTurn: -1,
   firstMoveInTurn: true,
   gameOver: false,
 };
@@ -72,7 +74,8 @@ export function makeMove(
   board.history[board.history.length - 1].push(move.san);
   board.numMovesInTurn -= 1;
   if (board.numMovesInTurn === 0) {
-    board.numMovesInTurn = 3;
+    board.diceRoll = -1;
+    board.numMovesInTurn = -1;
     board.firstMoveInTurn = true;
     board.history.push([]);
   } else {
@@ -100,7 +103,7 @@ export function promptUserIfPromotionMove(
   return undefined;
 }
 
-function swapTurn(): void {
+export function swapTurn(): void {
   let fen = boardEngine.fen();
   const fenA = fen.split(' ');
   fenA[1] = fenA[1] === 'w' ? 'b' : 'w';
