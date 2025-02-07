@@ -18,7 +18,7 @@ export function RightPanel({ turn, containerOnDiceRoll }: Props) {
   return (
     <div className="right-panel side-panel">
       <h2>Player {turn}'s Move</h2>
-      <span className="rainbow-colored-border">
+      <span className="roll-dice-button-border rainbow-colored-border">
         {board.diceRoll === -1 ? (
           <button className="roll-dice-button " onClick={handleRollButtonClick}>
             ROLL DICE
