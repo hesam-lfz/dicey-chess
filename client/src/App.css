@@ -5,6 +5,7 @@
 #root {
   display: flex;
   flex-direction: column;
+  justify-content: space-evenly;
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
@@ -19,6 +20,10 @@ button {
 
 .flex {
   display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
 }
 
 .flex-align-center {
@@ -118,12 +123,25 @@ nav li {
   justify-self: flex-end;
 }
 
+dialog {
+  font-size: 1.25rem;
+  border-radius: 20px;
+}
+
+dialog::backdrop {
+  backdrop-filter: blur(5px);
+}
+
+dialog button {
+  margin: 20px;
+}
+
 /*
 	Small Device Landscape Screen
 */
-@media screen and (orientation: landscape) and (height <= 900px) {
+@media screen and (orientation: landscape) and (height <= 450px) {
   .header-logo {
-    width: calc(1.5 * 10vw);
+    width: calc(2 * 7vw);
   }
 }
 
@@ -136,6 +154,6 @@ nav li {
   }
 
   .header-logo {
-    width: calc(2.5 * 10vw);
+    width: calc(3.5 * 7vw);
   }
 }

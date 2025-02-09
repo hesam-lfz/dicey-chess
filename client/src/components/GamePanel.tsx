@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import { board, swapTurn } from '../lib';
 import { LeftPanel } from './LeftPanel';
@@ -8,10 +8,18 @@ import { BoardLabels } from './BoardLabels';
 import { type Color } from 'chess.js';
 import './Panels.css';
 
-export function GamePanel() {
+type Props = {
+  onGameOver: () => void;
+};
+
+export function GamePanel({ onGameOver }: Props) {
   const [turn, setTurn] = useState<Color>(board.turn);
   const [numMovesInTurn, setNumMovesInTurn] = useState<number>(-1);
   const [history] = useState<string[][]>(board.history);
+
+  useEffect(() => {
+    if (board.gameOver) onGameOver();
+  });
 
   const onMove = useCallback(() => {
     setTurn(board.turn);

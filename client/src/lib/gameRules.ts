@@ -3,6 +3,7 @@ import {
   WHITE,
   PAWN,
   QUEEN,
+  KING,
   type Square,
   type PieceSymbol,
   type Color,
@@ -17,6 +18,7 @@ export type Board = {
   numMovesInTurn: number;
   firstMoveInTurn: boolean;
   gameOver: boolean;
+  outcome?: string;
 };
 
 import Icon_wk from '../assets/king_w.svg';
@@ -69,7 +71,7 @@ export const allRanks: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [
 export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
 
-export const board: Board = {
+export let board: Board = {
   initPositionFEN: undefined,
   history: [[]],
   turn: WHITE,
@@ -79,13 +81,31 @@ export const board: Board = {
   gameOver: false,
 };
 
-export let boardEngine: Chess = new Chess(board.initPositionFEN);
-
 console.log(board);
+
+export let boardEngine: Chess;
+
+export const resetBoard = () => {
+  board = {
+    initPositionFEN: undefined,
+    history: [[]],
+    turn: WHITE,
+    diceRoll: -1,
+    numMovesInTurn: -1,
+    firstMoveInTurn: true,
+    gameOver: false,
+  };
+  boardEngine = new Chess(board.initPositionFEN);
+};
+
+resetBoard();
 
 export const getSquarePiece = (square: Square) => boardEngine.get(square);
 
 export function validateMove(fromSquare: Square, toSquare: Square): boolean {
+  // boardEngine accepts a move in which a king is taken! Take care of it manually here:
+  const toPiece = getSquarePiece(toSquare);
+  if (toPiece && toPiece.type === KING) return false;
   const possibleMoves = boardEngine.moves({
     square: fromSquare,
     verbose: true,
@@ -107,18 +127,30 @@ export function makeMove(
   board.history[board.history.length - 1].push(move.san);
   board.numMovesInTurn -= 1;
   if (board.numMovesInTurn === 0) {
+    // The player has played current turn's all the number of moves according to the dice roll:
     board.diceRoll = -1;
     board.numMovesInTurn = -1;
     board.firstMoveInTurn = true;
     board.history.push([]);
+    checkForGameOver();
   } else {
+    // The player still has moves left in the current turn, according to the dice roll:
     board.firstMoveInTurn = false;
+    // swap turn back to the player who just moved since there's still more to make:
     swapTurn();
   }
   return board.history;
 }
 
-export const checkForMate: () => boolean = () => boardEngine.isCheckmate();
+export const checkForGameOver: () => void = () => {
+  if (boardEngine.isDraw()) {
+    board.gameOver = true;
+    board.outcome = 'Draw!';
+  } else if (boardEngine.isCheckmate()) {
+    board.gameOver = true;
+    board.outcome = (board.turn === WHITE ? 'Black' : 'White') + ' wins!';
+  }
+};
 
 export function promptUserIfPromotionMove(
   fromSquare: Square,

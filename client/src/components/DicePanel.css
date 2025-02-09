@@ -4,7 +4,7 @@
 }
 
 .roll-dice-button-border {
-  margin: 20px;
+  margin: 20px 0;
   box-shadow: 4px 8px 20px 0 #646cff;
   transition: box-shadow 0.2s ease-in-out 0s;
 }
@@ -14,6 +14,6 @@
 }
 
 .player-turn-title-box span {
-  font-size: 1.5rem;
+  font-size: 1.5rem !important;
   font-weight: bold;
 }

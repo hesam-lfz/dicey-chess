@@ -6,7 +6,6 @@ import {
   getSquarePiece,
   makeMove,
   validateMove,
-  checkForMate,
   promptUserIfPromotionMove,
   board,
 } from '../lib';
@@ -45,7 +44,6 @@ export function Board({ containerOnMove }: Props) {
       promptUserIfPromotionMove(movingFromSq!, movingToSq!, board.turn)
     );
     containerOnMove();
-    board.gameOver = checkForMate();
   }, [movingFromSq, movingToSq, containerOnMove]);
 
   const squareClicked = useCallback(
