@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, MouseEvent } from 'react';
 import {
+  pieceSVGs,
   allFiles,
   allRanks,
   getSquarePiece,
@@ -9,35 +10,7 @@ import {
   promptUserIfPromotionMove,
   board,
 } from '../lib';
-import { type Color, type Piece, type Square } from 'chess.js';
-
-import Icon_wk from '../assets/king_w.svg';
-import Icon_bk from '../assets/king_b.svg';
-import Icon_wq from '../assets/queen_w.svg';
-import Icon_bq from '../assets/queen_b.svg';
-import Icon_wb from '../assets/bishop_w.svg';
-import Icon_bb from '../assets/bishop_b.svg';
-import Icon_wn from '../assets/knight_w.svg';
-import Icon_bn from '../assets/knight_b.svg';
-import Icon_wr from '../assets/rook_w.svg';
-import Icon_br from '../assets/rook_b.svg';
-import Icon_wp from '../assets/pawn_w.svg';
-import Icon_bp from '../assets/pawn_b.svg';
-
-const pieceSVGs: { [key: string]: any } = {
-  Icon_wk,
-  Icon_bk,
-  Icon_wq,
-  Icon_bq,
-  Icon_wb,
-  Icon_bb,
-  Icon_wn,
-  Icon_bn,
-  Icon_wr,
-  Icon_br,
-  Icon_wp,
-  Icon_bp,
-};
+import { type Piece, type Square } from 'chess.js';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -48,15 +21,10 @@ function renderOccupyingPiece(piece?: Piece) {
 }
 
 type Props = {
-  currTurn: Color;
-  currDiceRoll: number;
   containerOnMove: () => void;
 };
 
-export function Board({ currTurn, currDiceRoll, containerOnMove }: Props) {
-  console.log('currDiceRoll', currDiceRoll, board);
-  const [turn, setTurn] = useState<Color>(currTurn);
-  const [diceRoll] = useState<number>(currDiceRoll);
+export function Board({ containerOnMove }: Props) {
   const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
   const [movingToSq, setMovingToSq] = useState<Square | null>(null);
   const [prevMoveFromSq, setPrevMoveFromSq] = useState<Square | null>(null);
@@ -74,16 +42,14 @@ export function Board({ currTurn, currDiceRoll, containerOnMove }: Props) {
     makeMove(
       movingFromSq!,
       movingToSq!,
-      promptUserIfPromotionMove(movingFromSq!, movingToSq!, turn)
+      promptUserIfPromotionMove(movingFromSq!, movingToSq!, board.turn)
     );
-    setTurn(board.turn);
     containerOnMove();
     board.gameOver = checkForMate();
-  }, [movingFromSq, movingToSq, turn, containerOnMove]);
+  }, [movingFromSq, movingToSq, containerOnMove]);
 
   const squareClicked = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      console.log('diceRoll', diceRoll, board.diceRoll);
       if (board.diceRoll === -1 || board.gameOver) return;
       // find the square element which was clicked on so we can get the square coords:
       let $clickedSq = e.target as HTMLElement;
@@ -91,11 +57,12 @@ export function Board({ currTurn, currDiceRoll, containerOnMove }: Props) {
         $clickedSq = $clickedSq!.closest('.square') ?? $clickedSq;
       const square = $clickedSq.id as Square;
       const clickedPiece = getSquarePiece(square);
-      if (clickedPiece && clickedPiece.color === turn) setMovingFromSq(square);
+      if (clickedPiece && clickedPiece.color === board.turn)
+        setMovingFromSq(square);
       else if (movingFromSq && validateMove(movingFromSq, square))
         setMovingToSq(square);
     },
-    [movingFromSq, turn, diceRoll]
+    [movingFromSq]
   );
 
   return (

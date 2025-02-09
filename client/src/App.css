@@ -8,9 +8,21 @@
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
-
-  /* padding: 2rem; */
   text-align: center;
+  background-color: #222;
+  color: white;
+}
+
+button {
+  color: white;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-align-center {
+  align-items: center;
 }
 
 .card {

@@ -19,6 +19,39 @@ export type Board = {
   gameOver: boolean;
 };
 
+import Icon_wk from '../assets/king_w.svg';
+import Icon_bk from '../assets/king_b.svg';
+import Icon_wq from '../assets/queen_w.svg';
+import Icon_bq from '../assets/queen_b.svg';
+import Icon_wb from '../assets/bishop_w.svg';
+import Icon_bb from '../assets/bishop_b.svg';
+import Icon_wn from '../assets/knight_w.svg';
+import Icon_bn from '../assets/knight_b.svg';
+import Icon_wr from '../assets/rook_w.svg';
+import Icon_br from '../assets/rook_b.svg';
+import Icon_wp from '../assets/pawn_w.svg';
+import Icon_bp from '../assets/pawn_b.svg';
+
+export const pieceSVGs: { [key: string]: any } = {
+  Icon_wk,
+  Icon_bk,
+  Icon_wq,
+  Icon_bq,
+  Icon_wb,
+  Icon_bb,
+  Icon_wn,
+  Icon_bn,
+  Icon_wr,
+  Icon_br,
+  Icon_wp,
+  Icon_bp,
+};
+
+export const playerIconSVGs = {
+  w: pieceSVGs['Icon_wp'],
+  b: pieceSVGs['Icon_bp'],
+};
+
 export const allFiles: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h')[] = [
   'a',
   'b',

@@ -24,6 +24,10 @@
   overflow: auto;
 }
 
+.side-panel span {
+  font-size: 1.2rem;
+}
+
 .left-panel li {
   list-style-type: none;
 }
