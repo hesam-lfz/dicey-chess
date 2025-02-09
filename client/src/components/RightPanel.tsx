@@ -5,16 +5,20 @@ import { type Color } from 'chess.js';
 import './DicePanel.css';
 
 type Props = {
-  turn: Color;
+  currGameId: number;
+  currTurn: Color;
   currNumMovesInTurn: number;
   containerOnDiceRoll: (n: number) => void;
 };
 
 export function RightPanel({
-  turn,
+  currGameId,
+  currTurn,
   currNumMovesInTurn,
   containerOnDiceRoll,
 }: Props) {
+  const [gameId, setGameId] = useState<number>(currGameId);
+  const [turn, setTurn] = useState<Color>(board.turn);
   const [numMovesInTurn, setNumMovesInTurn] =
     useState<number>(currNumMovesInTurn);
   const handleRollButtonClick = useCallback(() => {
@@ -24,8 +28,10 @@ export function RightPanel({
   }, [containerOnDiceRoll]);
 
   useEffect(() => {
+    setTurn(board.turn);
+    setGameId(currGameId);
     setNumMovesInTurn(currNumMovesInTurn);
-  }, [currNumMovesInTurn]);
+  }, [currNumMovesInTurn, currGameId, gameId, currTurn, turn]);
 
   return (
     <div className="right-panel side-panel">

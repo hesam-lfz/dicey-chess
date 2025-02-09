@@ -1,19 +1,20 @@
 import { ReactElement, useEffect, useState, useRef } from 'react';
 
 type Props = {
-  initHistory: string[][];
+  currNumSingleMovesMade: number;
+  currHistory: string[][];
 };
 
-export function HistoryPanel({ initHistory }: Props) {
+export function HistoryPanel({ currNumSingleMovesMade, currHistory }: Props) {
   const historyItemsRef = useRef<null | HTMLDivElement>(null);
-
-  const [history] = useState<string[][]>(initHistory);
+  const [history, setHistory] = useState<string[][]>(currHistory);
 
   // scroll to the bottom of the history:
   useEffect(() => {
     historyItemsRef!.current!.scrollTop =
       historyItemsRef!.current!.scrollHeight;
-  });
+    setHistory(currHistory);
+  }, [currNumSingleMovesMade, currHistory]);
 
   const allHistoryItems: ReactElement[] = [];
   let moveCtr = 1;

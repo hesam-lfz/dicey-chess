@@ -20,18 +20,16 @@ function renderOccupyingPiece(piece?: Piece) {
 }
 
 type Props = {
+  currGameId: number;
   containerOnMove: () => void;
 };
 
-export function Board({ containerOnMove }: Props) {
+export function Board({ currGameId, containerOnMove }: Props) {
+  const [gameId, setGameId] = useState<number>(currGameId);
   const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
   const [movingToSq, setMovingToSq] = useState<Square | null>(null);
   const [prevMoveFromSq, setPrevMoveFromSq] = useState<Square | null>(null);
   const [prevMoveToSq, setPrevMoveToSq] = useState<Square | null>(null);
-
-  useEffect(() => {
-    if (movingFromSq && movingToSq) setTimeout(handleMove, 200);
-  });
 
   const handleMove = useCallback(() => {
     setPrevMoveFromSq(movingFromSq);
@@ -45,6 +43,15 @@ export function Board({ containerOnMove }: Props) {
     );
     containerOnMove();
   }, [movingFromSq, movingToSq, containerOnMove]);
+
+  useEffect(() => {
+    if (movingFromSq && movingToSq) setTimeout(handleMove, 200);
+    if (currGameId !== gameId) {
+      setPrevMoveFromSq(null);
+      setPrevMoveToSq(null);
+    }
+    setGameId(currGameId);
+  }, [movingFromSq, movingToSq, handleMove, currGameId, gameId]);
 
   const squareClicked = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {

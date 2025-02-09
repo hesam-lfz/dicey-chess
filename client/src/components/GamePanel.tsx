@@ -9,22 +9,30 @@ import { type Color } from 'chess.js';
 import './Panels.css';
 
 type Props = {
+  currGameId: number;
+  currHistory: string[][];
   onGameOver: () => void;
 };
 
-export function GamePanel({ onGameOver }: Props) {
+export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
+  const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
+  const [numSingleMovesMade, setNumSingleMovesMade] = useState<number>(0);
   const [numMovesInTurn, setNumMovesInTurn] = useState<number>(-1);
-  const [history] = useState<string[][]>(board.history);
+  const [history, setHistory] = useState<string[][]>(currHistory);
 
   useEffect(() => {
     if (board.gameOver) onGameOver();
+    setGameId(currGameId);
+    setHistory(currHistory);
   });
 
   const onMove = useCallback(() => {
     setTurn(board.turn);
     setNumMovesInTurn(board.numMovesInTurn);
+    setNumSingleMovesMade((n) => n + 1);
   }, []);
+
   const onDiceRoll = useCallback((roll: number) => {
     if (roll === 0) {
       swapTurn();
@@ -39,13 +47,17 @@ export function GamePanel({ onGameOver }: Props) {
   return (
     <>
       <div className="main-panel">
-        <LeftPanel initHistory={history} />
+        <LeftPanel
+          currNumSingleMovesMade={numSingleMovesMade}
+          currHistory={history}
+        />
         <div className="board-panel">
           <BoardLabels />
-          <Board containerOnMove={onMove} />
+          <Board currGameId={gameId} containerOnMove={onMove} />
         </div>
         <RightPanel
-          turn={turn}
+          currGameId={gameId}
+          currTurn={turn}
           currNumMovesInTurn={numMovesInTurn}
           containerOnDiceRoll={onDiceRoll}
         />

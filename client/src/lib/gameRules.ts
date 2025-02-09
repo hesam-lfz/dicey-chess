@@ -10,6 +10,11 @@ import {
   type Move,
 } from 'chess.js';
 
+export type Settings = {
+  onePlayerMode: boolean;
+  humanPlaysColor: Color;
+};
+
 export type Board = {
   initPositionFEN?: string;
   history: string[][];
@@ -71,7 +76,7 @@ export const allRanks: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [
 export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
 
-export let board: Board = {
+const initBoard: Board = {
   initPositionFEN: undefined,
   history: [[]],
   turn: WHITE,
@@ -81,23 +86,26 @@ export let board: Board = {
   gameOver: false,
 };
 
-console.log(board);
+const initSettings: Settings = {
+  onePlayerMode: true,
+  humanPlaysColor: WHITE,
+};
 
+export let settings: Settings;
+export let board: Board;
 export let boardEngine: Chess;
 
+export const resetSettings = () => {
+  settings = { ...initSettings };
+};
+
 export const resetBoard = () => {
-  board = {
-    initPositionFEN: undefined,
-    history: [[]],
-    turn: WHITE,
-    diceRoll: -1,
-    numMovesInTurn: -1,
-    firstMoveInTurn: true,
-    gameOver: false,
-  };
+  board = { ...initBoard };
+  board.history = [[]];
   boardEngine = new Chess(board.initPositionFEN);
 };
 
+resetSettings();
 resetBoard();
 
 export const getSquarePiece = (square: Square) => boardEngine.get(square);

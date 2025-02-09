@@ -1,14 +1,18 @@
 import { HistoryPanel } from './HistoryPanel';
 
 type Props = {
-  initHistory: string[][];
+  currNumSingleMovesMade: number;
+  currHistory: string[][];
 };
 
-export function LeftPanel({ initHistory }: Props) {
+export function LeftPanel({ currNumSingleMovesMade, currHistory }: Props) {
   return (
     <div className="left-panel side-panel">
       <h2>History</h2>
-      <HistoryPanel initHistory={initHistory} />
+      <HistoryPanel
+        currNumSingleMovesMade={currNumSingleMovesMade}
+        currHistory={currHistory}
+      />
     </div>
   );
 }
