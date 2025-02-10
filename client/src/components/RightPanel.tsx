@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { DicePanel } from './DicePanel';
 import { board, playerIconSVGs } from '../lib';
 import { type Color } from 'chess.js';
+import Icon_dice from '../assets/dice.svg';
 import './DicePanel.css';
 
 type Props = {
@@ -50,7 +51,7 @@ export function RightPanel({
       {board.diceRoll === -1 ? (
         <span className="roll-dice-button-border rainbow-colored-border">
           <button className="roll-dice-button " onClick={handleRollButtonClick}>
-            ROLL DICE
+            <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
           </button>
         </span>
       ) : null}

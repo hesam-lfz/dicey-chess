@@ -47,6 +47,20 @@
   width: 100%;
 }
 
+.dice-icon {
+  width: 5vw;
+  transform: rotate(60deg);
+}
+
+/*
+	Small Device Landscape Screen
+*/
+@media screen and (orientation: landscape) and (height <= 450px) {
+  .dice-icon {
+    width: calc(1.5 * 5vw);
+  }
+}
+
 /*
 	Portrait Screen
 */
@@ -57,5 +71,9 @@
 
   .history-panel {
     height: 50vw;
+  }
+
+  .5 dice-icon {
+    width: calc(3 * 5vw);
   }
 }
