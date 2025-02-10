@@ -8,6 +8,7 @@ import {
   validateMove,
   promptUserIfPromotionMove,
   board,
+  settings,
 } from '../lib';
 import { type Piece, type Square } from 'chess.js';
 
@@ -55,7 +56,11 @@ export function Board({ currGameId, containerOnMove }: Props) {
 
   const squareClicked = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
+      // if dice isn't rolled yet or the game is over, clicking is not allowed:
       if (board.diceRoll === -1 || board.gameOver) return;
+      // if in 1-player mode and it's not player's turn, clicking is not allowed:
+      if (settings.onePlayerMode && board.turn !== settings.humanPlaysColor)
+        return;
       // find the square element which was clicked on so we can get the square coords:
       let $clickedSq = e.target as HTMLElement;
       if ($clickedSq.tagName === 'IMG')

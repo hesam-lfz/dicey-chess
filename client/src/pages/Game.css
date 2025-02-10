@@ -123,6 +123,20 @@
 }
 
 /*
+	Small Device Landscape Screen
+*/
+@media screen and (orientation: landscape) and (height <= 450px) {
+  .player-icon-container .piece {
+    height: calc(1.3 * 4vw);
+  }
+
+  .player-icon-container {
+    width: calc(2.5 * 4vh);
+    height: calc(2.5 * 4vh);
+  }
+}
+
+/*
 	Portrait Screen
 */
 @media screen and (orientation: portrait) {
