@@ -17,3 +17,25 @@
   font-size: 1.5rem !important;
   font-weight: bold;
 }
+
+/* animate slide in zoom a bit */
+.shadow-grow-and-back {
+  animation-name: shadow-grow-and-back;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+
+@keyframes shadow-grow-and-back {
+  0% {
+    box-shadow: 4px 8px 20px 0 #646cff;
+  }
+
+  50% {
+    box-shadow: 4px 8px 20px 20px #646cff;
+  }
+
+  100% {
+    box-shadow: 4px 8px 20px 0 #646cff;
+  }
+}

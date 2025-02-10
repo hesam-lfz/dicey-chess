@@ -49,7 +49,7 @@ export function RightPanel({
         <span>'s Move</span>
       </div>
       {board.diceRoll === -1 ? (
-        <span className="roll-dice-button-border rainbow-colored-border">
+        <span className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back">
           <button className="roll-dice-button " onClick={handleRollButtonClick}>
             <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
           </button>

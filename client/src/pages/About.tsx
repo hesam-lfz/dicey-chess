@@ -25,7 +25,7 @@ export function About() {
         </p>
         <p>
           <div className="">
-            Chess piece icons by{' '}
+            Chess piece icons by:{' '}
             <a
               href="//commons.wikimedia.org/wiki/User:Cburnett"
               title="User:Cburnett">
@@ -44,6 +44,14 @@ export function About() {
             ,{' '}
             <a href="https://commons.wikimedia.org/w/index.php?curid=1496683">
               Link
+            </a>
+          </div>
+        </p>
+        <p>
+          <div className="">
+            Dice icon by:{' '}
+            <a href="https://en.m.wikipedia.org/wiki/User:Steaphan_Greene">
+              Steaphan Greene
             </a>
           </div>
         </p>

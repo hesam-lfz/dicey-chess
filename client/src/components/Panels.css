@@ -55,7 +55,7 @@
 /*
 	Small Device Landscape Screen
 */
-@media screen and (orientation: landscape) and (height <= 450px) {
+@media screen and (orientation: landscape) and (height <= 700px) {
   .dice-icon {
     width: calc(1.5 * 5vw);
   }
@@ -73,7 +73,7 @@
     height: 50vw;
   }
 
-  .5 dice-icon {
+  .dice-icon {
     width: calc(3 * 5vw);
   }
 }
