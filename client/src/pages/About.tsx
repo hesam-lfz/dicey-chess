@@ -11,61 +11,55 @@ export function About() {
         </div>
         <h2>About Creators</h2>
         <h2>Credits</h2>
-        <p>
-          <div className="">
-            Chess Rules API by:{' '}
-            <a href="https://github.com/jhlywa/chess.js">chess.js</a>
-          </div>
-        </p>
-        <p>
-          <div className="">
-            Chess AI Engine API by:{' '}
-            <a href="https://chess-api.com/">chess-api.com</a>
-          </div>
-        </p>
-        <p>
-          <div className="">
-            Chess piece icons by:{' '}
-            <a
-              href="//commons.wikimedia.org/wiki/User:Cburnett"
-              title="User:Cburnett">
-              Cburnett
-            </a>{' '}
-            -{' '}
-            <span className="int-own-work" lang="en">
-              Own work
-            </span>
-            ,{' '}
-            <a
-              href="http://creativecommons.org/licenses/by-sa/3.0/"
-              title="Creative Commons Attribution-Share Alike 3.0">
-              CC BY-SA 3.0
-            </a>
-            ,{' '}
-            <a href="https://commons.wikimedia.org/w/index.php?curid=1496683">
-              Link
-            </a>
-          </div>
-        </p>
-        <p>
-          <div className="">
-            Dice icon by:{' '}
-            <a href="https://en.m.wikipedia.org/wiki/User:Steaphan_Greene">
-              Steaphan Greene
-            </a>
-          </div>
-        </p>
-        <p>
-          <div className="">
-            Dice graphics/lib by:{' '}
-            <a href="https://github.com/Upmostly/react-dice">
-              https://github.com/Upmostly/react-dice
-            </a>
-          </div>
-        </p>
-        <p>
-          <div className="">Logo by: ChatGPT</div>
-        </p>
+
+        <div className="">
+          Chess Rules API by:{' '}
+          <a href="https://github.com/jhlywa/chess.js">chess.js</a>
+        </div>
+
+        <div className="">
+          Chess AI Engine API by:{' '}
+          <a href="https://chess-api.com/">chess-api.com</a>
+        </div>
+
+        <div className="">
+          Chess piece icons by:{' '}
+          <a
+            href="//commons.wikimedia.org/wiki/User:Cburnett"
+            title="User:Cburnett">
+            Cburnett
+          </a>{' '}
+          -{' '}
+          <span className="int-own-work" lang="en">
+            Own work
+          </span>
+          ,{' '}
+          <a
+            href="http://creativecommons.org/licenses/by-sa/3.0/"
+            title="Creative Commons Attribution-Share Alike 3.0">
+            CC BY-SA 3.0
+          </a>
+          ,{' '}
+          <a href="https://commons.wikimedia.org/w/index.php?curid=1496683">
+            Link
+          </a>
+        </div>
+
+        <div className="">
+          Dice icon by:{' '}
+          <a href="https://en.m.wikipedia.org/wiki/User:Steaphan_Greene">
+            Steaphan Greene
+          </a>
+        </div>
+
+        <div className="">
+          Dice graphics/lib by:{' '}
+          <a href="https://github.com/Upmostly/react-dice">
+            https://github.com/Upmostly/react-dice
+          </a>
+        </div>
+
+        <div className="">Logo by: ChatGPT</div>
       </div>
     </div>
   );

@@ -26,7 +26,17 @@ export function Header() {
             <img className="header-logo" src={LogoIcon} alt="logo"></img>
           </Link>
         </div>
-        <div className="header-side header-right-side"></div>
+        <div className="header-side header-right-side">
+          <nav>
+            <ul>
+              <li className="inline-block">
+                <Link to="/dicey-chess-web/settings" className="">
+                  Settings
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
       <Outlet />
     </>

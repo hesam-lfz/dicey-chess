@@ -5,12 +5,12 @@
 
 .roll-dice-button-border {
   margin: 20px 0;
-  box-shadow: 4px 8px 20px 0 #646cff;
+  box-shadow: 0 8px 20px 0 #646cff;
   transition: box-shadow 0.2s ease-in-out 0s;
 }
 
 .roll-dice-button-border:hover {
-  box-shadow: 4px 8px 20px 10px #646cff;
+  box-shadow: 0 8px 20px 10px #646cff;
 }
 
 .player-turn-title-box span {
@@ -28,14 +28,14 @@
 
 @keyframes shadow-grow-and-back {
   0% {
-    box-shadow: 4px 8px 20px 0 #646cff;
+    box-shadow: 0 8px 20px 0 #646cff;
   }
 
   50% {
-    box-shadow: 4px 8px 20px 20px #646cff;
+    box-shadow: 0 8px 20px 20px #646cff;
   }
 
   100% {
-    box-shadow: 4px 8px 20px 0 #646cff;
+    box-shadow: 0 8px 20px 0 #646cff;
   }
 }

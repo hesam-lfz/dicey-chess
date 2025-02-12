@@ -18,7 +18,9 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
   const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [numSingleMovesMade, setNumSingleMovesMade] = useState<number>(0);
-  const [numMovesInTurn, setNumMovesInTurn] = useState<number>(-1);
+  const [numMovesInTurn, setNumMovesInTurn] = useState<number>(
+    board.numMovesInTurn
+  );
   const [history, setHistory] = useState<string[][]>(currHistory);
 
   useEffect(() => {

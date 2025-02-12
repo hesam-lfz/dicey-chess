@@ -73,6 +73,7 @@ button {
   justify-content: center;
   align-self: flex-start;
   width: 100%;
+  font-size: larger;
 }
 
 .header-logo-holder {
@@ -95,6 +96,7 @@ button {
 
 .header-right-side {
   width: calc(100% / 3);
+  justify-content: flex-end;
 }
 
 .header-logo-name {
