@@ -7,6 +7,10 @@
   width: 100%;
 }
 
+.padded-main-panel {
+  padding: 0 10vw;
+}
+
 .board-panel {
   display: flex;
   position: relative;
@@ -50,6 +54,13 @@
 .dice-icon {
   width: 5vw;
   transform: rotate(60deg);
+}
+
+.about-dice-icon {
+  position: relative;
+  top: 25px;
+  width: 50px;
+  padding: 10px;
 }
 
 /*

@@ -1,15 +1,38 @@
+import Dice1Icon from '../assets/dice-1.svg';
+import Dice5Icon from '../assets/dice-5.svg';
+
 export function About() {
   return (
-    <div className="main-panel">
+    <div className="main-panel padded-main-panel">
       <div className="m-0 h-screen bg-center bg-no-repeat bg-[url('/hylian-emblem.svg')]">
-        <div className="m-auto pt-20 w-1/2 text-center text-2xl">
-          Dicey Chess
+        <div className="m-auto pt-20 w-1/2 text-center text-2xl rainbow-colored">
+          <h3 className="header-logo-name">Dicey Chess</h3>
         </div>
         <h2>Rules</h2>
         <div className="dotted-border">
-          Dicey Chess is a variation of the game of chess.
+          <p>
+            Dicey Chess is a variation of the game of chess. On each turn, the
+            player rolls 2 dice and then makes N consecutive chess moves, where
+            N is the difference between the number of dots between the 2 dice:
+          </p>
+          <p>
+            For example, <strong>4</strong> moves if the dice roll was
+            <img className="about-dice-icon" src={Dice5Icon} alt="logo"></img>
+            and
+            <img className="about-dice-icon" src={Dice1Icon} alt="logo"></img>.
+            And <strong>0</strong> moves if the dice roll was
+            <img className="about-dice-icon" src={Dice5Icon} alt="logo"></img>
+            and
+            <img className="about-dice-icon" src={Dice5Icon} alt="logo"></img>.
+          </p>
         </div>
         <h2>About Creators</h2>
+
+        <div className="">
+          This chess variation and full-stack React website is designed &amp;
+          developed by: <a href="https://hesam.us">Hesam (Sam) Samimi</a>
+        </div>
+
         <h2>Credits</h2>
 
         <div className="">
@@ -20,6 +43,13 @@ export function About() {
         <div className="">
           Chess AI Engine API by:{' '}
           <a href="https://chess-api.com/">chess-api.com</a>
+        </div>
+
+        <div className="">
+          ToggleSwitch React Component by:{' '}
+          <a href="https://www.geeksforgeeks.org/how-to-create-a-toggle-switch-in-react-as-a-reusable-component/">
+            geeksforgeeks.org
+          </a>
         </div>
 
         <div className="">
