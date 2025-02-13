@@ -2,29 +2,17 @@
 
 A full-stack TypeScript ReactJS website featuring a variation of the game of chess called "Dicey Chess"
 
+## Dicey Chess
+
+Dicey Chess is a variation of the game of chess. On each turn, the player rolls 2 dice and then makes 
+N consecutive chess moves, where N is the difference between the number of dots between the 2 dice:
+For example, *4* moves if the dice roll was 5 & 1, and *0* moves if the dice roll was 5 & 5. 
+
+## Live Website
+
+Play at: [Dicey Chess](https://hesam-lfz.github.io/dicey-chess-web/) 
+
 ## Getting Started
-
----
-
-### Use this template to create a new repo on your GitHub account
-
-1. Click the green `Use this template` button, select `Create a new repository`
-   1. Under `Owner` select your username
-   1. Give your repository a name. Name it after your application. The name `full-stack-project` is _not_ a good name.
-   1. (Optional) Add a description
-   1. Leave repository as `Public`
-   1. **DO NOT** Include all branches
-   1. Click the green `Create repository from template` button
-
----
-
-### Clone Newly created repo into `lfz-code`
-
-1. From your newly created repo on GitHub, click the green `<> Code` button, then copy **SSH** URL
-1. Open `lfz-code`, click on blue `><` button in bottom left of `lfz-code`
-   1. Select `Clone Repository in Container Volume...`
-      - If this option does not appear, open the Command Palette (cmd-shift-P on Mac or ctrl-shift-P on Windows), type "Dev Containers", and select `Clone Repository in Container Volume...`. Then continue to the next step.
-   1. Paste **SSH** URL for your repo, click `Clone git repository from URL`
 
 ---
 
