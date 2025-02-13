@@ -8,7 +8,8 @@ import {
   validateMove,
   promptUserIfPromotionMove,
   board,
-  settings,
+  isAITurn,
+  getAIMove,
 } from '../lib';
 import { type Piece, type Square } from 'chess.js';
 
@@ -29,29 +30,40 @@ export function Board({ currGameId, containerOnMove }: Props) {
   const [gameId, setGameId] = useState<number>(currGameId);
   const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
   const [movingToSq, setMovingToSq] = useState<Square | null>(null);
+  const [pawnPromotion, setPawnPromotion] = useState<string | undefined>(
+    undefined
+  );
   const [prevMoveFromSq, setPrevMoveFromSq] = useState<Square | null>(null);
   const [prevMoveToSq, setPrevMoveToSq] = useState<Square | null>(null);
 
   const handleMove = useCallback(() => {
+    console.log('handleMove', isAITurn());
     setPrevMoveFromSq(movingFromSq);
     setPrevMoveToSq(movingToSq);
     setMovingFromSq(null);
     setMovingToSq(null);
-    makeMove(
-      movingFromSq!,
-      movingToSq!,
-      promptUserIfPromotionMove(movingFromSq!, movingToSq!, board.turn)
-    );
+    makeMove(movingFromSq!, movingToSq!, pawnPromotion);
     containerOnMove();
-  }, [movingFromSq, movingToSq, containerOnMove]);
+  }, [movingFromSq, movingToSq, pawnPromotion, containerOnMove]);
 
   useEffect(() => {
-    if (movingFromSq && movingToSq) setTimeout(handleMove, 200);
-    if (currGameId !== gameId) {
-      setPrevMoveFromSq(null);
-      setPrevMoveToSq(null);
-    }
-    setGameId(currGameId);
+    const run = async () => {
+      if (isAITurn()) {
+        console.log('board rendered is AI turn');
+        const move = await getAIMove();
+        console.log(move);
+        setMovingFromSq(move.from);
+        setMovingToSq(move.to);
+        setPawnPromotion(move.promotion);
+      }
+      if (movingFromSq && movingToSq) setTimeout(handleMove, 200);
+      if (currGameId !== gameId) {
+        setPrevMoveFromSq(null);
+        setPrevMoveToSq(null);
+      }
+      setGameId(currGameId);
+    };
+    run();
   }, [movingFromSq, movingToSq, handleMove, currGameId, gameId]);
 
   const squareClicked = useCallback(
@@ -59,8 +71,7 @@ export function Board({ currGameId, containerOnMove }: Props) {
       // if dice isn't rolled yet or the game is over, clicking is not allowed:
       if (board.diceRoll === -1 || board.gameOver) return;
       // if in 1-player mode and it's not player's turn, clicking is not allowed:
-      if (settings.onePlayerMode && board.turn !== settings.humanPlaysColor)
-        return;
+      if (isAITurn()) return;
       // find the square element which was clicked on so we can get the square coords:
       let $clickedSq = e.target as HTMLElement;
       if ($clickedSq.tagName === 'IMG')
@@ -69,10 +80,14 @@ export function Board({ currGameId, containerOnMove }: Props) {
       const clickedPiece = getSquarePiece(square);
       if (clickedPiece && clickedPiece.color === board.turn)
         setMovingFromSq(square);
-      else if (movingFromSq && validateMove(movingFromSq, square))
+      else if (movingFromSq && validateMove(movingFromSq, square)) {
         setMovingToSq(square);
+        setPawnPromotion(
+          promptUserIfPromotionMove(movingFromSq, movingToSq!, board.turn)
+        );
+      }
     },
-    [movingFromSq]
+    [movingFromSq, movingToSq]
   );
 
   return (

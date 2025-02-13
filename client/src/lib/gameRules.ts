@@ -149,6 +149,9 @@ export function makeMove(
   }
   return board.history;
 }
+// returns true if we're in 1-player mode and it's not human player's turn:
+export const isAITurn: () => boolean = () =>
+  settings.onePlayerMode && board.turn !== settings.humanPlaysColor;
 
 export const checkForGameOver: () => void = () => {
   if (boardEngine.isDraw()) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DicePanel } from './DicePanel';
-import { board, playerIconSVGs } from '../lib';
+import { board, isAITurn, playerIconSVGs } from '../lib';
 import { type Color } from 'chess.js';
 import Icon_dice from '../assets/dice.svg';
 import './DicePanel.css';
@@ -22,8 +22,10 @@ export function RightPanel({
   const [turn, setTurn] = useState<Color>(board.turn);
   const [numMovesInTurn, setNumMovesInTurn] =
     useState<number>(currNumMovesInTurn);
+  const [AIMoveTriggered, setAIMoveTriggered] = useState<boolean>(false);
   const handleRollButtonClick = useCallback(() => {
     const roll = Math.floor(Math.random() * 6);
+    console.log('roll', roll);
     setNumMovesInTurn(roll);
     containerOnDiceRoll(roll);
   }, [containerOnDiceRoll]);
@@ -32,7 +34,22 @@ export function RightPanel({
     setTurn(board.turn);
     setGameId(currGameId);
     setNumMovesInTurn(currNumMovesInTurn);
-  }, [currNumMovesInTurn, currGameId, gameId, currTurn, turn]);
+    // If it's AI's turn, trigger dice roll automatically:
+    if (isAITurn()) {
+      if (!AIMoveTriggered) {
+        setAIMoveTriggered(true);
+        setTimeout(handleRollButtonClick, 500);
+      }
+    } else setAIMoveTriggered(false);
+  }, [
+    currNumMovesInTurn,
+    currGameId,
+    gameId,
+    currTurn,
+    turn,
+    AIMoveTriggered,
+    handleRollButtonClick,
+  ]);
 
   return (
     <div className="right-panel side-panel">
@@ -48,7 +65,7 @@ export function RightPanel({
         }
         <span>'s Move</span>
       </div>
-      {board.diceRoll === -1 ? (
+      {board.diceRoll === -1 && !isAITurn() ? (
         <span className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back">
           <button className="roll-dice-button " onClick={handleRollButtonClick}>
             <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />

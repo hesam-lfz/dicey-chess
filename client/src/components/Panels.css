@@ -58,7 +58,8 @@
 
 .about-dice-icon {
   position: relative;
-  top: 25px;
+  display: inline-block;
+  top: 20px;
   width: 50px;
   padding: 10px;
 }
