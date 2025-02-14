@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 
-import { board, swapTurn } from '../lib';
+import { board, isAITurn, swapTurn } from '../lib';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Board } from './Board';
@@ -17,6 +17,7 @@ type Props = {
 export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
   const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
+  const [AITurn, setAITurn] = useState<boolean>(isAITurn());
   const [numSingleMovesMade, setNumSingleMovesMade] = useState<number>(0);
   const [numMovesInTurn, setNumMovesInTurn] = useState<number>(
     board.numMovesInTurn
@@ -44,6 +45,7 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
     board.numMovesInTurn = roll;
     setTurn(board.turn);
     setNumMovesInTurn(roll);
+    setAITurn(isAITurn());
   }, []);
 
   return (
@@ -55,7 +57,11 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
         />
         <div className="board-panel">
           <BoardLabels />
-          <Board currGameId={gameId} containerOnMove={onMove} />
+          <Board
+            currGameId={gameId}
+            currIsAITurn={AITurn}
+            containerOnMove={onMove}
+          />
         </div>
         <RightPanel
           currGameId={gameId}

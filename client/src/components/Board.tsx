@@ -23,11 +23,13 @@ function renderOccupyingPiece(piece?: Piece) {
 
 type Props = {
   currGameId: number;
+  currIsAITurn: boolean;
   containerOnMove: () => void;
 };
 
-export function Board({ currGameId, containerOnMove }: Props) {
+export function Board({ currGameId, currIsAITurn, containerOnMove }: Props) {
   const [gameId, setGameId] = useState<number>(currGameId);
+  const [AITurn, setAITurn] = useState<boolean>(currIsAITurn);
   const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
   const [movingToSq, setMovingToSq] = useState<Square | null>(null);
   const [pawnPromotion, setPawnPromotion] = useState<string | undefined>(
@@ -37,34 +39,61 @@ export function Board({ currGameId, containerOnMove }: Props) {
   const [prevMoveToSq, setPrevMoveToSq] = useState<Square | null>(null);
 
   const handleMove = useCallback(() => {
-    console.log('handleMove', isAITurn());
+    console.log('handleMove', AITurn, isAITurn(), JSON.stringify(board));
     setPrevMoveFromSq(movingFromSq);
     setPrevMoveToSq(movingToSq);
     setMovingFromSq(null);
     setMovingToSq(null);
     makeMove(movingFromSq!, movingToSq!, pawnPromotion);
     containerOnMove();
-  }, [movingFromSq, movingToSq, pawnPromotion, containerOnMove]);
+  }, [movingFromSq, movingToSq, pawnPromotion, AITurn, containerOnMove]);
+
+  const triggerAIMove = useCallback(() => {
+    const run = async () => {
+      console.log(
+        'board rendered is AI turn',
+        isAITurn(),
+        JSON.stringify(board)
+      );
+      const move = await getAIMove();
+      console.log(move);
+      setMovingFromSq(move.from);
+      setMovingToSq(move.to);
+      setPawnPromotion(move.promotion);
+      setAITurn(false);
+    };
+    run();
+  }, []);
 
   useEffect(() => {
     const run = async () => {
-      if (isAITurn()) {
+      console.log('board rendered', AITurn, isAITurn(), JSON.stringify(board));
+
+      if (AITurn && board.firstMoveInTurn) {
         console.log('board rendered is AI turn');
-        const move = await getAIMove();
-        console.log(move);
-        setMovingFromSq(move.from);
-        setMovingToSq(move.to);
-        setPawnPromotion(move.promotion);
+        setTimeout(triggerAIMove, 500);
+        return;
       }
+
       if (movingFromSq && movingToSq) setTimeout(handleMove, 200);
       if (currGameId !== gameId) {
         setPrevMoveFromSq(null);
         setPrevMoveToSq(null);
       }
       setGameId(currGameId);
+      setAITurn(currIsAITurn);
     };
     run();
-  }, [movingFromSq, movingToSq, handleMove, currGameId, gameId]);
+  }, [
+    movingFromSq,
+    movingToSq,
+    handleMove,
+    currGameId,
+    currIsAITurn,
+    AITurn,
+    gameId,
+    triggerAIMove,
+  ]);
 
   const squareClicked = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {

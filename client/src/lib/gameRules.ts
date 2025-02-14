@@ -12,6 +12,7 @@ import {
 
 export type Settings = {
   onePlayerMode: boolean;
+  AIPlayerIsSmart: boolean;
   humanPlaysColor: Color;
 };
 
@@ -88,6 +89,7 @@ const initBoard: Board = {
 
 const initSettings: Settings = {
   onePlayerMode: true,
+  AIPlayerIsSmart: false,
   humanPlaysColor: WHITE,
 };
 
