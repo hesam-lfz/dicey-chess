@@ -6,7 +6,7 @@ export async function getAIMove(): Promise<Move> {
 }
 
 async function getAIRandomMove(): Promise<Move> {
-  const seconds = 0.5 + Math.random() * 1;
+  const seconds = (settings.AIMoveDelay * 5 * Math.random()) / 1000;
   return new Promise((resolve) => {
     setTimeout(() => {
       const possibleMoves = boardEngine.moves({

@@ -17,17 +17,22 @@ type Props = {
 export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
   const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
-  const [AITurn, setAITurn] = useState<boolean>(isAITurn());
+  const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
+    isAITurn()
+  );
   const [numSingleMovesMade, setNumSingleMovesMade] = useState<number>(0);
   const [numMovesInTurn, setNumMovesInTurn] = useState<number>(
     board.numMovesInTurn
   );
   const [history, setHistory] = useState<string[][]>(currHistory);
+  const [shouldAlertDiceRoll, setShouldAlertDiceRoll] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (board.gameOver) onGameOver();
     setGameId(currGameId);
     setHistory(currHistory);
+    setShouldAlertDiceRoll(false);
   });
 
   const onMove = useCallback(() => {
@@ -38,6 +43,7 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
 
   const onDiceRoll = useCallback((roll: number) => {
     if (roll === 0) {
+      // player gets 0 moves. Swap turn:
       swapTurn();
       roll = -1;
     }
@@ -45,8 +51,12 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
     board.numMovesInTurn = roll;
     setTurn(board.turn);
     setNumMovesInTurn(roll);
-    console.log('setting ai turn', isAITurn(), roll);
-    setAITurn(roll !== -1 && isAITurn());
+    // if we're in 1-player mode and it's AI's turn, trigger AI move:
+    setShouldTriggerAITurn(roll !== -1 && isAITurn());
+  }, []);
+
+  const onAlertDiceRoll = useCallback(() => {
+    setShouldAlertDiceRoll(true);
   }, []);
 
   return (
@@ -60,14 +70,16 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
           <BoardLabels />
           <Board
             currGameId={gameId}
-            currIsAITurn={AITurn}
+            currShouldTriggerAITurn={shouldTriggerAITurn}
             containerOnMove={onMove}
+            containerOnAlertDiceRoll={onAlertDiceRoll}
           />
         </div>
         <RightPanel
           currGameId={gameId}
           currTurn={turn}
           currNumMovesInTurn={numMovesInTurn}
+          currShouldAlertDiceRoll={shouldAlertDiceRoll}
           containerOnDiceRoll={onDiceRoll}
         />
       </div>

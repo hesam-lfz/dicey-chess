@@ -10,6 +10,7 @@ import {
   board,
   isAITurn,
   getAIMove,
+  settings,
 } from '../lib';
 import { type Piece, type Square } from 'chess.js';
 
@@ -23,13 +24,21 @@ function renderOccupyingPiece(piece?: Piece) {
 
 type Props = {
   currGameId: number;
-  currIsAITurn: boolean;
+  currShouldTriggerAITurn: boolean;
   containerOnMove: () => void;
+  containerOnAlertDiceRoll: () => void;
 };
 
-export function Board({ currGameId, currIsAITurn, containerOnMove }: Props) {
+export function Board({
+  currGameId,
+  currShouldTriggerAITurn,
+  containerOnMove,
+  containerOnAlertDiceRoll,
+}: Props) {
   const [gameId, setGameId] = useState<number>(currGameId);
-  const [AITurn, setAITurn] = useState<boolean>(currIsAITurn);
+  const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
+    currShouldTriggerAITurn
+  );
   const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
   const [movingToSq, setMovingToSq] = useState<Square | null>(null);
   const [pawnPromotion, setPawnPromotion] = useState<string | undefined>(
@@ -39,68 +48,48 @@ export function Board({ currGameId, currIsAITurn, containerOnMove }: Props) {
   const [prevMoveToSq, setPrevMoveToSq] = useState<Square | null>(null);
 
   const handleMove = useCallback(() => {
-    console.log(
-      'handleMove',
-      'AITurn',
-      AITurn,
-      'isAITurn()',
-      isAITurn(),
-      JSON.stringify(board)
-    );
     setPrevMoveFromSq(movingFromSq);
     setPrevMoveToSq(movingToSq);
     setMovingFromSq(null);
     setMovingToSq(null);
     makeMove(movingFromSq!, movingToSq!, pawnPromotion);
+    setShouldTriggerAITurn(false);
     containerOnMove();
-  }, [movingFromSq, movingToSq, pawnPromotion, AITurn, containerOnMove]);
+  }, [movingFromSq, movingToSq, pawnPromotion, containerOnMove]);
 
   const triggerAIMove = useCallback(() => {
     const run = async () => {
-      console.log(
-        'board rendered is AI turn',
-        isAITurn(),
-        JSON.stringify(board)
-      );
       const move = await getAIMove();
-      console.log(move);
       setMovingFromSq(move.from);
       setMovingToSq(move.to);
       setPawnPromotion(move.promotion);
-      setAITurn(false);
     };
     run();
   }, []);
 
   useEffect(() => {
     const run = async () => {
-      console.log(
-        'board rendered',
-        'currIsAITurn',
-        currIsAITurn,
-        'AITurn',
-        AITurn,
-        'isAITurn()',
-        isAITurn(),
-        JSON.stringify(board)
-      );
-
-      if (AITurn && isAITurn()) {
-        console.log('board rendered is AI turn');
-        if (board.firstMoveInTurn) {
-          console.log('triggering move', JSON.stringify(board));
-          setTimeout(triggerAIMove, 500);
-        }
+      // if the 'from' and 'to' of a move were just determined, ready to execute the move:
+      if (movingFromSq && movingToSq) {
+        setTimeout(handleMove, 200);
         return;
       }
-
-      if (movingFromSq && movingToSq) setTimeout(handleMove, 200);
+      // mechanism to trigger AI move automatically, if needed (part two):
+      if (shouldTriggerAITurn) {
+        setTimeout(triggerAIMove, settings.AIMoveDelay);
+        return;
+      }
+      // mechanism to trigger AI move automatically, if needed (part one)
+      if (isAITurn() && !board.gameOver) {
+        setShouldTriggerAITurn(currShouldTriggerAITurn);
+        return;
+      }
+      // we're resetting the game:
       if (currGameId !== gameId) {
         setPrevMoveFromSq(null);
         setPrevMoveToSq(null);
       }
       setGameId(currGameId);
-      setAITurn(currIsAITurn);
     };
     run();
   }, [
@@ -108,16 +97,22 @@ export function Board({ currGameId, currIsAITurn, containerOnMove }: Props) {
     movingToSq,
     handleMove,
     currGameId,
-    currIsAITurn,
-    AITurn,
+    currShouldTriggerAITurn,
+    shouldTriggerAITurn,
     gameId,
     triggerAIMove,
   ]);
 
   const squareClicked = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      // if dice isn't rolled yet or the game is over, clicking is not allowed:
-      if (board.diceRoll === -1 || board.gameOver) return;
+      // if dice isn't rolled yet clicking is not allowed:
+      if (board.diceRoll === -1) {
+        // alert user they need to roll dice first:
+        containerOnAlertDiceRoll();
+        return;
+      }
+      // if the game is over, clicking is not allowed:
+      if (board.gameOver) return;
       // if in 1-player mode and it's not player's turn, clicking is not allowed:
       if (isAITurn()) return;
       // find the square element which was clicked on so we can get the square coords:

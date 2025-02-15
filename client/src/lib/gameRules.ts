@@ -14,6 +14,7 @@ export type Settings = {
   onePlayerMode: boolean;
   AIPlayerIsSmart: boolean;
   humanPlaysColor: Color;
+  AIMoveDelay: number;
 };
 
 export type Board = {
@@ -91,6 +92,7 @@ const initSettings: Settings = {
   onePlayerMode: true,
   AIPlayerIsSmart: false,
   humanPlaysColor: WHITE,
+  AIMoveDelay: 250,
 };
 
 export let settings: Settings;
@@ -142,13 +144,15 @@ export function makeMove(
     board.numMovesInTurn = -1;
     board.firstMoveInTurn = true;
     board.history.push([]);
-    checkForGameOver();
   } else {
     // The player still has moves left in the current turn, according to the dice roll:
     board.firstMoveInTurn = false;
     // swap turn back to the player who just moved since there's still more to make:
     swapTurn();
   }
+  // After each move we need to check for game over because if player has moves left
+  // in the turn but has no valid moves then it's a draw:
+  checkForGameOver();
   return board.history;
 }
 // returns true if we're in 1-player mode and it's not human player's turn:
@@ -156,14 +160,16 @@ export const isAITurn: () => boolean = () =>
   settings.onePlayerMode && board.turn !== settings.humanPlaysColor;
 
 export const checkForGameOver: () => void = () => {
-  if (boardEngine.isDraw()) {
-    board.gameOver = true;
-    board.outcome = 'Draw!';
-  } else if (boardEngine.isCheckmate()) {
+  if (boardEngine.isCheckmate()) {
     board.gameOver = true;
     board.outcome = (board.turn === WHITE ? 'Black' : 'White') + ' wins!';
+  } else if (boardEngine.isDraw() || isDiceyChessDraw()) {
+    board.gameOver = true;
+    board.outcome = 'Draw!';
   }
 };
+
+const isDiceyChessDraw: () => boolean = () => boardEngine.moves().length === 0;
 
 export function promptUserIfPromotionMove(
   fromSquare: Square,

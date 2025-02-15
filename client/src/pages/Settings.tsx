@@ -23,12 +23,12 @@ export function Settings() {
       <h2>Settings</h2>
       <div className="dotted-border">
         <ToggleSwitch
-          label="1-Player — Play vs AI"
+          label="1-Player — Play vs. AI"
           initChecked={onePlayer}
           containerOnChange={(checked: boolean) => onOnePlayerChange(checked)}
         />
         <ToggleSwitch
-          label="2-Player — Play vs Human"
+          label="2-Player — Play vs. Human"
           initChecked={!onePlayer}
           containerOnChange={(checked: boolean) => onOnePlayerChange(!checked)}
         />
