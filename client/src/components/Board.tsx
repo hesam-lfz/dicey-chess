@@ -39,7 +39,14 @@ export function Board({ currGameId, currIsAITurn, containerOnMove }: Props) {
   const [prevMoveToSq, setPrevMoveToSq] = useState<Square | null>(null);
 
   const handleMove = useCallback(() => {
-    console.log('handleMove', AITurn, isAITurn(), JSON.stringify(board));
+    console.log(
+      'handleMove',
+      'AITurn',
+      AITurn,
+      'isAITurn()',
+      isAITurn(),
+      JSON.stringify(board)
+    );
     setPrevMoveFromSq(movingFromSq);
     setPrevMoveToSq(movingToSq);
     setMovingFromSq(null);
@@ -67,11 +74,23 @@ export function Board({ currGameId, currIsAITurn, containerOnMove }: Props) {
 
   useEffect(() => {
     const run = async () => {
-      console.log('board rendered', AITurn, isAITurn(), JSON.stringify(board));
+      console.log(
+        'board rendered',
+        'currIsAITurn',
+        currIsAITurn,
+        'AITurn',
+        AITurn,
+        'isAITurn()',
+        isAITurn(),
+        JSON.stringify(board)
+      );
 
-      if (AITurn && board.firstMoveInTurn) {
+      if (AITurn && isAITurn()) {
         console.log('board rendered is AI turn');
-        setTimeout(triggerAIMove, 500);
+        if (board.firstMoveInTurn) {
+          console.log('triggering move', JSON.stringify(board));
+          setTimeout(triggerAIMove, 500);
+        }
         return;
       }
 
@@ -112,11 +131,11 @@ export function Board({ currGameId, currIsAITurn, containerOnMove }: Props) {
       else if (movingFromSq && validateMove(movingFromSq, square)) {
         setMovingToSq(square);
         setPawnPromotion(
-          promptUserIfPromotionMove(movingFromSq, movingToSq!, board.turn)
+          promptUserIfPromotionMove(movingFromSq, square, board.turn)
         );
       }
     },
-    [movingFromSq, movingToSq]
+    [movingFromSq]
   );
 
   return (

@@ -45,7 +45,8 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
     board.numMovesInTurn = roll;
     setTurn(board.turn);
     setNumMovesInTurn(roll);
-    setAITurn(isAITurn());
+    console.log('setting ai turn', isAITurn(), roll);
+    setAITurn(roll !== -1 && isAITurn());
   }, []);
 
   return (

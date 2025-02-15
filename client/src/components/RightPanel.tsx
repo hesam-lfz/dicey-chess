@@ -24,7 +24,7 @@ export function RightPanel({
     useState<number>(currNumMovesInTurn);
   const [AIMoveTriggered, setAIMoveTriggered] = useState<boolean>(false);
   const handleRollButtonClick = useCallback(() => {
-    const roll = Math.floor(Math.random() * 6);
+    const roll = Math.floor(Math.random() * 3);
     console.log('roll', roll);
     setNumMovesInTurn(roll);
     containerOnDiceRoll(roll);
@@ -37,6 +37,7 @@ export function RightPanel({
     // If it's AI's turn, trigger dice roll automatically:
     if (isAITurn()) {
       if (!AIMoveTriggered) {
+        console.log('dice roll triggered');
         setAIMoveTriggered(true);
         setTimeout(handleRollButtonClick, 500);
       }
