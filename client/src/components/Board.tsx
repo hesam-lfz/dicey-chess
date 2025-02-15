@@ -130,7 +130,7 @@ export function Board({
         );
       }
     },
-    [movingFromSq]
+    [movingFromSq, containerOnAlertDiceRoll]
   );
 
   return (
