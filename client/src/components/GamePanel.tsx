@@ -45,6 +45,7 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
     if (roll === 0) {
       // player gets 0 moves. Swap turn:
       swapTurn();
+      board.history.push([]);
       roll = -1;
     }
     board.diceRoll = roll;

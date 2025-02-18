@@ -13,7 +13,8 @@ import {
 export type Settings = {
   onePlayerMode: boolean;
   AIPlayerIsSmart: boolean;
-  humanPlaysColor: Color;
+  humanPlaysColor: Color | null;
+  humanPlaysColorRandomly: boolean;
   AIMoveDelay: number;
 };
 
@@ -88,32 +89,63 @@ const initBoard: Board = {
   gameOver: false,
 };
 
-const initSettings: Settings = {
+const defaultInitSettings: Settings = {
   onePlayerMode: true,
   AIPlayerIsSmart: false,
   humanPlaysColor: WHITE,
+  humanPlaysColorRandomly: false,
   AIMoveDelay: 250,
 };
 
+const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
+
+let initSettings: Settings;
 export let settings: Settings;
 export let board: Board;
-export let boardEngine: Chess;
+export let boardEngine: Chess; // <-- board rules engine
+export const chessAIEngine: WebSocket | null = null; // <-- chess AI player engine
 
+// Initialize settings and load any saved settings:
+function loadSettings(): void {
+  const localData = localStorage.getItem(localStorageKeyPrefix + '-settings');
+  initSettings = localData
+    ? (JSON.parse(localData) as Settings)
+    : defaultInitSettings;
+  resetSettings();
+}
+
+// Save the current settings:
+export function saveSettings(): void {
+  const settingsDataJSON = JSON.stringify(settings);
+  localStorage.setItem(localStorageKeyPrefix + '-settings', settingsDataJSON);
+}
+
+// Reset the current settings:
 export const resetSettings = () => {
   settings = { ...initSettings };
 };
 
+// Reset the board to start a new game:
 export const resetBoard = () => {
   board = { ...initBoard };
   board.history = [[]];
   boardEngine = new Chess(board.initPositionFEN);
+  // close the chess AI engine socket if we have one running currently:
+  if (chessAIEngine !== null) (chessAIEngine as WebSocket).close();
+  // If we need the chess aI engine (1-player game) set it up:
+  if (settings.onePlayerMode) {
+    //chessAIEngine = new WebSocket(import.meta.env.VITE_APP_CHESS_ENGINE_API_URL);
+  }
 };
 
-resetSettings();
+// Load initial settings:
+loadSettings();
+// Reset the board:
 resetBoard();
 
 export const getSquarePiece = (square: Square) => boardEngine.get(square);
 
+// Returns whether or not making move from to square is a valid move based on current board:
 export function validateMove(fromSquare: Square, toSquare: Square): boolean {
   // boardEngine accepts a move in which a king is taken! Take care of it manually here:
   const toPiece = getSquarePiece(toSquare);
@@ -125,6 +157,7 @@ export function validateMove(fromSquare: Square, toSquare: Square): boolean {
   return possibleMoves.filter((m) => m.to === toSquare).length > 0;
 }
 
+// Execute the given move from to square:
 export function makeMove(
   fromSquare: Square,
   toSquare: Square,
@@ -155,10 +188,12 @@ export function makeMove(
   checkForGameOver();
   return board.history;
 }
-// returns true if we're in 1-player mode and it's not human player's turn:
+
+// Returns true if we're in 1-player mode and it's not human player's turn:
 export const isAITurn: () => boolean = () =>
   settings.onePlayerMode && board.turn !== settings.humanPlaysColor;
 
+// Is the game over based on the current board:
 export const checkForGameOver: () => void = () => {
   if (boardEngine.isCheckmate()) {
     board.gameOver = true;
@@ -169,8 +204,11 @@ export const checkForGameOver: () => void = () => {
   }
 };
 
+// Is this a draw situation for Dicey chess, since player still hasn't played all
+// moves in the current turn (based on the dice roll), but has no valid move to make:
 const isDiceyChessDraw: () => boolean = () => boardEngine.moves().length === 0;
 
+// Prompt user when promoting a pawn which type of piece they want to promote to:
 export function promptUserIfPromotionMove(
   fromSquare: Square,
   toSquare: Square,
@@ -187,6 +225,9 @@ export function promptUserIfPromotionMove(
   return undefined;
 }
 
+// Manually manipulate the current board to make it the other player's turn.
+// This is needed since we want to make a player make multiple moves in a single
+// turn:
 export function swapTurn(): void {
   let fen = boardEngine.fen();
   const fenA = fen.split(' ');
