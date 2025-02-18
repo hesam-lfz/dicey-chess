@@ -1,4 +1,11 @@
-import { allFiles, allRanks } from '../lib';
+import {
+  allFiles,
+  allFilesReversed,
+  allRanks,
+  allRanksReversed,
+  currentGameSettings,
+} from '../lib';
+import { WHITE } from 'chess.js';
 
 export function BoardLabels() {
   const idxs = [0, 1];
@@ -6,7 +13,11 @@ export function BoardLabels() {
     'chessboard-row chessboard-file-labels',
     'chessboard-col chessboard-rank-labels',
   ];
-  const allLabels = [allFiles, allRanks];
+  const ranks =
+    currentGameSettings.humanPlaysColor === WHITE ? allRanks : allRanksReversed;
+  const files =
+    currentGameSettings.humanPlaysColor === WHITE ? allFiles : allFilesReversed;
+  const allLabels = [files, ranks];
   return (
     <>
       {idxs.map((idx) => {

@@ -1,6 +1,7 @@
 import {
   Chess,
   WHITE,
+  BLACK,
   PAWN,
   QUEEN,
   KING,
@@ -10,12 +11,18 @@ import {
   type Move,
 } from 'chess.js';
 
+// General settings:
 export type Settings = {
   onePlayerMode: boolean;
   AIPlayerIsSmart: boolean;
   humanPlaysColor: Color | null;
   humanPlaysColorRandomly: boolean;
   AIMoveDelay: number;
+};
+
+// Settings specific for a given game:
+export type CurrentGameSettings = {
+  humanPlaysColor: Color;
 };
 
 export type Board = {
@@ -62,6 +69,8 @@ export const playerIconSVGs = {
   b: pieceSVGs['Icon_bp'],
 };
 
+export const allColors: Color[] = [WHITE, BLACK];
+
 export const allFiles: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h')[] = [
   'a',
   'b',
@@ -72,8 +81,24 @@ export const allFiles: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h')[] = [
   'g',
   'h',
 ];
+
+export const allFilesReversed: (
+  | 'a'
+  | 'b'
+  | 'c'
+  | 'd'
+  | 'e'
+  | 'f'
+  | 'g'
+  | 'h'
+)[] = ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
+
 export const allRanks: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [
   1, 2, 3, 4, 5, 6, 7, 8,
+];
+
+export const allRanksReversed: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [
+  8, 7, 6, 5, 4, 3, 2, 1,
 ];
 
 export const getSquareRank: (square: Square) => number = (square: Square) =>
@@ -101,6 +126,9 @@ const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
 
 let initSettings: Settings;
 export let settings: Settings;
+export const currentGameSettings: CurrentGameSettings = {
+  humanPlaysColor: WHITE,
+};
 export let board: Board;
 export let boardEngine: Chess; // <-- board rules engine
 export const chessAIEngine: WebSocket | null = null; // <-- chess AI player engine
@@ -123,6 +151,10 @@ export function saveSettings(): void {
 // Reset the current settings:
 export const resetSettings = () => {
   settings = { ...initSettings };
+  // set which players gets which color:
+  currentGameSettings.humanPlaysColor = settings.humanPlaysColorRandomly
+    ? allColors[Math.floor(Math.random() * 2)]
+    : settings.humanPlaysColor!;
 };
 
 // Reset the board to start a new game:
@@ -191,7 +223,7 @@ export function makeMove(
 
 // Returns true if we're in 1-player mode and it's not human player's turn:
 export const isAITurn: () => boolean = () =>
-  settings.onePlayerMode && board.turn !== settings.humanPlaysColor;
+  settings.onePlayerMode && board.turn !== currentGameSettings.humanPlaysColor;
 
 // Is the game over based on the current board:
 export const checkForGameOver: () => void = () => {

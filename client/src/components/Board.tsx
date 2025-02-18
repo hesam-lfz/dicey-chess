@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback, MouseEvent } from 'react';
 import {
   pieceSVGs,
   allFiles,
+  allFilesReversed,
   allRanks,
+  allRanksReversed,
   getSquarePiece,
   makeMove,
   validateMove,
@@ -11,8 +13,9 @@ import {
   isAITurn,
   getAIMove,
   settings,
+  currentGameSettings,
 } from '../lib';
-import { type Piece, type Square } from 'chess.js';
+import { WHITE, type Piece, type Square } from 'chess.js';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -133,11 +136,16 @@ export function Board({
     [movingFromSq, containerOnAlertDiceRoll]
   );
 
+  // Draw the chess board:
+  const ranks =
+    currentGameSettings.humanPlaysColor === WHITE ? allRanks : allRanksReversed;
+  const files =
+    currentGameSettings.humanPlaysColor === WHITE ? allFiles : allFilesReversed;
   return (
     <div className="chessboard" onClick={(e) => squareClicked(e)}>
-      {allRanks.map((r) => (
+      {ranks.map((r) => (
         <div className="chessboard-row" key={String(r)}>
-          {allFiles.map((f) => {
+          {files.map((f) => {
             const sq = (f + allRanks[8 - r]) as Square;
             let squareClasses = 'square';
             if (movingFromSq === sq)
