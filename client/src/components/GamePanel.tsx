@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 
-import { board, isAITurn, swapTurn } from '../lib';
+import { board, currentGameSettings, isAITurn, swapTurn } from '../lib';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Board } from './Board';
@@ -68,9 +68,12 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
           currHistory={history}
         />
         <div className="board-panel">
-          <BoardLabels />
+          <BoardLabels
+            currHumanPlaysColor={currentGameSettings.humanPlaysColor}
+          />
           <Board
             currGameId={gameId}
+            currHumanPlaysColor={currentGameSettings.humanPlaysColor}
             currShouldTriggerAITurn={shouldTriggerAITurn}
             containerOnMove={onMove}
             containerOnAlertDiceRoll={onAlertDiceRoll}

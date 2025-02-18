@@ -1,22 +1,25 @@
-import {
-  allFiles,
-  allFilesReversed,
-  allRanks,
-  allRanksReversed,
-  currentGameSettings,
-} from '../lib';
-import { WHITE } from 'chess.js';
+import { useEffect, useState } from 'react';
+import { allFiles, allFilesReversed, allRanks, allRanksReversed } from '../lib';
+import { WHITE, Color } from 'chess.js';
 
-export function BoardLabels() {
+type Props = {
+  currHumanPlaysColor: Color;
+};
+
+export function BoardLabels({ currHumanPlaysColor }: Props) {
+  const [humanPlaysColor, setHumanPlaysColor] =
+    useState<Color>(currHumanPlaysColor);
+
+  useEffect(() => {
+    setHumanPlaysColor(currHumanPlaysColor);
+  }, [currHumanPlaysColor]);
   const idxs = [0, 1];
   const classNames = [
     'chessboard-row chessboard-file-labels',
     'chessboard-col chessboard-rank-labels',
   ];
-  const ranks =
-    currentGameSettings.humanPlaysColor === WHITE ? allRanks : allRanksReversed;
-  const files =
-    currentGameSettings.humanPlaysColor === WHITE ? allFiles : allFilesReversed;
+  const ranks = humanPlaysColor === WHITE ? allRanks : allRanksReversed;
+  const files = humanPlaysColor === WHITE ? allFiles : allFilesReversed;
   const allLabels = [files, ranks];
   return (
     <>

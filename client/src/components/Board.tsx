@@ -13,9 +13,8 @@ import {
   isAITurn,
   getAIMove,
   settings,
-  currentGameSettings,
 } from '../lib';
-import { WHITE, type Piece, type Square } from 'chess.js';
+import { Color, WHITE, type Piece, type Square } from 'chess.js';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -27,6 +26,7 @@ function renderOccupyingPiece(piece?: Piece) {
 
 type Props = {
   currGameId: number;
+  currHumanPlaysColor: Color;
   currShouldTriggerAITurn: boolean;
   containerOnMove: () => void;
   containerOnAlertDiceRoll: () => void;
@@ -34,11 +34,14 @@ type Props = {
 
 export function Board({
   currGameId,
+  currHumanPlaysColor,
   currShouldTriggerAITurn,
   containerOnMove,
   containerOnAlertDiceRoll,
 }: Props) {
   const [gameId, setGameId] = useState<number>(currGameId);
+  const [humanPlaysColor, setHumanPlaysColor] =
+    useState<Color>(currHumanPlaysColor);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
     currShouldTriggerAITurn
   );
@@ -93,6 +96,7 @@ export function Board({
         setPrevMoveToSq(null);
       }
       setGameId(currGameId);
+      setHumanPlaysColor(currHumanPlaysColor);
     };
     run();
   }, [
@@ -100,6 +104,7 @@ export function Board({
     movingToSq,
     handleMove,
     currGameId,
+    currHumanPlaysColor,
     currShouldTriggerAITurn,
     shouldTriggerAITurn,
     gameId,
@@ -137,10 +142,8 @@ export function Board({
   );
 
   // Draw the chess board:
-  const ranks =
-    currentGameSettings.humanPlaysColor === WHITE ? allRanks : allRanksReversed;
-  const files =
-    currentGameSettings.humanPlaysColor === WHITE ? allFiles : allFilesReversed;
+  const ranks = humanPlaysColor === WHITE ? allRanks : allRanksReversed;
+  const files = humanPlaysColor === WHITE ? allFiles : allFilesReversed;
   return (
     <div className="chessboard" onClick={(e) => squareClicked(e)}>
       {ranks.map((r) => (
