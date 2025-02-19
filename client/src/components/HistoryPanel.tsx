@@ -22,10 +22,16 @@ export function HistoryPanel({ currNumSingleMovesMade, currHistory }: Props) {
     const whiteMove = msIdx % 2 === 0;
     const liClass = 'justify-self-' + (whiteMove ? 'start' : 'end');
     const moveSetLabel = 'history-moveset-' + msIdx + '-';
+    if (whiteMove)
+      allHistoryItems.push(
+        <li key={moveSetLabel} className={liClass}>
+          {moveCtr++ + '. '}
+        </li>
+      );
     moveSet.forEach((move, mIdx) => {
       allHistoryItems.push(
         <li key={moveSetLabel + mIdx} className={liClass}>
-          {(whiteMove && mIdx === 0 ? '' + moveCtr++ + '. ' : '') + move}
+          {move}
         </li>
       );
     });

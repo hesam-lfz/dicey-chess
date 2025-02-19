@@ -29,6 +29,15 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
     useState<boolean>(false);
 
   useEffect(() => {
+    console.log(
+      'rendered GamePanel',
+      'shouldTriggerAITurn',
+      shouldTriggerAITurn,
+      'isAITurn()',
+      isAITurn(),
+      JSON.stringify(board)
+    );
+
     if (board.gameOver) onGameOver();
     setGameId(currGameId);
     setHistory(currHistory);

@@ -80,6 +80,18 @@ export function Board({
         setTimeout(handleMove, 200);
         return;
       }
+
+      console.log(
+        'rendered Board',
+        'currShouldTriggerAITurn',
+        currShouldTriggerAITurn,
+        'shouldTriggerAITurn',
+        shouldTriggerAITurn,
+        'isAITurn()',
+        isAITurn(),
+        JSON.stringify(board)
+      );
+
       // mechanism to trigger AI move automatically, if needed (part two):
       if (shouldTriggerAITurn) {
         setTimeout(triggerAIMove, settings.AIMoveDelay);
