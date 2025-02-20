@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { DicePanel } from './DicePanel';
+import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { board, isAITurn, playerIconSVGs } from '../lib';
 import { type Color } from 'chess.js';
 import Icon_dice from '../assets/dice.svg';
@@ -21,7 +22,7 @@ export function RightPanel({
   containerOnDiceRoll,
 }: Props) {
   const rollDiceButtonBorderRef = useRef<null | HTMLSpanElement>(null);
-
+  const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [numMovesInTurn, setNumMovesInTurn] =
@@ -50,12 +51,12 @@ export function RightPanel({
       'AIMoveTriggered',
       AIMoveTriggered,
       'isAITurn()',
-      isAITurn(),
+      isAITurn(currentGameSettings),
       JSON.stringify(board)
     );
     */
     // If it's AI's turn, trigger dice roll automatically:
-    if (isAITurn() && !board.gameOver) {
+    if (isAITurn(currentGameSettings) && !board.gameOver) {
       if (!AIMoveTriggered) {
         //console.log('roll trigger');
         setAIMoveTriggered(true);
@@ -97,7 +98,7 @@ export function RightPanel({
         }
         <span>'s Move</span>
       </div>
-      {board.diceRoll === -1 && !isAITurn() ? (
+      {board.diceRoll === -1 && !isAITurn(currentGameSettings) ? (
         <span
           className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
           ref={rollDiceButtonBorderRef}>

@@ -1,3 +1,16 @@
+import Icon_wk from '../assets/king_w.svg';
+import Icon_bk from '../assets/king_b.svg';
+import Icon_wq from '../assets/queen_w.svg';
+import Icon_bq from '../assets/queen_b.svg';
+import Icon_wb from '../assets/bishop_w.svg';
+import Icon_bb from '../assets/bishop_b.svg';
+import Icon_wn from '../assets/knight_w.svg';
+import Icon_bn from '../assets/knight_b.svg';
+import Icon_wr from '../assets/rook_w.svg';
+import Icon_br from '../assets/rook_b.svg';
+import Icon_wp from '../assets/pawn_w.svg';
+import Icon_bp from '../assets/pawn_b.svg';
+
 import {
   Chess,
   WHITE,
@@ -35,19 +48,6 @@ export type Board = {
   gameOver: boolean;
   outcome?: string;
 };
-
-import Icon_wk from '../assets/king_w.svg';
-import Icon_bk from '../assets/king_b.svg';
-import Icon_wq from '../assets/queen_w.svg';
-import Icon_bq from '../assets/queen_b.svg';
-import Icon_wb from '../assets/bishop_w.svg';
-import Icon_bb from '../assets/bishop_b.svg';
-import Icon_wn from '../assets/knight_w.svg';
-import Icon_bn from '../assets/knight_b.svg';
-import Icon_wr from '../assets/rook_w.svg';
-import Icon_br from '../assets/rook_b.svg';
-import Icon_wp from '../assets/pawn_w.svg';
-import Icon_bp from '../assets/pawn_b.svg';
 
 export const pieceSVGs: { [key: string]: any } = {
   Icon_wk,
@@ -126,30 +126,30 @@ const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
 
 let initSettings: Settings;
 export let settings: Settings;
-export const currentGameSettings: CurrentGameSettings = {
-  humanPlaysColor: WHITE,
-};
+
 export let board: Board;
 export let boardEngine: Chess; // <-- board rules engine
 export const chessAIEngine: WebSocket | null = null; // <-- chess AI player engine
 
 // Initialize settings and load any saved settings:
-function loadSettings(): void {
+export function loadSettings(currentGameSettings: CurrentGameSettings): void {
   const localData = localStorage.getItem(localStorageKeyPrefix + '-settings');
   initSettings = localData
     ? (JSON.parse(localData) as Settings)
     : defaultInitSettings;
-  resetSettings();
+  resetSettings(currentGameSettings);
 }
 
 // Save the current settings:
-export function saveSettings(): void {
+export function saveSettings(setNewCurrentGameSettings: () => void): void {
   const settingsDataJSON = JSON.stringify(settings);
   localStorage.setItem(localStorageKeyPrefix + '-settings', settingsDataJSON);
+  // trigger resetting the current game settings and board reset:
+  setNewCurrentGameSettings();
 }
 
 // Reset the current settings:
-export const resetSettings = () => {
+export const resetSettings = (currentGameSettings: CurrentGameSettings) => {
   settings = { ...initSettings };
   // set which players gets which color:
   currentGameSettings.humanPlaysColor = settings.humanPlaysColorRandomly
@@ -169,11 +169,6 @@ export const resetBoard = () => {
     //chessAIEngine = new WebSocket(import.meta.env.VITE_APP_CHESS_ENGINE_API_URL);
   }
 };
-
-// Load initial settings:
-loadSettings();
-// Reset the board:
-resetBoard();
 
 export const getSquarePiece = (square: Square) => boardEngine.get(square);
 
@@ -222,7 +217,9 @@ export function makeMove(
 }
 
 // Returns true if we're in 1-player mode and it's not human player's turn:
-export const isAITurn: () => boolean = () =>
+export const isAITurn: (currentGameSettings: CurrentGameSettings) => boolean = (
+  currentGameSettings: CurrentGameSettings
+) =>
   settings.onePlayerMode && board.turn !== currentGameSettings.humanPlaysColor;
 
 // Is the game over based on the current board:

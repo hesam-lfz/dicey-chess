@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-
-import { board, currentGameSettings, isAITurn, swapTurn } from '../lib';
+import { board, isAITurn, swapTurn } from '../lib';
+import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Board } from './Board';
@@ -15,10 +15,11 @@ type Props = {
 };
 
 export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
+  const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
-    board.diceRoll !== -1 && isAITurn()
+    board.diceRoll !== -1 && isAITurn(currentGameSettings)
   );
   const [numSingleMovesMade, setNumSingleMovesMade] = useState<number>(0);
   const [numMovesInTurn, setNumMovesInTurn] = useState<number>(
@@ -63,7 +64,7 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
     setTurn(board.turn);
     setNumMovesInTurn(roll);
     // if we're in 1-player mode and it's AI's turn, trigger AI move:
-    setShouldTriggerAITurn(roll !== -1 && isAITurn());
+    setShouldTriggerAITurn(roll !== -1 && isAITurn(currentGameSettings));
   }, []);
 
   const onAlertDiceRoll = useCallback(() => {

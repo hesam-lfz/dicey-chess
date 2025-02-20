@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, MouseEvent } from 'react';
+import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import {
   pieceSVGs,
   allFiles,
@@ -39,6 +40,7 @@ export function Board({
   containerOnMove,
   containerOnAlertDiceRoll,
 }: Props) {
+  const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [humanPlaysColor, setHumanPlaysColor] =
     useState<Color>(currHumanPlaysColor);
@@ -88,7 +90,7 @@ export function Board({
         'shouldTriggerAITurn',
         shouldTriggerAITurn,
         'isAITurn()',
-        isAITurn(),
+        isAITurn(currentGameSettings),
         JSON.stringify(board)
       );
       */
@@ -99,7 +101,7 @@ export function Board({
         return;
       }
       // mechanism to trigger AI move automatically, if needed (part one)
-      if (isAITurn() && !board.gameOver) {
+      if (isAITurn(currentGameSettings) && !board.gameOver) {
         setShouldTriggerAITurn(currShouldTriggerAITurn);
         return;
       }
@@ -135,7 +137,7 @@ export function Board({
       // if the game is over, clicking is not allowed:
       if (board.gameOver) return;
       // if in 1-player mode and it's not player's turn, clicking is not allowed:
-      if (isAITurn()) return;
+      if (isAITurn(currentGameSettings)) return;
       // find the square element which was clicked on so we can get the square coords:
       let $clickedSq = e.target as HTMLElement;
       if ($clickedSq.tagName === 'IMG')

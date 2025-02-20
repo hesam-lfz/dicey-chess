@@ -1,9 +1,12 @@
 import { useState, useCallback } from 'react';
 import { ToggleSwitch } from '../components/ToggleSwitch';
+import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { saveSettings, settings } from '../lib';
 import { Color, WHITE, BLACK } from 'chess.js';
 
 export function Settings() {
+  const { setNewCurrentGameSettings } = useCurrentGameSettings();
+
   const [onePlayer, setOnePlayer] = useState<boolean>(settings.onePlayerMode);
   const [humanPlaysColor, setHumanPlaysColor] = useState<Color | null>(
     settings.humanPlaysColor
@@ -14,11 +17,14 @@ export function Settings() {
     settings.AIPlayerIsSmart
   );
 
-  const onOnePlayerChange = useCallback((checked: boolean) => {
-    setOnePlayer(checked);
-    settings.onePlayerMode = checked;
-    saveSettings();
-  }, []);
+  const onOnePlayerChange = useCallback(
+    (checked: boolean) => {
+      setOnePlayer(checked);
+      settings.onePlayerMode = checked;
+      saveSettings(setNewCurrentGameSettings);
+    },
+    [setNewCurrentGameSettings]
+  );
 
   const onHumanPlaysColorChange = useCallback(
     (color: Color | null, checked: boolean) => {
@@ -40,16 +46,19 @@ export function Settings() {
       setHumanPlaysColorRandomly(randomOn);
       settings.humanPlaysColor = colorToSet;
       settings.humanPlaysColorRandomly = randomOn;
-      saveSettings();
+      saveSettings(setNewCurrentGameSettings);
     },
-    []
+    [setNewCurrentGameSettings]
   );
 
-  const onAISmartChange = useCallback((checked: boolean) => {
-    setAIPlayerIsSmart(checked);
-    settings.AIPlayerIsSmart = checked;
-    saveSettings();
-  }, []);
+  const onAISmartChange = useCallback(
+    (checked: boolean) => {
+      setAIPlayerIsSmart(checked);
+      settings.AIPlayerIsSmart = checked;
+      saveSettings(setNewCurrentGameSettings);
+    },
+    [setNewCurrentGameSettings]
+  );
 
   return (
     <div className="main-panel padded-main-panel flex flex-col flex-align-center">
