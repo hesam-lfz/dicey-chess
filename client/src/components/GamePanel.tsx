@@ -52,20 +52,23 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
     setNumSingleMovesMade((n) => n + 1);
   }, []);
 
-  const onDiceRoll = useCallback((roll: number) => {
-    if (roll === 0) {
-      // player gets 0 moves. Swap turn:
-      swapTurn();
-      board.history.push([]);
-      roll = -1;
-    }
-    board.diceRoll = roll;
-    board.numMovesInTurn = roll;
-    setTurn(board.turn);
-    setNumMovesInTurn(roll);
-    // if we're in 1-player mode and it's AI's turn, trigger AI move:
-    setShouldTriggerAITurn(roll !== -1 && isAITurn(currentGameSettings));
-  }, []);
+  const onDiceRoll = useCallback(
+    (roll: number) => {
+      if (roll === 0) {
+        // player gets 0 moves. Swap turn:
+        swapTurn();
+        board.history.push([]);
+        roll = -1;
+      }
+      board.diceRoll = roll;
+      board.numMovesInTurn = roll;
+      setTurn(board.turn);
+      setNumMovesInTurn(roll);
+      // if we're in 1-player mode and it's AI's turn, trigger AI move:
+      setShouldTriggerAITurn(roll !== -1 && isAITurn(currentGameSettings));
+    },
+    [currentGameSettings]
+  );
 
   const onAlertDiceRoll = useCallback(() => {
     setShouldAlertDiceRoll(true);

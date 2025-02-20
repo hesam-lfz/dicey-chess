@@ -38,6 +38,7 @@ export function CurrentGameSettingsProvider({ children }: Props) {
   console.log('load settings...');
   loadSettings(currentGameSettings);
 
+  // FIXME: This needs to be somewhere else??
   // Reset the board:
   console.log('reset board...');
   resetBoard();

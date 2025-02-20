@@ -82,6 +82,7 @@ export function RightPanel({
     AIMoveTriggered,
     currShouldAlertDiceRoll,
     handleRollButtonClick,
+    currentGameSettings,
   ]);
 
   return (

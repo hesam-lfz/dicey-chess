@@ -124,6 +124,7 @@ export function Board({
     shouldTriggerAITurn,
     gameId,
     triggerAIMove,
+    currentGameSettings,
   ]);
 
   const squareClicked = useCallback(
@@ -153,7 +154,7 @@ export function Board({
         );
       }
     },
-    [movingFromSq, containerOnAlertDiceRoll]
+    [movingFromSq, currentGameSettings, containerOnAlertDiceRoll]
   );
 
   // Draw the chess board:
