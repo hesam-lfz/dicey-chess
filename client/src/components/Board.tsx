@@ -80,7 +80,7 @@ export function Board({
         setTimeout(handleMove, 200);
         return;
       }
-
+      /*
       console.log(
         'rendered Board',
         'currShouldTriggerAITurn',
@@ -91,9 +91,10 @@ export function Board({
         isAITurn(),
         JSON.stringify(board)
       );
-
+      */
       // mechanism to trigger AI move automatically, if needed (part two):
       if (shouldTriggerAITurn) {
+        //console.log('triggering move');
         setTimeout(triggerAIMove, settings.AIMoveDelay);
         return;
       }

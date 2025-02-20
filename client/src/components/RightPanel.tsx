@@ -30,6 +30,7 @@ export function RightPanel({
 
   const handleRollButtonClick = useCallback(() => {
     const roll = Math.floor(Math.random() * 5);
+    //console.log('rolled', roll);
     setNumMovesInTurn(roll);
     containerOnDiceRoll(roll);
   }, [containerOnDiceRoll]);
@@ -38,9 +39,25 @@ export function RightPanel({
     setTurn(board.turn);
     setGameId(currGameId);
     setNumMovesInTurn(currNumMovesInTurn);
+    /*
+    console.log(
+      'rendered RightPanel',
+      currGameId,
+      'currTurn',
+      currTurn,
+      'currNumMovesInTurn',
+      currNumMovesInTurn,
+      'AIMoveTriggered',
+      AIMoveTriggered,
+      'isAITurn()',
+      isAITurn(),
+      JSON.stringify(board)
+    );
+    */
     // If it's AI's turn, trigger dice roll automatically:
     if (isAITurn() && !board.gameOver) {
       if (!AIMoveTriggered) {
+        //console.log('roll trigger');
         setAIMoveTriggered(true);
         setTimeout(handleRollButtonClick, 500);
       }

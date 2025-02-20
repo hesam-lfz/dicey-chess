@@ -18,7 +18,7 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
   const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
-    isAITurn()
+    board.diceRoll !== -1 && isAITurn()
   );
   const [numSingleMovesMade, setNumSingleMovesMade] = useState<number>(0);
   const [numMovesInTurn, setNumMovesInTurn] = useState<number>(
@@ -29,6 +29,7 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
     useState<boolean>(false);
 
   useEffect(() => {
+    /*
     console.log(
       'rendered GamePanel',
       'shouldTriggerAITurn',
@@ -37,7 +38,7 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
       isAITurn(),
       JSON.stringify(board)
     );
-
+    */
     if (board.gameOver) onGameOver();
     setGameId(currGameId);
     setHistory(currHistory);
