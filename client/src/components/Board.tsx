@@ -44,7 +44,7 @@ export function Board({
 }: Props) {
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
-  const [replayModeOn] = useState<boolean>(currReplayModeOn);
+  const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [humanPlaysColor, setHumanPlaysColor] =
     useState<Color>(currHumanPlaysColor);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
@@ -114,6 +114,7 @@ export function Board({
         setPrevMoveToSq(null);
       }
       setGameId(currGameId);
+      setReplayModeOn(currReplayModeOn);
       setHumanPlaysColor(currHumanPlaysColor);
     };
     run();

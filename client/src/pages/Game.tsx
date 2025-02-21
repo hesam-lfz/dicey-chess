@@ -18,14 +18,16 @@ export function Game() {
   }
 
   function handleGameOverModalClose(): void {
-    console.log('reset mode');
+    console.log('reset mode', isModalOpen);
     setIsModalOpen(false);
-    resetGame();
+    //resetGame();
   }
 
   function onGameOver(): void {
+    console.log('onGameOver');
     setReplayModeOn(true);
     setIsModalOpen(true);
+    if (Math.random() === 2) resetGame();
   }
 
   function resetGame(): void {

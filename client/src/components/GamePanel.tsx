@@ -23,7 +23,7 @@ export function GamePanel({
 }: Props) {
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
-  const [replayModeOn] = useState<boolean>(currReplayModeOn);
+  const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
     board.diceRoll !== -1 && isAITurn(currentGameSettings)
@@ -43,13 +43,16 @@ export function GamePanel({
       'shouldTriggerAITurn',
       shouldTriggerAITurn,
       'isAITurn()',
-      isAITurn(),
-      JSON.stringify(board)
+      isAITurn(currentGameSettings),
+      JSON.stringify(board),
+      replayModeOn,
+      currReplayModeOn
     );
     */
-    if (board.gameOver) onGameOver();
+    if (board.gameOver && !replayModeOn) onGameOver();
     setGameId(currGameId);
     setHistory(currHistory);
+    setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
   });
 
