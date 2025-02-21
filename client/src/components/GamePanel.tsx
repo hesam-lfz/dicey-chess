@@ -13,6 +13,7 @@ type Props = {
   currHistory: string[][];
   currReplayModeOn: boolean;
   onGameOver: () => void;
+  onNewGame: () => void;
 };
 
 export function GamePanel({
@@ -20,6 +21,7 @@ export function GamePanel({
   currHistory,
   currReplayModeOn,
   onGameOver,
+  onNewGame,
 }: Props) {
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
@@ -106,10 +108,12 @@ export function GamePanel({
         </div>
         <DicePanel
           currGameId={gameId}
+          currReplayModeOn={replayModeOn}
           currTurn={turn}
           currNumMovesInTurn={numMovesInTurn}
           currShouldAlertDiceRoll={shouldAlertDiceRoll}
           containerOnDiceRoll={onDiceRoll}
+          containerOnNewGame={onNewGame}
         />
       </div>
     </>

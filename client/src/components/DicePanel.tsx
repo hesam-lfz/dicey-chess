@@ -7,22 +7,27 @@ import './DicePanel.css';
 
 type Props = {
   currGameId: number;
+  currReplayModeOn: boolean;
   currTurn: Color;
   currNumMovesInTurn: number;
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number) => void;
+  containerOnNewGame: () => void;
 };
 
 export function DicePanel({
   currGameId,
+  currReplayModeOn,
   currTurn,
   currNumMovesInTurn,
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
+  containerOnNewGame,
 }: Props) {
   const rollDiceButtonBorderRef = useRef<null | HTMLSpanElement>(null);
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
+  const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [numMovesInTurn, setNumMovesInTurn] =
     useState<number>(currNumMovesInTurn);
@@ -38,6 +43,7 @@ export function DicePanel({
   useEffect(() => {
     setTurn(board.turn);
     setGameId(currGameId);
+    setReplayModeOn(currReplayModeOn);
     setNumMovesInTurn(currNumMovesInTurn);
     /*
     console.log(
@@ -82,6 +88,7 @@ export function DicePanel({
     currShouldAlertDiceRoll,
     handleRollButtonClick,
     currentGameSettings,
+    currReplayModeOn,
   ]);
 
   return (
@@ -115,6 +122,9 @@ export function DicePanel({
             ' left.'}{' '}
         </span>
       )}
+      {replayModeOn ? (
+        <button onClick={containerOnNewGame}>New Game</button>
+      ) : null}
     </div>
   );
 }

@@ -18,22 +18,19 @@ export function Game() {
   }
 
   function handleGameOverModalClose(): void {
-    console.log('reset mode', isModalOpen);
     setIsModalOpen(false);
-    //resetGame();
   }
 
   function onGameOver(): void {
-    console.log('onGameOver');
     setReplayModeOn(true);
     setIsModalOpen(true);
-    if (Math.random() === 2) resetGame();
   }
 
   function resetGame(): void {
     console.log('Resetting game!');
     resetBoard();
     setGameId((id) => id + 1);
+    setReplayModeOn(false);
     setHistory([...board.history]);
   }
 
@@ -44,6 +41,7 @@ export function Game() {
         currHistory={history}
         currReplayModeOn={replayModeOn}
         onGameOver={onGameOver}
+        onNewGame={resetGame}
       />
       <FooterPanel />
       <Modal isOpen={isModalOpen} onClose={() => {}}>

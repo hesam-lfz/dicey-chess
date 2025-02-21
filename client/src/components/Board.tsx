@@ -129,6 +129,7 @@ export function Board({
     gameId,
     triggerAIMove,
     currentGameSettings,
+    currReplayModeOn,
   ]);
 
   const squareClicked = useCallback(
@@ -158,7 +159,7 @@ export function Board({
         );
       }
     },
-    [movingFromSq, currentGameSettings, containerOnAlertDiceRoll]
+    [movingFromSq, currentGameSettings, replayModeOn, containerOnAlertDiceRoll]
   );
 
   // Draw the chess board:
