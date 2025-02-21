@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { board, isAITurn, swapTurn } from '../lib';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { LeftPanel } from './LeftPanel';
-import { RightPanel } from './RightPanel';
+import { DicePanel } from './DicePanel';
 import { Board } from './Board';
 import { BoardLabels } from './BoardLabels';
 import { type Color } from 'chess.js';
@@ -11,12 +11,19 @@ import './Panels.css';
 type Props = {
   currGameId: number;
   currHistory: string[][];
+  currReplayModeOn: boolean;
   onGameOver: () => void;
 };
 
-export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
+export function GamePanel({
+  currGameId,
+  currHistory,
+  currReplayModeOn,
+  onGameOver,
+}: Props) {
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
+  const [replayModeOn] = useState<boolean>(currReplayModeOn);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
     board.diceRoll !== -1 && isAITurn(currentGameSettings)
@@ -87,13 +94,14 @@ export function GamePanel({ currGameId, currHistory, onGameOver }: Props) {
           />
           <Board
             currGameId={gameId}
+            currReplayModeOn={replayModeOn}
             currHumanPlaysColor={currentGameSettings.humanPlaysColor}
             currShouldTriggerAITurn={shouldTriggerAITurn}
             containerOnMove={onMove}
             containerOnAlertDiceRoll={onAlertDiceRoll}
           />
         </div>
-        <RightPanel
+        <DicePanel
           currGameId={gameId}
           currTurn={turn}
           currNumMovesInTurn={numMovesInTurn}

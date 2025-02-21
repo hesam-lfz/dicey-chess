@@ -9,6 +9,7 @@ import { board, resetBoard } from '../lib';
 export function Game() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [gameId, setGameId] = useState<number>(0);
+  const [replayModeOn, setReplayModeOn] = useState<boolean>(false);
   const [history, setHistory] = useState<string[][]>(board.history);
 
   function handleSaveGame(): void {
@@ -17,9 +18,19 @@ export function Game() {
   }
 
   function handleGameOverModalClose(): void {
+    console.log('reset mode');
+    setIsModalOpen(false);
+    resetGame();
+  }
+
+  function onGameOver(): void {
+    setReplayModeOn(true);
+    setIsModalOpen(true);
+  }
+
+  function resetGame(): void {
     console.log('Resetting game!');
     resetBoard();
-    setIsModalOpen(false);
     setGameId((id) => id + 1);
     setHistory([...board.history]);
   }
@@ -29,7 +40,8 @@ export function Game() {
       <GamePanel
         currGameId={gameId}
         currHistory={history}
-        onGameOver={() => setIsModalOpen(true)}
+        currReplayModeOn={replayModeOn}
+        onGameOver={onGameOver}
       />
       <FooterPanel />
       <Modal isOpen={isModalOpen} onClose={() => {}}>
