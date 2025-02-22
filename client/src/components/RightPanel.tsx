@@ -1,28 +1,33 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { DicePanel } from '../components/DicePanel';
+import { ReplayPanel } from '../components/ReplayPanel';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
-import { board, isAITurn, playerIconSVGs } from '../lib';
+import { board, isAITurn } from '../lib';
 import { type Color } from 'chess.js';
-import Icon_dice from '../assets/dice.svg';
-import './DicePanel.css';
 
 type Props = {
   currGameId: number;
+  currReplayModeOn: boolean;
   currTurn: Color;
   currNumMovesInTurn: number;
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number) => void;
+  containerOnNewGame: () => void;
 };
 
-export function DicePanel({
+export function RightPanel({
   currGameId,
+  currReplayModeOn,
   currTurn,
   currNumMovesInTurn,
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
+  containerOnNewGame,
 }: Props) {
   const rollDiceButtonBorderRef = useRef<null | HTMLSpanElement>(null);
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
+  const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [numMovesInTurn, setNumMovesInTurn] =
     useState<number>(currNumMovesInTurn);
@@ -38,6 +43,7 @@ export function DicePanel({
   useEffect(() => {
     setTurn(board.turn);
     setGameId(currGameId);
+    setReplayModeOn(currReplayModeOn);
     setNumMovesInTurn(currNumMovesInTurn);
     /*
     console.log(
@@ -82,39 +88,25 @@ export function DicePanel({
     currShouldAlertDiceRoll,
     handleRollButtonClick,
     currentGameSettings,
+    currReplayModeOn,
   ]);
 
   return (
-    <>
-      <div className="player-turn-title-box flex flex-align-center">
-        {
-          <div className={'square player-icon-container'}>
-            <img
-              src={playerIconSVGs[turn]}
-              className="piece play-icon"
-              alt={'player-icon-' + turn}
-            />
-          </div>
-        }
-        <span>'s Move</span>
-      </div>
-      {board.diceRoll === -1 && !isAITurn(currentGameSettings) ? (
-        <span
-          className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
-          ref={rollDiceButtonBorderRef}>
-          <button className="roll-dice-button " onClick={handleRollButtonClick}>
-            <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
-          </button>
-        </span>
-      ) : null}
-      {board.diceRoll === -1 ? null : (
-        <span>
-          {numMovesInTurn +
-            ' move' +
-            (numMovesInTurn > 1 ? 's' : '') +
-            ' left.'}{' '}
-        </span>
+    <div className="right-panel side-panel">
+      {replayModeOn ? (
+        <ReplayPanel
+          currGameId={gameId}
+          containerOnNewGame={containerOnNewGame}
+        />
+      ) : (
+        <DicePanel
+          currGameId={gameId}
+          currTurn={turn}
+          currNumMovesInTurn={numMovesInTurn}
+          currShouldAlertDiceRoll={currShouldAlertDiceRoll}
+          containerOnDiceRoll={containerOnDiceRoll}
+        />
       )}
-    </>
+    </div>
   );
 }

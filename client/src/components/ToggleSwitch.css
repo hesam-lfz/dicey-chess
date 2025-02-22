@@ -50,7 +50,7 @@
 }
 
 .toggle-switch-inner::before {
-  content: '✓';
+  content: ''; /* '✓'; */
   padding-left: 10px;
   background: linear-gradient(to right, orange, yellow, green);
   color: #fff;

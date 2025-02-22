@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { board, isAITurn, swapTurn } from '../lib';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { LeftPanel } from './LeftPanel';
-import { DicePanel } from './DicePanel';
+import { RightPanel } from './RightPanel';
 import { Board } from './Board';
 import { BoardLabels } from './BoardLabels';
 import { type Color } from 'chess.js';
@@ -106,7 +106,7 @@ export function GamePanel({
             containerOnAlertDiceRoll={onAlertDiceRoll}
           />
         </div>
-        <DicePanel
+        <RightPanel
           currGameId={gameId}
           currReplayModeOn={replayModeOn}
           currTurn={turn}
