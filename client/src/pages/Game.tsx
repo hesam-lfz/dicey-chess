@@ -7,7 +7,10 @@ import { Modal } from '../components/Modal';
 import { board, resetBoard } from '../lib';
 
 export function Game() {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
+    useState<boolean>(false);
+  const [isResetGameModalOpen, setIsResetGameModalOpen] =
+    useState<boolean>(false);
   const [gameId, setGameId] = useState<number>(0);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(false);
   const [history, setHistory] = useState<string[][]>(board.history);
@@ -18,12 +21,25 @@ export function Game() {
   }
 
   function handleGameOverModalClose(): void {
-    setIsModalOpen(false);
+    setIsGameSaveModalOpen(false);
   }
 
   function onGameOver(): void {
     setReplayModeOn(true);
-    setIsModalOpen(true);
+    setIsGameSaveModalOpen(true);
+  }
+
+  function handleResetGameModalClose(): void {
+    setIsResetGameModalOpen(false);
+  }
+
+  function onResetGame(): void {
+    setIsResetGameModalOpen(true);
+  }
+
+  function handleResetGame(): void {
+    resetGame();
+    handleResetGameModalClose();
   }
 
   function resetGame(): void {
@@ -41,10 +57,10 @@ export function Game() {
         currHistory={history}
         currReplayModeOn={replayModeOn}
         onGameOver={onGameOver}
-        onNewGame={resetGame}
+        onNewGame={onResetGame}
       />
       <FooterPanel />
-      <Modal isOpen={isModalOpen} onClose={() => {}}>
+      <Modal isOpen={isGameSaveModalOpen} onClose={() => {}}>
         <p>{board.outcome}</p>
         <p>Would you like to save this game?</p>
         <div>
@@ -53,6 +69,19 @@ export function Game() {
           </span>
           <span className="rainbow-colored-border">
             <button onClick={handleSaveGame} autoFocus>
+              Yes
+            </button>
+          </span>
+        </div>
+      </Modal>
+      <Modal isOpen={isResetGameModalOpen} onClose={() => {}}>
+        <p>Start a new game?</p>
+        <div>
+          <span className="rainbow-colored-border">
+            <button onClick={handleResetGameModalClose}>No</button>
+          </span>
+          <span className="rainbow-colored-border">
+            <button onClick={handleResetGame} autoFocus>
               Yes
             </button>
           </span>

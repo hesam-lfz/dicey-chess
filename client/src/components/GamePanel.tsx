@@ -86,12 +86,17 @@ export function GamePanel({
     setShouldAlertDiceRoll(true);
   }, []);
 
+  const onStepReplayMoveIndex = useCallback((step: number) => {
+    console.log('replay step', step);
+  }, []);
+
   return (
     <>
       <div className="main-panel">
         <LeftPanel
           currNumSingleMovesMade={numSingleMovesMade}
           currHistory={history}
+          containerOnNewGame={onNewGame}
         />
         <div className="board-panel">
           <BoardLabels
@@ -113,7 +118,7 @@ export function GamePanel({
           currNumMovesInTurn={numMovesInTurn}
           currShouldAlertDiceRoll={shouldAlertDiceRoll}
           containerOnDiceRoll={onDiceRoll}
-          containerOnNewGame={onNewGame}
+          containerOnStepReplayMoveIndex={onStepReplayMoveIndex}
         />
       </div>
     </>

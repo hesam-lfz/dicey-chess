@@ -12,7 +12,7 @@ type Props = {
   currNumMovesInTurn: number;
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number) => void;
-  containerOnNewGame: () => void;
+  containerOnStepReplayMoveIndex: (n: number) => void;
 };
 
 export function RightPanel({
@@ -22,7 +22,7 @@ export function RightPanel({
   currNumMovesInTurn,
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
-  containerOnNewGame,
+  containerOnStepReplayMoveIndex,
 }: Props) {
   const rollDiceButtonBorderRef = useRef<null | HTMLSpanElement>(null);
   const { currentGameSettings } = useCurrentGameSettings();
@@ -96,7 +96,7 @@ export function RightPanel({
       {replayModeOn ? (
         <ReplayPanel
           currGameId={gameId}
-          containerOnNewGame={containerOnNewGame}
+          containerOnStepReplayMoveIndex={containerOnStepReplayMoveIndex}
         />
       ) : (
         <DicePanel

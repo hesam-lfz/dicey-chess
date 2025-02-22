@@ -135,7 +135,7 @@ export function Board({
   const squareClicked = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
       // if the game is over or we're in replay mode, clicking is not allowed:
-      if (board.gameOver || replayModeOn) return;
+      if (board.gameOver) return;
       // if dice isn't rolled yet clicking is not allowed:
       if (board.diceRoll === -1) {
         // alert user they need to roll dice first:

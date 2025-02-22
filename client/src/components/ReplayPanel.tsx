@@ -6,10 +6,12 @@ import { useCallback, useState } from 'react';
 
 type Props = {
   currGameId: number;
-  containerOnNewGame: () => void;
+  containerOnStepReplayMoveIndex: (step: number) => void;
 };
 
-export function ReplayPanel({ /*currGameId, */ containerOnNewGame }: Props) {
+export function ReplayPanel({
+  /*currGameId, */ containerOnStepReplayMoveIndex,
+}: Props) {
   const [replayMoveIndex, setReplayMoveIndex] = useState<number>(
     board.historyNumMoves - 1
   );
@@ -17,10 +19,12 @@ export function ReplayPanel({ /*currGameId, */ containerOnNewGame }: Props) {
   const stepReplayMoveIndex = useCallback(
     (step: number) => {
       const idx = replayMoveIndex + step;
-      if (idx >= 0 && idx < board.historyNumMoves)
+      if (idx >= 0 && idx < board.historyNumMoves) {
         setReplayMoveIndex(replayMoveIndex + step);
+        containerOnStepReplayMoveIndex(step);
+      }
     },
-    [replayMoveIndex]
+    [replayMoveIndex, containerOnStepReplayMoveIndex]
   );
 
   /*
@@ -57,9 +61,6 @@ export function ReplayPanel({ /*currGameId, */ containerOnNewGame }: Props) {
           />
         </button>
       </div>
-      <span className="rainbow-colored-border">
-        <button onClick={containerOnNewGame}>New Game</button>
-      </span>
     </>
   );
 }
