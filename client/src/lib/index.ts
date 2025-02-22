@@ -1,2 +1,2 @@
-export * from './gameRules';
-export * from './gameAI';
+export * from './boardEngineApi';
+export * from './gameAiApi';

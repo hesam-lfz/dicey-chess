@@ -43,6 +43,8 @@ export type Board = {
   history: string[][];
   flatHistory: string[];
   historyNumMoves: number;
+  replayCurrentTurnIndex: number;
+  replayCurrentMoveInTurnIndex: number;
   turn: Color;
   diceRoll: number;
   numMovesInTurn: number;
@@ -111,6 +113,8 @@ const initBoard: Board = {
   history: [[]],
   flatHistory: [],
   historyNumMoves: 0,
+  replayCurrentTurnIndex: 0,
+  replayCurrentMoveInTurnIndex: 0,
   turn: WHITE,
   diceRoll: -1,
   numMovesInTurn: -1,
@@ -166,7 +170,6 @@ export const resetBoard = () => {
   board = { ...initBoard };
   board.history = [[]];
   board.flatHistory = [];
-  board.historyNumMoves = 0;
   boardEngine = new Chess(board.initPositionFEN);
   // close the chess AI engine socket if we have one running currently:
   if (chessAIEngine !== null) (chessAIEngine as WebSocket).close();
@@ -206,12 +209,15 @@ export function makeMove(
   board.flatHistory.push(move.san);
   board.historyNumMoves += 1;
   board.numMovesInTurn -= 1;
+  board.replayCurrentMoveInTurnIndex += 1;
   if (board.numMovesInTurn === 0) {
     // The player has played current turn's all the number of moves according to the dice roll:
     board.diceRoll = -1;
     board.numMovesInTurn = -1;
     board.firstMoveInTurn = true;
     board.history.push([]);
+    board.replayCurrentTurnIndex += 1;
+    board.replayCurrentMoveInTurnIndex = 0;
   } else {
     // The player still has moves left in the current turn, according to the dice roll:
     board.firstMoveInTurn = false;
@@ -222,6 +228,29 @@ export function makeMove(
   // in the turn but has no valid moves then it's a draw:
   checkForGameOver();
   return board.history;
+}
+
+// Undo to previous board before last move:
+export function undoMove(): Move | null {
+  console.log('undoMove', JSON.stringify(board));
+  let prevMoveAfterUndo: Move | null = null;
+  const undoneMove = boardEngine.undo();
+  console.log('undoneMove', undoneMove);
+  if (undoneMove) {
+    if (board.replayCurrentMoveInTurnIndex === 0) {
+      board.replayCurrentTurnIndex -= 1;
+      board.replayCurrentMoveInTurnIndex =
+        board.history[board.replayCurrentTurnIndex].length - 2;
+    } else {
+      board.replayCurrentMoveInTurnIndex -= 1;
+      swapTurn();
+    }
+    console.log('after undoneMove', JSON.stringify(board));
+    prevMoveAfterUndo = boardEngine.undo();
+    console.log(prevMoveAfterUndo);
+    if (prevMoveAfterUndo) boardEngine.move(prevMoveAfterUndo);
+  }
+  return prevMoveAfterUndo;
 }
 
 // Returns true if we're in 1-player mode and it's not human player's turn:

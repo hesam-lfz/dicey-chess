@@ -26,6 +26,7 @@ export function GamePanel({
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
+  const [replayStepMove, setReplayStepMove] = useState<number>(0);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
     board.diceRoll !== -1 && isAITurn(currentGameSettings)
@@ -88,6 +89,7 @@ export function GamePanel({
 
   const onStepReplayMoveIndex = useCallback((step: number) => {
     console.log('replay step', step);
+    setReplayStepMove(step);
   }, []);
 
   return (
@@ -105,6 +107,7 @@ export function GamePanel({
           <Board
             currGameId={gameId}
             currReplayModeOn={replayModeOn}
+            currReplayStepMove={replayStepMove}
             currHumanPlaysColor={currentGameSettings.humanPlaysColor}
             currShouldTriggerAITurn={shouldTriggerAITurn}
             containerOnMove={onMove}

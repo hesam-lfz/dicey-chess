@@ -1,5 +1,5 @@
 import { type Move } from 'chess.js';
-import { boardEngine, settings } from './gameRules';
+import { boardEngine, settings } from './boardEngineApi';
 
 export async function getAIMove(): Promise<Move> {
   return settings.AIPlayerIsSmart ? getAIRandomMove() : getAISmartMove();

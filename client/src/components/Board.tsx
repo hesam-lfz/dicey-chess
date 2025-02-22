@@ -14,8 +14,9 @@ import {
   isAITurn,
   getAIMove,
   settings,
+  undoMove,
 } from '../lib';
-import { Color, WHITE, type Piece, type Square } from 'chess.js';
+import { Color, Move, WHITE, type Piece, type Square } from 'chess.js';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -28,6 +29,7 @@ function renderOccupyingPiece(piece?: Piece) {
 type Props = {
   currGameId: number;
   currReplayModeOn: boolean;
+  currReplayStepMove: number;
   currHumanPlaysColor: Color;
   currShouldTriggerAITurn: boolean;
   containerOnMove: () => void;
@@ -37,6 +39,7 @@ type Props = {
 export function Board({
   currGameId,
   currReplayModeOn,
+  currReplayStepMove,
   currHumanPlaysColor,
   currShouldTriggerAITurn,
   containerOnMove,
@@ -45,6 +48,8 @@ export function Board({
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
+  const [replayStepMove, setReplayStepMove] =
+    useState<number>(currReplayStepMove);
   const [humanPlaysColor, setHumanPlaysColor] =
     useState<Color>(currHumanPlaysColor);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
@@ -78,35 +83,75 @@ export function Board({
     run();
   }, []);
 
+  // Move to next/prev move during game replay:
+  const triggerReplayStepMove = useCallback((step: number) => {
+    const run = async () => {
+      let move: Move | null;
+      if (step > 0) {
+        // moving to next move in replay
+        move = undoMove();
+      } else {
+        // moving to prev move in replay
+        move = undoMove();
+      }
+      if (move) {
+        setMovingFromSq(move.from);
+        setMovingToSq(move.to);
+        setPawnPromotion(move.promotion);
+        setReplayStepMove(0);
+      }
+    };
+    run();
+  }, []);
+
   useEffect(() => {
     const run = async () => {
-      // if the 'from' and 'to' of a move were just determined, ready to execute the move:
-      if (movingFromSq && movingToSq) {
-        setTimeout(handleMove, 200);
-        return;
-      }
-      /*
       console.log(
         'rendered Board',
+        'movingFromSq',
+        movingFromSq,
+        'movingToSq',
+        movingToSq,
         'currShouldTriggerAITurn',
         currShouldTriggerAITurn,
         'shouldTriggerAITurn',
         shouldTriggerAITurn,
         'isAITurn()',
         isAITurn(currentGameSettings),
+        'replayModeOn',
+        replayModeOn,
+        'replayStepMove',
+        replayStepMove,
+        'currReplayStepMove',
+        currReplayStepMove,
         JSON.stringify(board)
       );
-      */
-      // mechanism to trigger AI move automatically, if needed (part two):
-      if (shouldTriggerAITurn) {
-        //console.log('triggering move');
-        setTimeout(triggerAIMove, settings.AIMoveDelay);
+
+      // if the 'from' and 'to' of a move were just determined, ready to execute the move:
+      if (movingFromSq && movingToSq) {
+        setTimeout(handleMove, 200);
         return;
       }
-      // mechanism to trigger AI move automatically, if needed (part one)
-      if (isAITurn(currentGameSettings) && !board.gameOver) {
-        setShouldTriggerAITurn(currShouldTriggerAITurn);
-        return;
+
+      if (replayModeOn) {
+        if (replayStepMove !== 0) {
+          console.log('replay trigger move', replayStepMove);
+          triggerReplayStepMove(replayStepMove);
+          //setReplayStepMove(0);
+          return;
+        }
+      } else {
+        // mechanism to trigger AI move automatically, if needed (part two):
+        if (shouldTriggerAITurn) {
+          //console.log('triggering move');
+          setTimeout(triggerAIMove, settings.AIMoveDelay);
+          return;
+        }
+        // mechanism to trigger AI move automatically, if needed (part one)
+        if (isAITurn(currentGameSettings) && !board.gameOver) {
+          setShouldTriggerAITurn(currShouldTriggerAITurn);
+          return;
+        }
       }
       // we're resetting the game:
       if (currGameId !== gameId) {
@@ -115,6 +160,7 @@ export function Board({
       }
       setGameId(currGameId);
       setReplayModeOn(currReplayModeOn);
+      setReplayStepMove(currReplayStepMove);
       setHumanPlaysColor(currHumanPlaysColor);
     };
     run();
@@ -130,6 +176,9 @@ export function Board({
     triggerAIMove,
     currentGameSettings,
     currReplayModeOn,
+    replayModeOn,
+    currReplayStepMove,
+    replayStepMove,
   ]);
 
   const squareClicked = useCallback(
@@ -159,7 +208,7 @@ export function Board({
         );
       }
     },
-    [movingFromSq, currentGameSettings, replayModeOn, containerOnAlertDiceRoll]
+    [movingFromSq, currentGameSettings, containerOnAlertDiceRoll]
   );
 
   // Draw the chess board:
