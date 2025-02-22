@@ -85,6 +85,10 @@
     height: 50vw;
   }
 
+  .history-panel ul {
+    padding: 3vw;
+  }
+
   .dice-icon {
     width: calc(3 * 5vw);
   }

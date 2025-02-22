@@ -1,0 +1,28 @@
+.replay-controls-box {
+  justify-content: space-between;
+}
+
+.replay-controls-box button {
+  min-width: unset;
+}
+
+.replay-controls-move {
+  display: inline-block;
+  width: 100px;
+  text-decoration: underline;
+}
+
+.replay-control-icon {
+  width: 3vw;
+  height: 3vw;
+}
+
+/*
+	Portrait Screen
+*/
+@media screen and (orientation: portrait) {
+  .replay-control-icon {
+    width: calc(2.5 * 3vw);
+    height: calc(2.5 * 3vw);
+  }
+}

@@ -48,10 +48,14 @@ export function Game() {
         <p>{board.outcome}</p>
         <p>Would you like to save this game?</p>
         <div>
-          <button onClick={handleGameOverModalClose}>No</button>
-          <button onClick={handleSaveGame} autoFocus>
-            Yes
-          </button>
+          <span className="rainbow-colored-border">
+            <button onClick={handleGameOverModalClose}>No</button>
+          </span>
+          <span className="rainbow-colored-border">
+            <button onClick={handleSaveGame} autoFocus>
+              Yes
+            </button>
+          </span>
         </div>
       </Modal>
     </>

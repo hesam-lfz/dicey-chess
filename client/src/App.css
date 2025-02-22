@@ -15,10 +15,6 @@
   color: white;
 }
 
-button {
-  color: white;
-}
-
 .flex {
   display: flex;
 }
@@ -66,8 +62,13 @@ button {
     #fc4f4f 100%
   );
   display: inline-block;
-  padding: 15px;
+  padding: 5px;
   border-radius: 15px;
+  margin: 15px 0;
+}
+
+dialog .rainbow-colored-border {
+  margin: 0 20px;
 }
 
 .header {
@@ -127,6 +128,19 @@ nav li {
   justify-self: flex-end;
 }
 
+.rotate180 {
+  transform: rotate(180deg);
+}
+
+.disabled {
+  opacity: 0.1;
+  cursor: none;
+}
+
+.disabled:hover {
+  border-color: unset;
+}
+
 dialog {
   font-size: 1.25rem;
   border-radius: 20px;
@@ -138,7 +152,6 @@ dialog::backdrop {
 
 dialog button {
   font-size: 1em;
-  margin: 20px;
 }
 
 /* animate slide in zoom a bit */

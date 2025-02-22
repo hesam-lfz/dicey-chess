@@ -2,10 +2,11 @@
   border-style: solid;
   font-size: 1.5rem;
   margin: 0;
+  width: 130px;
 }
 
 .roll-dice-button-border {
-  margin: 20px 0;
+  margin: 40px 0 !important;
   box-shadow: 0 8px 20px 0 #646cff;
   transition: box-shadow 0.2s ease-in-out 0s;
 }

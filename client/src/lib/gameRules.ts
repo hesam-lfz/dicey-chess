@@ -41,6 +41,8 @@ export type CurrentGameSettings = {
 export type Board = {
   initPositionFEN?: string;
   history: string[][];
+  flatHistory: string[];
+  historyNumMoves: number;
   turn: Color;
   diceRoll: number;
   numMovesInTurn: number;
@@ -107,6 +109,8 @@ export const getSquareRank: (square: Square) => number = (square: Square) =>
 const initBoard: Board = {
   initPositionFEN: undefined,
   history: [[]],
+  flatHistory: [],
+  historyNumMoves: 0,
   turn: WHITE,
   diceRoll: -1,
   numMovesInTurn: -1,
@@ -161,6 +165,8 @@ export const resetSettings = (currentGameSettings: CurrentGameSettings) => {
 export const resetBoard = () => {
   board = { ...initBoard };
   board.history = [[]];
+  board.flatHistory = [];
+  board.historyNumMoves = 0;
   boardEngine = new Chess(board.initPositionFEN);
   // close the chess AI engine socket if we have one running currently:
   if (chessAIEngine !== null) (chessAIEngine as WebSocket).close();
@@ -197,6 +203,8 @@ export function makeMove(
   });
   board.turn = boardEngine.turn();
   board.history[board.history.length - 1].push(move.san);
+  board.flatHistory.push(move.san);
+  board.historyNumMoves += 1;
   board.numMovesInTurn -= 1;
   if (board.numMovesInTurn === 0) {
     // The player has played current turn's all the number of moves according to the dice roll:
