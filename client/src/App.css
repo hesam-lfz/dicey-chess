@@ -38,6 +38,7 @@
 .dotted-border {
   border-style: dotted;
   padding: 10px;
+  border-radius: 15px;
 }
 
 .rainbow-colored {

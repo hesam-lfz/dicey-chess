@@ -29,7 +29,7 @@ export function DicePanel({
   const [AIMoveTriggered, setAIMoveTriggered] = useState<boolean>(false);
 
   const handleRollButtonClick = useCallback(() => {
-    const roll = Math.floor(Math.random() * 5);
+    const roll = Math.floor(Math.random() * 6);
     //console.log('rolled', roll);
     setNumMovesInTurn(roll);
     containerOnDiceRoll(roll);

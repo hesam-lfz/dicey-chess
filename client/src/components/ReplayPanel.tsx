@@ -32,7 +32,7 @@ export function ReplayPanel({ /*currGameId, */ containerOnNewGame }: Props) {
   return (
     <>
       <h2>Game Replay</h2>
-      <div className="replay-controls-box flex flex-row flex-align-center">
+      <div className="replay-controls-box dotted-border flex flex-row flex-align-center">
         <button
           className={replayMoveIndex === 0 ? ' disabled' : ''}
           onClick={() => stepReplayMoveIndex(-1)}>

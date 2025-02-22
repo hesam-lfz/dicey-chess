@@ -38,7 +38,7 @@ export function HistoryPanel({ currNumSingleMovesMade, currHistory }: Props) {
   });
 
   return (
-    <div className="history-panel" ref={historyItemsRef}>
+    <div className="history-panel dotted-border" ref={historyItemsRef}>
       <ul className="history-items">{allHistoryItems}</ul>
     </div>
   );
