@@ -5,6 +5,7 @@ import { GamePanel } from '../components/GamePanel';
 import { FooterPanel } from '../components/FooterPanel';
 import { Modal } from '../components/Modal';
 import { board, resetBoard } from '../lib';
+import { database_saveGame } from '../lib/storageApi';
 
 export function Game() {
   const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
@@ -15,8 +16,10 @@ export function Game() {
   const [replayModeOn, setReplayModeOn] = useState<boolean>(false);
   const [history, setHistory] = useState<string[][]>(board.history);
 
-  function handleSaveGame(): void {
-    alert('You save game!');
+  async function handleSaveGame(): Promise<void> {
+    console.log('Saving game!');
+    await database_saveGame(board);
+    console.log('Saved!');
     handleGameOverModalClose();
   }
 

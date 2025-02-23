@@ -39,7 +39,9 @@ export function ReplayPanel({ containerOnStepReplayMoveIndex }: Props) {
           />
         </button>
         <span className="replay-controls-move">
-          {replayMoveIndex >= 0 ? board.flatHistory[replayMoveIndex] : ''}
+          {replayMoveIndex >= 0
+            ? board.flatSanMoveHistory[replayMoveIndex]
+            : ''}
         </span>
         <button
           className={

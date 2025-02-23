@@ -71,6 +71,7 @@ export function GamePanel({
 
   const onDiceRoll = useCallback(
     (roll: number) => {
+      board.diceRollHistory.push(roll);
       if (roll === 0) {
         // player gets 0 moves. Swap turn:
         swapTurn();

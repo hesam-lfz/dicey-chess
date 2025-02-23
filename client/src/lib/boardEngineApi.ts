@@ -24,6 +24,11 @@ import {
   type Move,
 } from 'chess.js';
 
+import {
+  localStorage_loadSettings,
+  localStorage_saveSettings,
+} from './storageApi';
+
 // General settings:
 export type Settings = {
   onePlayerMode: boolean;
@@ -39,11 +44,12 @@ export type CurrentGameSettings = {
 };
 
 export type Board = {
-  initPositionFEN?: string;
+  initPositionFen?: string;
   history: string[][];
-  flatHistory: string[];
-  flatBoardHistory: string[];
+  flatSanMoveHistory: string[];
   flatSquareMoveHistory: Move[];
+  flatBoardFenHistory: string[];
+  diceRollHistory: number[];
   historyNumMoves: number;
   replayCurrentFlatIndex: number;
   //replayCurrentTurnIndex: number;
@@ -54,6 +60,7 @@ export type Board = {
   firstMoveInTurn: boolean;
   gameOver: boolean;
   outcome?: string;
+  gameStartTime: number;
 };
 
 export const pieceSVGs: { [key: string]: any } = {
@@ -112,11 +119,12 @@ export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
 
 const initBoard: Board = {
-  initPositionFEN: undefined,
+  initPositionFen: undefined,
   history: [[]],
-  flatHistory: [],
-  flatBoardHistory: [],
+  flatSanMoveHistory: [],
   flatSquareMoveHistory: [],
+  flatBoardFenHistory: [],
+  diceRollHistory: [],
   historyNumMoves: 0,
   replayCurrentFlatIndex: -1,
   //replayCurrentTurnIndex: 0,
@@ -126,6 +134,7 @@ const initBoard: Board = {
   numMovesInTurn: -1,
   firstMoveInTurn: true,
   gameOver: false,
+  gameStartTime: 0,
 };
 
 const defaultInitSettings: Settings = {
@@ -136,8 +145,6 @@ const defaultInitSettings: Settings = {
   AIMoveDelay: 250,
 };
 
-const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
-
 let initSettings: Settings;
 export let settings: Settings;
 
@@ -147,17 +154,14 @@ export const chessAIEngine: WebSocket | null = null; // <-- chess AI player engi
 
 // Initialize settings and load any saved settings:
 export function loadSettings(currentGameSettings: CurrentGameSettings): void {
-  const localData = localStorage.getItem(localStorageKeyPrefix + '-settings');
-  initSettings = localData
-    ? (JSON.parse(localData) as Settings)
-    : defaultInitSettings;
+  const retrievedSettings = localStorage_loadSettings();
+  initSettings = retrievedSettings || defaultInitSettings;
   resetSettings(currentGameSettings);
 }
 
 // Save the current settings:
 export function saveSettings(setNewCurrentGameSettings: () => void): void {
-  const settingsDataJSON = JSON.stringify(settings);
-  localStorage.setItem(localStorageKeyPrefix + '-settings', settingsDataJSON);
+  localStorage_saveSettings(settings);
   // trigger resetting the current game settings and board reset:
   setNewCurrentGameSettings();
 }
@@ -175,11 +179,13 @@ export const resetSettings = (currentGameSettings: CurrentGameSettings) => {
 export const resetBoard = () => {
   board = { ...initBoard };
   board.history = [[]];
-  board.flatHistory = [];
-  board.flatBoardHistory = [];
+  board.flatSanMoveHistory = [];
+  board.flatBoardFenHistory = [];
   board.flatSquareMoveHistory = [];
-  boardEngine = new Chess(board.initPositionFEN);
-  board.flatBoardHistory.push(boardEngine.fen());
+  board.diceRollHistory = [];
+  board.gameStartTime = Math.floor(Date.now() / 1000);
+  boardEngine = new Chess(board.initPositionFen);
+  board.flatBoardFenHistory.push(boardEngine.fen());
   // close the chess AI engine socket if we have one running currently:
   if (chessAIEngine !== null) (chessAIEngine as WebSocket).close();
   // If we need the chess aI engine (1-player game) set it up:
@@ -215,7 +221,7 @@ export function makeMove(
   });
   board.turn = boardEngine.turn();
   board.history[board.history.length - 1].push(move.san);
-  board.flatHistory.push(move.san);
+  board.flatSanMoveHistory.push(move.san);
   board.historyNumMoves += 1;
   board.numMovesInTurn -= 1;
   //board.replayCurrentMoveInTurnIndex += 1;
@@ -234,7 +240,7 @@ export function makeMove(
     swapTurn();
   }
   board.replayCurrentFlatIndex += 1;
-  board.flatBoardHistory.push(boardEngine.fen());
+  board.flatBoardFenHistory.push(boardEngine.fen());
   board.flatSquareMoveHistory.push(move);
 
   // After each move we need to check for game over because if player has moves left
@@ -309,7 +315,7 @@ export function promptUserIfPromotionMove(
 export function boardReplayStepMove(step: number): Move | null {
   const newReplayCurrentFlatIndex = board.replayCurrentFlatIndex + step;
   board.replayCurrentFlatIndex = newReplayCurrentFlatIndex;
-  setBoard(board.flatBoardHistory[newReplayCurrentFlatIndex]);
+  setBoard(board.flatBoardFenHistory[newReplayCurrentFlatIndex]);
   const move: Move | null =
     board.flatSquareMoveHistory[newReplayCurrentFlatIndex] || null;
   if (move) boardEngine.move(move);
