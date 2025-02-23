@@ -60,10 +60,14 @@ export function GamePanel({
   });
 
   const onMove = useCallback(() => {
-    setTurn(board.turn);
-    setNumMovesInTurn(board.numMovesInTurn);
-    setNumSingleMovesMade((n) => n + 1);
-  }, []);
+    if (replayModeOn) {
+      setReplayStepMove(0);
+    } else {
+      setTurn(board.turn);
+      setNumMovesInTurn(board.numMovesInTurn);
+      setNumSingleMovesMade((n) => n + 1);
+    }
+  }, [replayModeOn]);
 
   const onDiceRoll = useCallback(
     (roll: number) => {

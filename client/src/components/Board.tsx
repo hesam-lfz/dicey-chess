@@ -14,9 +14,9 @@ import {
   isAITurn,
   getAIMove,
   settings,
-  undoMove,
+  boardReplayStepMove,
 } from '../lib';
-import { Color, Move, WHITE, type Piece, type Square } from 'chess.js';
+import { Color, WHITE, type Piece, type Square } from 'chess.js';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -50,6 +50,8 @@ export function Board({
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [replayStepMove, setReplayStepMove] =
     useState<number>(currReplayStepMove);
+  const [replayStepMoveTriggered, setReplayStepMoveTriggered] =
+    useState<boolean>(false);
   const [humanPlaysColor, setHumanPlaysColor] =
     useState<Color>(currHumanPlaysColor);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
@@ -68,10 +70,14 @@ export function Board({
     setPrevMoveToSq(movingToSq);
     setMovingFromSq(null);
     setMovingToSq(null);
-    makeMove(movingFromSq!, movingToSq!, pawnPromotion);
-    setShouldTriggerAITurn(false);
+    if (replayModeOn) {
+      setReplayStepMoveTriggered(false);
+    } else {
+      makeMove(movingFromSq!, movingToSq!, pawnPromotion);
+      setShouldTriggerAITurn(false);
+    }
     containerOnMove();
-  }, [movingFromSq, movingToSq, pawnPromotion, containerOnMove]);
+  }, [movingFromSq, movingToSq, pawnPromotion, replayModeOn, containerOnMove]);
 
   const triggerAIMove = useCallback(() => {
     const run = async () => {
@@ -86,20 +92,11 @@ export function Board({
   // Move to next/prev move during game replay:
   const triggerReplayStepMove = useCallback((step: number) => {
     const run = async () => {
-      let move: Move | null;
-      if (step > 0) {
-        // moving to next move in replay
-        move = undoMove();
-      } else {
-        // moving to prev move in replay
-        move = undoMove();
-      }
-      if (move) {
-        setMovingFromSq(move.from);
-        setMovingToSq(move.to);
-        setPawnPromotion(move.promotion);
-        setReplayStepMove(0);
-      }
+      const move = boardReplayStepMove(step);
+      setMovingFromSq(move.from);
+      setMovingToSq(move.to);
+      setPawnPromotion(move.promotion);
+      setReplayStepMove(0);
     };
     run();
   }, []);
@@ -124,6 +121,8 @@ export function Board({
         replayStepMove,
         'currReplayStepMove',
         currReplayStepMove,
+        'replayStepMoveTriggered',
+        replayStepMoveTriggered,
         JSON.stringify(board)
       );
 
@@ -135,9 +134,11 @@ export function Board({
 
       if (replayModeOn) {
         if (replayStepMove !== 0) {
-          console.log('replay trigger move', replayStepMove);
-          triggerReplayStepMove(replayStepMove);
-          //setReplayStepMove(0);
+          if (!replayStepMoveTriggered) {
+            console.log('replay trigger move', replayStepMove);
+            setReplayStepMoveTriggered(true);
+            triggerReplayStepMove(replayStepMove);
+          }
           return;
         }
       } else {
@@ -179,6 +180,8 @@ export function Board({
     replayModeOn,
     currReplayStepMove,
     replayStepMove,
+    replayStepMoveTriggered,
+    triggerReplayStepMove,
   ]);
 
   const squareClicked = useCallback(

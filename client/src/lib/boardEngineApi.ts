@@ -42,7 +42,10 @@ export type Board = {
   initPositionFEN?: string;
   history: string[][];
   flatHistory: string[];
+  flatBoardHistory: string[];
+  flatSquareMoveHistory: Move[];
   historyNumMoves: number;
+  replayCurrentFlatIndex: number;
   replayCurrentTurnIndex: number;
   replayCurrentMoveInTurnIndex: number;
   turn: Color;
@@ -112,7 +115,10 @@ const initBoard: Board = {
   initPositionFEN: undefined,
   history: [[]],
   flatHistory: [],
+  flatBoardHistory: [],
+  flatSquareMoveHistory: [],
   historyNumMoves: 0,
+  replayCurrentFlatIndex: -1,
   replayCurrentTurnIndex: 0,
   replayCurrentMoveInTurnIndex: 0,
   turn: WHITE,
@@ -170,7 +176,10 @@ export const resetBoard = () => {
   board = { ...initBoard };
   board.history = [[]];
   board.flatHistory = [];
+  board.flatBoardHistory = [];
+  board.flatSquareMoveHistory = [];
   boardEngine = new Chess(board.initPositionFEN);
+  board.flatBoardHistory.push(boardEngine.fen());
   // close the chess AI engine socket if we have one running currently:
   if (chessAIEngine !== null) (chessAIEngine as WebSocket).close();
   // If we need the chess aI engine (1-player game) set it up:
@@ -198,7 +207,7 @@ export function makeMove(
   fromSquare: Square,
   toSquare: Square,
   promotion?: string
-): string[][] {
+): void {
   const move: Move = boardEngine.move({
     from: fromSquare,
     to: toSquare,
@@ -224,12 +233,16 @@ export function makeMove(
     // swap turn back to the player who just moved since there's still more to make:
     swapTurn();
   }
+  board.replayCurrentFlatIndex += 1;
+  board.flatBoardHistory.push(boardEngine.fen());
+  board.flatSquareMoveHistory.push(move);
+
   // After each move we need to check for game over because if player has moves left
   // in the turn but has no valid moves then it's a draw:
   checkForGameOver();
-  return board.history;
 }
 
+/*
 // Undo to previous board before last move:
 export function undoMove(): Move | null {
   console.log('undoMove', JSON.stringify(board));
@@ -252,6 +265,7 @@ export function undoMove(): Move | null {
   }
   return prevMoveAfterUndo;
 }
+*/
 
 // Returns true if we're in 1-player mode and it's not human player's turn:
 export const isAITurn: (currentGameSettings: CurrentGameSettings) => boolean = (
@@ -291,6 +305,16 @@ export function promptUserIfPromotionMove(
   return undefined;
 }
 
+// Move board fwd or bkwd in replay mode:
+export function boardReplayStepMove(step: number): Move {
+  const newReplayCurrentFlatIndex = board.replayCurrentFlatIndex + step;
+  board.replayCurrentFlatIndex = newReplayCurrentFlatIndex;
+  setBoard(board.flatBoardHistory[newReplayCurrentFlatIndex]);
+  const move: Move = board.flatSquareMoveHistory[newReplayCurrentFlatIndex];
+  boardEngine.move(move);
+  return move;
+}
+
 // Manually manipulate the current board to make it the other player's turn.
 // This is needed since we want to make a player make multiple moves in a single
 // turn:
@@ -299,6 +323,11 @@ export function swapTurn(): void {
   const fenA = fen.split(' ');
   fenA[1] = fenA[1] === 'w' ? 'b' : 'w';
   fen = fenA.join(' ');
+  setBoard(fen);
+}
+
+// Manually modify the state of the board:
+export function setBoard(fen: string): void {
   boardEngine = new Chess(fen);
   board.turn = boardEngine.turn();
 }
