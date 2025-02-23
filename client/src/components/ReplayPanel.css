@@ -1,5 +1,6 @@
 .replay-controls-box {
   justify-content: space-between;
+  margin-bottom: 40px;
 }
 
 .replay-controls-box button {
@@ -15,6 +16,15 @@
 .replay-control-icon {
   width: 3vw;
   height: 3vw;
+}
+
+/*
+	Small Device Landscape Screen
+*/
+@media screen and (orientation: landscape) and (height <= 700px) {
+  .replay-controls-box {
+    padding: 0 !important;
+  }
 }
 
 /*

@@ -46,8 +46,8 @@ export type Board = {
   flatSquareMoveHistory: Move[];
   historyNumMoves: number;
   replayCurrentFlatIndex: number;
-  replayCurrentTurnIndex: number;
-  replayCurrentMoveInTurnIndex: number;
+  //replayCurrentTurnIndex: number;
+  //replayCurrentMoveInTurnIndex: number;
   turn: Color;
   diceRoll: number;
   numMovesInTurn: number;
@@ -119,8 +119,8 @@ const initBoard: Board = {
   flatSquareMoveHistory: [],
   historyNumMoves: 0,
   replayCurrentFlatIndex: -1,
-  replayCurrentTurnIndex: 0,
-  replayCurrentMoveInTurnIndex: 0,
+  //replayCurrentTurnIndex: 0,
+  //replayCurrentMoveInTurnIndex: 0,
   turn: WHITE,
   diceRoll: -1,
   numMovesInTurn: -1,
@@ -218,15 +218,15 @@ export function makeMove(
   board.flatHistory.push(move.san);
   board.historyNumMoves += 1;
   board.numMovesInTurn -= 1;
-  board.replayCurrentMoveInTurnIndex += 1;
+  //board.replayCurrentMoveInTurnIndex += 1;
   if (board.numMovesInTurn === 0) {
     // The player has played current turn's all the number of moves according to the dice roll:
     board.diceRoll = -1;
     board.numMovesInTurn = -1;
     board.firstMoveInTurn = true;
     board.history.push([]);
-    board.replayCurrentTurnIndex += 1;
-    board.replayCurrentMoveInTurnIndex = 0;
+    //board.replayCurrentTurnIndex += 1;
+    //board.replayCurrentMoveInTurnIndex = 0;
   } else {
     // The player still has moves left in the current turn, according to the dice roll:
     board.firstMoveInTurn = false;
@@ -306,12 +306,13 @@ export function promptUserIfPromotionMove(
 }
 
 // Move board fwd or bkwd in replay mode:
-export function boardReplayStepMove(step: number): Move {
+export function boardReplayStepMove(step: number): Move | null {
   const newReplayCurrentFlatIndex = board.replayCurrentFlatIndex + step;
   board.replayCurrentFlatIndex = newReplayCurrentFlatIndex;
   setBoard(board.flatBoardHistory[newReplayCurrentFlatIndex]);
-  const move: Move = board.flatSquareMoveHistory[newReplayCurrentFlatIndex];
-  boardEngine.move(move);
+  const move: Move | null =
+    board.flatSquareMoveHistory[newReplayCurrentFlatIndex] || null;
+  if (move) boardEngine.move(move);
   return move;
 }
 

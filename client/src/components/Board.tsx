@@ -93,9 +93,17 @@ export function Board({
   const triggerReplayStepMove = useCallback((step: number) => {
     const run = async () => {
       const move = boardReplayStepMove(step);
-      setMovingFromSq(move.from);
-      setMovingToSq(move.to);
-      setPawnPromotion(move.promotion);
+      if (move) {
+        setMovingFromSq(move.from);
+        setMovingToSq(move.to);
+        setPawnPromotion(move.promotion);
+      } else {
+        setPrevMoveFromSq(null);
+        setPrevMoveToSq(null);
+        setMovingFromSq(null);
+        setMovingToSq(null);
+        setPawnPromotion(undefined);
+      }
       setReplayStepMove(0);
     };
     run();
@@ -103,6 +111,7 @@ export function Board({
 
   useEffect(() => {
     const run = async () => {
+      /*
       console.log(
         'rendered Board',
         'movingFromSq',
@@ -125,17 +134,17 @@ export function Board({
         replayStepMoveTriggered,
         JSON.stringify(board)
       );
-
+      */
       // if the 'from' and 'to' of a move were just determined, ready to execute the move:
       if (movingFromSq && movingToSq) {
-        setTimeout(handleMove, 200);
+        replayModeOn ? handleMove() : setTimeout(handleMove, 200);
         return;
       }
 
       if (replayModeOn) {
         if (replayStepMove !== 0) {
           if (!replayStepMoveTriggered) {
-            console.log('replay trigger move', replayStepMove);
+            //console.log('replay trigger move', replayStepMove);
             setReplayStepMoveTriggered(true);
             triggerReplayStepMove(replayStepMove);
           }

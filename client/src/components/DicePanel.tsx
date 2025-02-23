@@ -98,15 +98,19 @@ export function DicePanel({
         }
         <span>'s Move</span>
       </div>
-      {board.diceRoll === -1 && !isAITurn(currentGameSettings) ? (
-        <span
-          className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
-          ref={rollDiceButtonBorderRef}>
-          <button className="roll-dice-button " onClick={handleRollButtonClick}>
-            <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
-          </button>
-        </span>
-      ) : null}
+      <div className="dice-area">
+        {board.diceRoll === -1 && !isAITurn(currentGameSettings) ? (
+          <span
+            className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
+            ref={rollDiceButtonBorderRef}>
+            <button
+              className="roll-dice-button "
+              onClick={handleRollButtonClick}>
+              <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
+            </button>
+          </span>
+        ) : null}
+      </div>
       {board.diceRoll === -1 ? null : (
         <span>
           {numMovesInTurn +

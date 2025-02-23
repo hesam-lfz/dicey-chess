@@ -9,9 +9,7 @@ type Props = {
   containerOnStepReplayMoveIndex: (step: number) => void;
 };
 
-export function ReplayPanel({
-  /*currGameId, */ containerOnStepReplayMoveIndex,
-}: Props) {
+export function ReplayPanel({ containerOnStepReplayMoveIndex }: Props) {
   const [replayMoveIndex, setReplayMoveIndex] = useState<number>(
     board.historyNumMoves - 1
   );
@@ -27,12 +25,6 @@ export function ReplayPanel({
     [replayMoveIndex, containerOnStepReplayMoveIndex]
   );
 
-  /*
-  useEffect(() => {
-    setGameId(currGameId);
-  }, [currGameId]);
-*/
-
   return (
     <>
       <h2>Game Replay</h2>
@@ -47,7 +39,7 @@ export function ReplayPanel({
           />
         </button>
         <span className="replay-controls-move">
-          {board.flatHistory[replayMoveIndex]}
+          {replayMoveIndex >= 0 ? board.flatHistory[replayMoveIndex] : ''}
         </span>
         <button
           className={

@@ -92,7 +92,6 @@ export function GamePanel({
   }, []);
 
   const onStepReplayMoveIndex = useCallback((step: number) => {
-    console.log('replay step', step);
     setReplayStepMove(step);
   }, []);
 
