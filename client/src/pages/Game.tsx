@@ -64,7 +64,7 @@ export function Game() {
       />
       <FooterPanel />
       <Modal isOpen={isGameSaveModalOpen} onClose={() => {}}>
-        <p>{board.outcome}</p>
+        <p>{board.outcome}!</p>
         <p>Would you like to save this game?</p>
         <div>
           <span className="rainbow-colored-border">

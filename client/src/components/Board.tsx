@@ -73,11 +73,18 @@ export function Board({
     if (replayModeOn) {
       setReplayStepMoveTriggered(false);
     } else {
-      makeMove(movingFromSq!, movingToSq!, pawnPromotion);
+      makeMove(currentGameSettings, movingFromSq!, movingToSq!, pawnPromotion);
       setShouldTriggerAITurn(false);
     }
     containerOnMove();
-  }, [movingFromSq, movingToSq, pawnPromotion, replayModeOn, containerOnMove]);
+  }, [
+    movingFromSq,
+    movingToSq,
+    pawnPromotion,
+    replayModeOn,
+    currentGameSettings,
+    containerOnMove,
+  ]);
 
   const triggerAIMove = useCallback(() => {
     const run = async () => {

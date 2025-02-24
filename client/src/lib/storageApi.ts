@@ -1,4 +1,4 @@
-import { Board, Settings } from './boardEngineApi';
+import { Board, Game, outcomeIds, Settings } from './boardEngineApi';
 
 const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
 
@@ -16,14 +16,29 @@ export function localStorage_saveSettings(settings: Settings): void {
   localStorage.setItem(localStorageKeyPrefix + '-settings', settingsDataJSON);
 }
 
+export async function database_loadGames(): Promise<Game[]> {
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      const retrievedData = localStorage.getItem(
+        localStorageKeyPrefix + '-games'
+      );
+      const gamesData = retrievedData
+        ? ((await JSON.parse(retrievedData)) as Game[])
+        : [];
+      console.log(gamesData);
+      resolve(gamesData);
+    }, 2000);
+  });
+}
 // Save a game to local storage:
 export async function database_saveGame(board: Board): Promise<boolean> {
   return new Promise((resolve) => {
     setTimeout(() => {
       const now = Math.floor(Date.now() / 1000);
-      const savedGameData = {
+      const savedGameData: Game = {
         uniqid: now,
         duration: now - board.gameStartTime,
+        outcome: outcomeIds[board.outcome!],
         moveHistory: board.flatSanMoveHistory.join(','),
         diceRollHistory: board.diceRollHistory.join(','),
       };

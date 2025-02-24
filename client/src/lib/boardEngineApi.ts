@@ -43,6 +43,14 @@ export type CurrentGameSettings = {
   humanPlaysColor: Color;
 };
 
+export type Game = {
+  uniqid: number;
+  duration: number;
+  outcome: number;
+  moveHistory: string;
+  diceRollHistory: string;
+};
+
 export type Board = {
   initPositionFen?: string;
   history: string[][];
@@ -114,6 +122,17 @@ export const allRanks: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [
 export const allRanksReversed: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [
   8, 7, 6, 5, 4, 3, 2, 1,
 ];
+
+export const outcomes: string[] = [
+  'Draw', // 0
+  'White (Human) wins', // 1
+  'Black (Human) wins', // 2
+  'White (AI) wins', // 3
+  'Black (AI) wins', // 4
+];
+
+export const outcomeIds: { [o: string]: number } = {};
+outcomes.forEach((o, id) => (outcomeIds[o] = id));
 
 export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
@@ -210,6 +229,7 @@ export function validateMove(fromSquare: Square, toSquare: Square): boolean {
 
 // Execute the given move from to square:
 export function makeMove(
+  currentGameSettings: CurrentGameSettings,
   fromSquare: Square,
   toSquare: Square,
   promotion?: string
@@ -245,7 +265,7 @@ export function makeMove(
 
   // After each move we need to check for game over because if player has moves left
   // in the turn but has no valid moves then it's a draw:
-  checkForGameOver();
+  checkForGameOver(currentGameSettings);
 }
 
 /*
@@ -279,14 +299,27 @@ export const isAITurn: (currentGameSettings: CurrentGameSettings) => boolean = (
 ) =>
   settings.onePlayerMode && board.turn !== currentGameSettings.humanPlaysColor;
 
-// Is the game over based on the current board:
-export const checkForGameOver: () => void = () => {
+// Is the game over based on the current board. If so, set the outcome:
+export const checkForGameOver: (
+  currentGameSettings: CurrentGameSettings
+) => void = (currentGameSettings: CurrentGameSettings) => {
   if (boardEngine.isCheckmate()) {
     board.gameOver = true;
-    board.outcome = (board.turn === WHITE ? 'Black' : 'White') + ' wins!';
+    const isWhiteWinner = board.turn === BLACK;
+    const isAIWinner =
+      settings.onePlayerMode &&
+      board.turn === currentGameSettings.humanPlaysColor;
+    const outcomeId = isAIWinner
+      ? isWhiteWinner
+        ? 3
+        : 4
+      : isWhiteWinner
+      ? 1
+      : 2;
+    board.outcome = outcomes[outcomeId];
   } else if (boardEngine.isDraw() || isDiceyChessDraw()) {
     board.gameOver = true;
-    board.outcome = 'Draw!';
+    board.outcome = outcomes[0];
   }
 };
 
