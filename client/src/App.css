@@ -145,6 +145,7 @@ nav li {
 dialog {
   font-size: 1.25rem;
   border-radius: 20px;
+  min-width: 300px;
 }
 
 dialog::backdrop {

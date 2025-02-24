@@ -36,6 +36,7 @@ export type Settings = {
   humanPlaysColor: Color | null;
   humanPlaysColorRandomly: boolean;
   AIMoveDelay: number;
+  makeMoveDelay: number;
 };
 
 // Settings specific for a given game:
@@ -162,6 +163,7 @@ const defaultInitSettings: Settings = {
   humanPlaysColor: WHITE,
   humanPlaysColorRandomly: false,
   AIMoveDelay: 250,
+  makeMoveDelay: 50,
 };
 
 let initSettings: Settings;

@@ -144,7 +144,9 @@ export function Board({
       */
       // if the 'from' and 'to' of a move were just determined, ready to execute the move:
       if (movingFromSq && movingToSq) {
-        replayModeOn ? handleMove() : setTimeout(handleMove, 200);
+        replayModeOn
+          ? handleMove()
+          : setTimeout(handleMove, settings.makeMoveDelay);
         return;
       }
 

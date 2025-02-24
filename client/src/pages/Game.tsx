@@ -12,6 +12,8 @@ export function Game() {
     useState<boolean>(false);
   const [isResetGameModalOpen, setIsResetGameModalOpen] =
     useState<boolean>(false);
+  const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
+    useState<boolean>(false);
   const [gameId, setGameId] = useState<number>(0);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(false);
   const [history, setHistory] = useState<string[][]>(board.history);
@@ -20,6 +22,7 @@ export function Game() {
     console.log('Saving game!');
     await database_saveGame(board);
     console.log('Saved!');
+    onSaveGame();
     handleGameOverModalClose();
   }
 
@@ -53,6 +56,15 @@ export function Game() {
     setHistory([...board.history]);
   }
 
+  function handleInfoMessageDone() {
+    setIsInfoMessageModalOpen(false);
+  }
+
+  function onSaveGame(): void {
+    setIsGameSaveModalOpen(false);
+    setIsInfoMessageModalOpen(true);
+  }
+
   return (
     <>
       <GamePanel
@@ -77,7 +89,11 @@ export function Game() {
           </span>
         </div>
       </Modal>
-      <Modal isOpen={isResetGameModalOpen} onClose={() => {}}>
+      <Modal
+        isOpen={isResetGameModalOpen}
+        onClose={() => {
+          setIsResetGameModalOpen(false);
+        }}>
         <p>Start a new game?</p>
         <div>
           <span className="rainbow-colored-border">
@@ -86,6 +102,16 @@ export function Game() {
           <span className="rainbow-colored-border">
             <button onClick={handleResetGame} autoFocus>
               Yes
+            </button>
+          </span>
+        </div>
+      </Modal>
+      <Modal isOpen={isInfoMessageModalOpen} onClose={() => {}}>
+        <p>Game saved.</p>
+        <div>
+          <span className="rainbow-colored-border">
+            <button onClick={handleInfoMessageDone} autoFocus>
+              OK
             </button>
           </span>
         </div>

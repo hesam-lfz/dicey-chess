@@ -33,7 +33,7 @@ export async function database_loadGames(): Promise<Game[]> {
 // Save a game to local storage:
 export async function database_saveGame(board: Board): Promise<boolean> {
   return new Promise((resolve) => {
-    setTimeout(() => {
+    setTimeout(async () => {
       const now = Math.floor(Date.now() / 1000);
       const savedGameData: Game = {
         uniqid: now,
@@ -43,8 +43,13 @@ export async function database_saveGame(board: Board): Promise<boolean> {
         diceRollHistory: board.diceRollHistory.join(','),
       };
       console.log(savedGameData);
-      const savedGameDataJSON = JSON.stringify(savedGameData);
-      localStorage.setItem(localStorageKeyPrefix + '-games', savedGameDataJSON);
+      const allSavedGames = await database_loadGames();
+      allSavedGames.push(savedGameData);
+      const savedGamesDataJSON = JSON.stringify(allSavedGames);
+      localStorage.setItem(
+        localStorageKeyPrefix + '-games',
+        savedGamesDataJSON
+      );
       resolve(true);
     }, 2000);
   });
