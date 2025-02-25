@@ -44,13 +44,13 @@ export async function database_saveGame(board: Board): Promise<boolean> {
       };
       console.log(savedGameData);
       const allSavedGames = await database_loadGames();
-      allSavedGames.push(savedGameData);
+      allSavedGames.unshift(savedGameData);
       const savedGamesDataJSON = JSON.stringify(allSavedGames);
       localStorage.setItem(
         localStorageKeyPrefix + '-games',
         savedGamesDataJSON
       );
       resolve(true);
-    }, 2000);
+    }, 1000);
   });
 }

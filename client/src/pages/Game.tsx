@@ -20,10 +20,11 @@ export function Game() {
 
   async function handleSaveGame(): Promise<void> {
     console.log('Saving game!');
+    handleGameOverModalClose();
+    onSaveGame();
     await database_saveGame(board);
     console.log('Saved!');
-    onSaveGame();
-    handleGameOverModalClose();
+    setIsInfoMessageModalOpen(true);
   }
 
   function handleGameOverModalClose(): void {
@@ -62,7 +63,6 @@ export function Game() {
 
   function onSaveGame(): void {
     setIsGameSaveModalOpen(false);
-    setIsInfoMessageModalOpen(true);
   }
 
   return (

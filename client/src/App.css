@@ -143,6 +143,8 @@ nav li {
 }
 
 dialog {
+  background-color: black;
+  color: white;
   font-size: 1.25rem;
   border-radius: 20px;
   min-width: 300px;
