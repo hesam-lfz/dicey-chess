@@ -83,7 +83,7 @@ export function Game() {
       <GamePanel
         currGameId={gameId}
         currHistory={history}
-        currReplayModeOn={replayModeOn}
+        currReplayModeOn={replayModeOn || board.gameOver}
         onGameOver={onGameOver}
         onNewGame={onResetGame}
         onLoadGame={onLoadGame}

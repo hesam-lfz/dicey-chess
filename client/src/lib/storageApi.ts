@@ -2,6 +2,9 @@ import { Board, Game, outcomeIds, Settings } from './boardEngineApi';
 
 const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
 
+// Cached saved games data retrieved from database:
+let cachedSavedGames: Game[];
+
 // Retrieve saved settings from local storage:
 export function localStorage_loadSettings(): Settings | null {
   const retrievedData = localStorage.getItem(
@@ -18,16 +21,20 @@ export function localStorage_saveSettings(settings: Settings): void {
 
 export async function database_loadGames(): Promise<Game[]> {
   return new Promise((resolve) => {
-    setTimeout(async () => {
-      const retrievedData = localStorage.getItem(
-        localStorageKeyPrefix + '-games'
-      );
-      const gamesData = retrievedData
-        ? ((await JSON.parse(retrievedData)) as Game[])
-        : [];
-      console.log(gamesData);
-      resolve(gamesData);
-    }, 2000);
+    if (cachedSavedGames) {
+      resolve(cachedSavedGames);
+    } else {
+      setTimeout(async () => {
+        const retrievedData = localStorage.getItem(
+          localStorageKeyPrefix + '-games'
+        );
+        cachedSavedGames = retrievedData
+          ? ((await JSON.parse(retrievedData)) as Game[])
+          : [];
+        console.log(cachedSavedGames);
+        resolve(cachedSavedGames);
+      }, 2000);
+    }
   });
 }
 // Save a game to local storage:
@@ -43,7 +50,7 @@ export async function database_saveGame(board: Board): Promise<boolean> {
         diceRollHistory: board.diceRollHistory.join(','),
       };
       console.log(savedGameData);
-      const allSavedGames = await database_loadGames();
+      const allSavedGames = cachedSavedGames || (await database_loadGames());
       allSavedGames.unshift(savedGameData);
       const savedGamesDataJSON = JSON.stringify(allSavedGames);
       localStorage.setItem(
