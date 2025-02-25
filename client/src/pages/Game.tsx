@@ -5,12 +5,14 @@ import { GamePanel } from '../components/GamePanel';
 import { FooterPanel } from '../components/FooterPanel';
 import { Modal } from '../components/Modal';
 import { board, resetBoard } from '../lib';
-import { database_saveGame } from '../lib/storageApi';
+import { database_loadGames, database_saveGame } from '../lib/storageApi';
 
 export function Game() {
   const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
     useState<boolean>(false);
   const [isResetGameModalOpen, setIsResetGameModalOpen] =
+    useState<boolean>(false);
+  const [isLoadGameModalOpen, setIsLoadGameModalOpen] =
     useState<boolean>(false);
   const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
     useState<boolean>(false);
@@ -65,6 +67,17 @@ export function Game() {
     setIsGameSaveModalOpen(false);
   }
 
+  async function onLoadGame(): Promise<void> {
+    console.log('Loading games!');
+    const allSavedGames = await database_loadGames();
+    console.log('saved games', allSavedGames);
+    setIsLoadGameModalOpen(true);
+  }
+
+  function handleLoadGameModalClose(): void {
+    setIsLoadGameModalOpen(false);
+  }
+
   return (
     <>
       <GamePanel
@@ -73,6 +86,7 @@ export function Game() {
         currReplayModeOn={replayModeOn}
         onGameOver={onGameOver}
         onNewGame={onResetGame}
+        onLoadGame={onLoadGame}
       />
       <FooterPanel />
       <Modal isOpen={isGameSaveModalOpen} onClose={() => {}}>
@@ -103,6 +117,14 @@ export function Game() {
             <button onClick={handleResetGame} autoFocus>
               Yes
             </button>
+          </span>
+        </div>
+      </Modal>
+      <Modal isOpen={isLoadGameModalOpen} onClose={() => {}}>
+        <p>Click on a saved game to load:</p>
+        <div>
+          <span className="rainbow-colored-border">
+            <button onClick={handleLoadGameModalClose}>Cancel</button>
           </span>
         </div>
       </Modal>

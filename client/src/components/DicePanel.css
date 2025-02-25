@@ -6,7 +6,8 @@
   border-style: solid;
   font-size: 1.5rem;
   margin: 0;
-  width: 130px;
+
+  /* width: 130px; */
 }
 
 .roll-dice-button-border {

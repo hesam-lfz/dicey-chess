@@ -1,7 +1,7 @@
 .main-panel {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* center */
   align-self: center;
   height: 100%;
   width: 100%;
@@ -79,6 +79,7 @@
 @media screen and (orientation: portrait) {
   .main-panel {
     flex-direction: column-reverse;
+    align-items: center;
   }
 
   .history-panel {

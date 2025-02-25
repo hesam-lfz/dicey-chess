@@ -4,12 +4,14 @@ type Props = {
   currNumSingleMovesMade: number;
   currHistory: string[][];
   containerOnNewGame: () => void;
+  containerOnLoadGame: () => void;
 };
 
 export function LeftPanel({
   currNumSingleMovesMade,
   currHistory,
   containerOnNewGame,
+  containerOnLoadGame,
 }: Props) {
   return (
     <div className="left-panel side-panel">
@@ -20,6 +22,9 @@ export function LeftPanel({
       />
       <span className="rainbow-colored-border">
         <button onClick={containerOnNewGame}>New Game</button>
+      </span>
+      <span className="rainbow-colored-border">
+        <button onClick={containerOnLoadGame}>Load Game</button>
       </span>
     </div>
   );

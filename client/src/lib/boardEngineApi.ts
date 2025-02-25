@@ -219,7 +219,13 @@ export const resetBoard = () => {
 // saved game, in order to prepare for replaying the game:
 export function initBoardForGameReplay(game: Game): void {
   resetBoard();
-  console.log('before prepping board', JSON.stringify(board));
+  console.log(
+    'before prepping board',
+    'game',
+    JSON.stringify(game),
+    'board',
+    JSON.stringify(board)
+  );
   board.gameOver = true;
   board.outcome = outcomes[game.outcome];
   board.historyNumMoves = game.moveHistory.length;

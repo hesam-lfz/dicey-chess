@@ -14,6 +14,7 @@ type Props = {
   currReplayModeOn: boolean;
   onGameOver: () => void;
   onNewGame: () => void;
+  onLoadGame: () => void;
 };
 
 export function GamePanel({
@@ -22,6 +23,7 @@ export function GamePanel({
   currReplayModeOn,
   onGameOver,
   onNewGame,
+  onLoadGame,
 }: Props) {
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
@@ -103,6 +105,7 @@ export function GamePanel({
           currNumSingleMovesMade={numSingleMovesMade}
           currHistory={history}
           containerOnNewGame={onNewGame}
+          containerOnLoadGame={onLoadGame}
         />
         <div className="board-panel">
           <BoardLabels
