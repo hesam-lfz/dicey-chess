@@ -11,7 +11,7 @@ type Props = {
 
 export function ReplayPanel({ containerOnStepReplayMoveIndex }: Props) {
   const [replayMoveIndex, setReplayMoveIndex] = useState<number>(
-    board.historyNumMoves - 1
+    board.replayCurrentFlatIndex
   );
 
   const stepReplayMoveIndex = useCallback(

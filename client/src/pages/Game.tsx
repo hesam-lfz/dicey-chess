@@ -17,7 +17,7 @@ export function Game() {
   const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
     useState<boolean>(false);
   const [gameId, setGameId] = useState<number>(0);
-  const [replayModeOn, setReplayModeOn] = useState<boolean>(false);
+  const [replayModeOn, setReplayModeOn] = useState<boolean>(board.gameOver);
   const [history, setHistory] = useState<string[][]>(board.history);
 
   async function handleSaveGame(): Promise<void> {
@@ -83,7 +83,7 @@ export function Game() {
       <GamePanel
         currGameId={gameId}
         currHistory={history}
-        currReplayModeOn={replayModeOn || board.gameOver}
+        currReplayModeOn={replayModeOn}
         onGameOver={onGameOver}
         onNewGame={onResetGame}
         onLoadGame={onLoadGame}
