@@ -1,5 +1,4 @@
-import Dice1Icon from '../assets/dice-1.svg';
-import Dice5Icon from '../assets/dice-5.svg';
+import { diceSVGs } from '../lib';
 
 export function About() {
   return (
@@ -17,17 +16,33 @@ export function About() {
           </p>
           <p>
             For example, <strong>4</strong> moves if the dice roll was
-            <img className="about-dice-icon" src={Dice5Icon} alt="logo"></img>
+            <img
+              className="about-dice-icon"
+              src={diceSVGs.Icon_Dice5}
+              alt="dice5-logo"
+            />
             and
-            <img className="about-dice-icon" src={Dice1Icon} alt="logo"></img>.
-            And <strong>0</strong> moves if the dice roll was
-            <img className="about-dice-icon" src={Dice5Icon} alt="logo"></img>
+            <img
+              className="about-dice-icon"
+              src={diceSVGs.Icon_Dice1}
+              alt="dice1-logo"
+            />
+            . And <strong>0</strong> moves if the dice roll was
+            <img
+              className="about-dice-icon"
+              src={diceSVGs.Icon_Dice5}
+              alt="dice5-logo"
+            />
             and
-            <img className="about-dice-icon" src={Dice5Icon} alt="logo"></img>.
+            <img
+              className="about-dice-icon"
+              src={diceSVGs.Icon_Dice5}
+              alt="dice5-logo"
+            />
+            .
           </p>
         </div>
         <h2>About Creators</h2>
-
         <div className="">
           This chess variation game and{' '}
           <a href="https://github.com/hesam-lfz/dicey-chess-web/">
@@ -36,26 +51,21 @@ export function About() {
           full-stack TypeScript ReactJS website is designed &amp; developed by:{' '}
           <a href="https://hesam.us">Hesam (Sam) Samimi</a>
         </div>
-
         <h2>Credits</h2>
-
         <div className="">
           Chess Rules API by:{' '}
           <a href="https://github.com/jhlywa/chess.js">chess.js</a>
         </div>
-
         <div className="">
           Chess AI Engine API by:{' '}
           <a href="https://chess-api.com/">chess-api.com</a>
         </div>
-
         <div className="">
           ToggleSwitch React Component by:{' '}
           <a href="https://www.geeksforgeeks.org/how-to-create-a-toggle-switch-in-react-as-a-reusable-component/">
             geeksforgeeks.org
           </a>
         </div>
-
         <div className="">
           Chess piece icons by:{' '}
           <a
@@ -78,21 +88,24 @@ export function About() {
             Link
           </a>
         </div>
-
         <div className="">
-          Dice icon by:{' '}
+          Dice logo icon by:{' '}
           <a href="https://en.m.wikipedia.org/wiki/User:Steaphan_Greene">
             Steaphan Greene
           </a>
         </div>
-
+        <div className="">
+          Dice logo icon by:{' '}
+          <a href="https://www.svgrepo.com/vectors/">
+            https://www.svgrepo.com/vectors/
+          </a>
+        </div>
         <div className="">
           Dice graphics/lib by:{' '}
           <a href="https://github.com/Upmostly/react-dice">
             https://github.com/Upmostly/react-dice
           </a>
         </div>
-
         <div className="">Logo by: ChatGPT</div>
       </div>
     </div>

@@ -10,6 +10,12 @@ import Icon_wr from '../assets/rook_w.svg';
 import Icon_br from '../assets/rook_b.svg';
 import Icon_wp from '../assets/pawn_w.svg';
 import Icon_bp from '../assets/pawn_b.svg';
+import Icon_Dice1 from '../assets/dice-1.svg';
+import Icon_Dice2 from '../assets/dice-2.svg';
+import Icon_Dice3 from '../assets/dice-3.svg';
+import Icon_Dice4 from '../assets/dice-4.svg';
+import Icon_Dice5 from '../assets/dice-5.svg';
+import Icon_Dice6 from '../assets/dice-6.svg';
 
 import {
   Chess,
@@ -85,6 +91,15 @@ export const pieceSVGs: { [key: string]: any } = {
   Icon_br,
   Icon_wp,
   Icon_bp,
+};
+
+export const diceSVGs: { [key: string]: any } = {
+  Icon_Dice1,
+  Icon_Dice2,
+  Icon_Dice3,
+  Icon_Dice4,
+  Icon_Dice5,
+  Icon_Dice6,
 };
 
 export const playerIconSVGs = {

@@ -1,5 +1,8 @@
 .dice-area {
   display: flex;
+  flex-direction: column;
+  height: 300px;
+  justify-content: space-evenly;
 }
 
 .num-moves-left-text {
@@ -31,4 +34,38 @@
 .player-turn-title-box span {
   font-size: 1.5rem !important;
   font-weight: bold;
+}
+
+.dice-box-icon {
+  width: 4vw;
+  margin: 1vw;
+  transform: rotate(20deg);
+}
+
+/*
+	Small Device Landscape Screen
+*/
+@media screen and (orientation: landscape) and (height <= 700px) {
+  .dice-area {
+    height: 200px;
+  }
+
+  .dice-box-icon {
+    width: calc(4vw * 1.2);
+    margin: calc(1vw * 1.2);
+  }
+}
+
+/*
+	Portrait Screen
+*/
+@media screen and (orientation: portrait) {
+  .dice-area {
+    height: 200px;
+  }
+
+  .dice-box-icon {
+    width: calc(4vw * 2.5);
+    margin: calc(1vw * 2.5);
+  }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
-import { board, isAITurn, playerIconSVGs } from '../lib';
+import { board, diceSVGs, isAITurn, playerIconSVGs } from '../lib';
 import { type Color } from 'chess.js';
 import Icon_dice from '../assets/dice.svg';
 import './DicePanel.css';
@@ -27,11 +27,16 @@ export function DicePanel({
   const [numMovesInTurn, setNumMovesInTurn] =
     useState<number>(currNumMovesInTurn);
   const [AIMoveTriggered, setAIMoveTriggered] = useState<boolean>(false);
-
+  const [roll1, setRoll1] = useState<number>(0);
+  const [roll2, setRoll2] = useState<number>(0);
   const handleRollButtonClick = useCallback(() => {
-    const roll = 4; //Math.floor(Math.random() * 6);
+    const roll1 = Math.floor(Math.random() * 6) + 1;
+    const roll2 = Math.floor(Math.random() * 6) + 1;
+    const roll = Math.abs(roll1 - roll2);
     //console.log('rolled', roll);
     setNumMovesInTurn(roll);
+    setRoll1(roll1);
+    setRoll2(roll2);
     containerOnDiceRoll(roll);
   }, [containerOnDiceRoll]);
 
@@ -109,14 +114,27 @@ export function DicePanel({
               <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
             </button>
           </span>
-        ) : null}
+        ) : (
+          <div className="dice-icons-box">
+            <img
+              className="dice-box-icon"
+              src={diceSVGs['Icon_Dice' + roll1]}
+              alt="dice-left-logo"
+            />
+            <img
+              className="dice-box-icon"
+              src={diceSVGs['Icon_Dice' + roll2]}
+              alt="dice-right-logo"
+            />
+          </div>
+        )}
+        {board.diceRoll === -1 ? null : (
+          <p className="num-moves-left-text">
+            <span className="num-moves-left-num">{numMovesInTurn}</span>
+            {' move' + (numMovesInTurn > 1 ? 's' : '') + ' left.'}
+          </p>
+        )}
       </div>
-      {board.diceRoll === -1 ? null : (
-        <p className="num-moves-left-text">
-          <span className="num-moves-left-num">{numMovesInTurn}</span>
-          {' move' + (numMovesInTurn > 1 ? 's' : '') + ' left.'}
-        </p>
-      )}
     </>
   );
 }
