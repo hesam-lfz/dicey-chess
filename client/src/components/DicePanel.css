@@ -2,6 +2,15 @@
   display: flex;
 }
 
+.num-moves-left-text {
+  margin: 0;
+}
+
+.num-moves-left-num {
+  font-size: 3em !important;
+  text-decoration: underline;
+}
+
 .roll-dice-button {
   border-style: solid;
   font-size: 1.5rem;

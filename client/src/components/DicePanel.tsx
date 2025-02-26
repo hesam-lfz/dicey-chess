@@ -112,12 +112,10 @@ export function DicePanel({
         ) : null}
       </div>
       {board.diceRoll === -1 ? null : (
-        <span>
-          {numMovesInTurn +
-            ' move' +
-            (numMovesInTurn > 1 ? 's' : '') +
-            ' left.'}{' '}
-        </span>
+        <p className="num-moves-left-text">
+          <span className="num-moves-left-num">{numMovesInTurn}</span>
+          {' move' + (numMovesInTurn > 1 ? 's' : '') + ' left.'}
+        </p>
       )}
     </>
   );
