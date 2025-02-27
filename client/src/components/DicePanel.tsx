@@ -20,6 +20,8 @@ export function DicePanel({
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
 }: Props) {
+  const diceLeftRef = useRef<null | HTMLImageElement>(null);
+  const diceRightRef = useRef<null | HTMLImageElement>(null);
   const rollDiceButtonBorderRef = useRef<null | HTMLSpanElement>(null);
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
@@ -67,6 +69,12 @@ export function DicePanel({
         setTimeout(handleRollButtonClick, 500);
       }
     } else setAIMoveTriggered(false);
+    // randomly rotate the image 2 dice a bit for aesthetics:
+    [diceLeftRef, diceRightRef].forEach((e) => {
+      if (e.current)
+        e.current.style.transform =
+          'rotate(' + (Math.floor(Math.random() * 50) - 25) + 'deg)';
+    });
     // if user was clicking somewhere else while they need to be rolling dice,
     // alert them with some animation to show them where they need to click:
     if (currShouldAlertDiceRoll) {
@@ -122,11 +130,13 @@ export function DicePanel({
               className={diceClassName}
               src={diceSVGs['Icon_Dice' + roll1]}
               alt="dice-left-logo"
+              ref={diceLeftRef}
             />
             <img
               className={diceClassName}
               src={diceSVGs['Icon_Dice' + roll2]}
               alt="dice-right-logo"
+              ref={diceRightRef}
             />
           </div>
         )}

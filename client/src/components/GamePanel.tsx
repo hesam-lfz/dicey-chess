@@ -89,7 +89,7 @@ export function GamePanel({
       board.diceRoll = roll;
       board.numMovesInTurn = roll;
       // add a bit of delay if the roll was 0 and we're changing turn:
-      roll === -1 ? setTimeout(() => run(roll), 1000) : run(roll);
+      roll === -1 ? setTimeout(() => run(roll), 2000) : run(roll);
     },
     [currentGameSettings]
   );
