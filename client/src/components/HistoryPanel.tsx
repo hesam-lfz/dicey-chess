@@ -16,7 +16,6 @@ export function HistoryPanel({ currNumSingleMovesMade, currHistory }: Props) {
       historyItemsRef!.current!.scrollHeight;
     setHistory(currHistory);
   }, [currNumSingleMovesMade, currHistory]);
-  console.log(history, board.diceRoll, board.diceRollHistory);
   const allHistoryItems: ReactElement[] = [];
   let moveCtr = 1;
   history.forEach((moveSet, msIdx) => {
