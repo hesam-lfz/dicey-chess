@@ -31,6 +31,7 @@ export function DicePanel({
   const [AIMoveTriggered, setAIMoveTriggered] = useState<boolean>(false);
   const [roll1, setRoll1] = useState<number>(0);
   const [roll2, setRoll2] = useState<number>(0);
+  const [roll, setRoll] = useState<number>(0);
   const handleRollButtonClick = useCallback(() => {
     const roll1 = Math.floor(Math.random() * 6) + 1;
     const roll2 = Math.floor(Math.random() * 6) + 1;
@@ -39,6 +40,7 @@ export function DicePanel({
     setNumMovesInTurn(roll);
     setRoll1(roll1);
     setRoll2(roll2);
+    setRoll(roll);
     containerOnDiceRoll(roll);
   }, [containerOnDiceRoll]);
 
@@ -70,11 +72,12 @@ export function DicePanel({
       }
     } else setAIMoveTriggered(false);
     // randomly rotate the image 2 dice a bit for aesthetics:
-    [diceLeftRef, diceRightRef].forEach((e) => {
-      if (e.current)
-        e.current.style.transform =
-          'rotate(' + (Math.floor(Math.random() * 50) - 25) + 'deg)';
-    });
+    if (roll === numMovesInTurn)
+      [diceLeftRef, diceRightRef].forEach((e) => {
+        if (e.current)
+          e.current.style.transform =
+            'rotate(' + (Math.floor(Math.random() * 50) - 25) + 'deg)';
+      });
     // if user was clicking somewhere else while they need to be rolling dice,
     // alert them with some animation to show them where they need to click:
     if (currShouldAlertDiceRoll) {
@@ -95,10 +98,11 @@ export function DicePanel({
     currShouldAlertDiceRoll,
     handleRollButtonClick,
     currentGameSettings,
+    roll,
+    numMovesInTurn,
   ]);
 
-  const isZeroRoll = roll1 === roll2;
-  const diceClassName = 'dice-box-icon' + (isZeroRoll ? ' dice-0' : '');
+  const diceClassName = 'dice-box-icon' + (roll === 0 ? ' dice-0' : '');
   return (
     <>
       <div className="player-turn-title-box flex flex-align-center">
