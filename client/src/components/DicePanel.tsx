@@ -89,6 +89,8 @@ export function DicePanel({
     currentGameSettings,
   ]);
 
+  const isZeroRoll = roll1 === roll2;
+  const diceClassName = 'dice-box-icon' + (isZeroRoll ? ' dice-0' : '');
   return (
     <>
       <div className="player-turn-title-box flex flex-align-center">
@@ -109,7 +111,7 @@ export function DicePanel({
             className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
             ref={rollDiceButtonBorderRef}>
             <button
-              className="roll-dice-button "
+              className="roll-dice-button"
               onClick={handleRollButtonClick}>
               <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
             </button>
@@ -117,12 +119,12 @@ export function DicePanel({
         ) : (
           <div className="dice-icons-box">
             <img
-              className="dice-box-icon"
+              className={diceClassName}
               src={diceSVGs['Icon_Dice' + roll1]}
               alt="dice-left-logo"
             />
             <img
-              className="dice-box-icon"
+              className={diceClassName}
               src={diceSVGs['Icon_Dice' + roll2]}
               alt="dice-right-logo"
             />

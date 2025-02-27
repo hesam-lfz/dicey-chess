@@ -40,6 +40,12 @@
   width: 4vw;
   margin: 1vw;
   transform: rotate(20deg);
+  filter: drop-shadow(2px 4px 6px black);
+}
+
+.dice-0 {
+  filter: invert(80%) sepia(68%) saturate(10000%) hue-rotate(-10deg)
+    brightness(90%) contrast(100%) drop-shadow(2px 4px 6px black);
 }
 
 /*
