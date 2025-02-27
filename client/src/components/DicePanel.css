@@ -1,8 +1,8 @@
 .dice-area {
   display: flex;
   flex-direction: column;
-  height: 300px;
-  justify-content: space-evenly;
+  height: 180px;
+  justify-content: space-around;
 }
 
 .num-moves-left-text {
@@ -18,7 +18,7 @@
   border-style: solid;
   font-size: 1.5rem;
   margin: 0;
-  min-width: 130px;
+  min-width: 155px;
 }
 
 .roll-dice-button-border {
@@ -54,7 +54,7 @@
 */
 @media screen and (orientation: landscape) and (height <= 700px) {
   .dice-area {
-    height: 200px;
+    height: 120px;
   }
 
   .dice-box-icon {
@@ -68,7 +68,7 @@
 */
 @media screen and (orientation: portrait) {
   .dice-area {
-    height: 200px;
+    height: 120px;
   }
 
   .dice-box-icon {

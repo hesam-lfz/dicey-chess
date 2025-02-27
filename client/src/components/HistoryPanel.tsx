@@ -1,4 +1,5 @@
 import { ReactElement, useEffect, useState, useRef } from 'react';
+import { board } from '../lib';
 
 type Props = {
   currNumSingleMovesMade: number;
@@ -15,7 +16,7 @@ export function HistoryPanel({ currNumSingleMovesMade, currHistory }: Props) {
       historyItemsRef!.current!.scrollHeight;
     setHistory(currHistory);
   }, [currNumSingleMovesMade, currHistory]);
-
+  console.log(history, board.diceRoll, board.diceRollHistory);
   const allHistoryItems: ReactElement[] = [];
   let moveCtr = 1;
   history.forEach((moveSet, msIdx) => {
@@ -26,6 +27,13 @@ export function HistoryPanel({ currNumSingleMovesMade, currHistory }: Props) {
       allHistoryItems.push(
         <li key={moveSetLabel} className={liClass}>
           {moveCtr++ + '. '}
+        </li>
+      );
+    const roll = board.diceRollHistory[msIdx];
+    if (roll !== undefined)
+      allHistoryItems.push(
+        <li key={moveSetLabel + '-roll'} className={liClass}>
+          {'(#' + roll + ')'}
         </li>
       );
     moveSet.forEach((move, mIdx) => {

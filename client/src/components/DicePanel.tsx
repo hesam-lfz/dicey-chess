@@ -32,6 +32,8 @@ export function DicePanel({
   const [roll1, setRoll1] = useState<number>(0);
   const [roll2, setRoll2] = useState<number>(0);
   const [roll, setRoll] = useState<number>(0);
+  const [dice1IconRotation, setDice1IconRotation] = useState<number>(0);
+  const [dice2IconRotation, setDice2IconRotation] = useState<number>(0);
   const handleRollButtonClick = useCallback(() => {
     const roll1 = Math.floor(Math.random() * 6) + 1;
     const roll2 = Math.floor(Math.random() * 6) + 1;
@@ -41,6 +43,8 @@ export function DicePanel({
     setRoll1(roll1);
     setRoll2(roll2);
     setRoll(roll);
+    setDice1IconRotation(Math.floor(Math.random() * 50) - 25);
+    setDice2IconRotation(Math.floor(Math.random() * 50) - 25);
     containerOnDiceRoll(roll);
   }, [containerOnDiceRoll]);
 
@@ -71,13 +75,6 @@ export function DicePanel({
         setTimeout(handleRollButtonClick, 500);
       }
     } else setAIMoveTriggered(false);
-    // randomly rotate the image 2 dice a bit for aesthetics:
-    if (roll === numMovesInTurn)
-      [diceLeftRef, diceRightRef].forEach((e) => {
-        if (e.current)
-          e.current.style.transform =
-            'rotate(' + (Math.floor(Math.random() * 50) - 25) + 'deg)';
-      });
     // if user was clicking somewhere else while they need to be rolling dice,
     // alert them with some animation to show them where they need to click:
     if (currShouldAlertDiceRoll) {
@@ -134,23 +131,27 @@ export function DicePanel({
               className={diceClassName}
               src={diceSVGs['Icon_Dice' + roll1]}
               alt="dice-left-logo"
+              style={{ transform: 'rotate(' + dice1IconRotation + 'deg)' }}
               ref={diceLeftRef}
             />
             <img
               className={diceClassName}
               src={diceSVGs['Icon_Dice' + roll2]}
               alt="dice-right-logo"
+              style={{ transform: 'rotate(' + dice2IconRotation + 'deg)' }}
               ref={diceRightRef}
             />
           </div>
         )}
-        {board.diceRoll === -1 ? null : (
-          <p className="num-moves-left-text">
-            <span className="num-moves-left-num">{numMovesInTurn}</span>
-            {' move' + (numMovesInTurn > 1 ? 's' : '') + ' left.'}
-          </p>
-        )}
       </div>
+      <p
+        className={
+          'num-moves-left-text' +
+          (board.diceRoll === -1 || numMovesInTurn === -1 ? ' invisible' : '')
+        }>
+        <span className="num-moves-left-num">{numMovesInTurn}</span>
+        {' move' + (numMovesInTurn > 1 ? 's' : '') + ' left.'}
+      </p>
     </>
   );
 }

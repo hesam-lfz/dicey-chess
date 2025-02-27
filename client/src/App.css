@@ -139,6 +139,10 @@ nav li {
   cursor: none;
 }
 
+.invisible {
+  visibility: hidden;
+}
+
 .disabled:hover {
   border-color: unset;
 }
