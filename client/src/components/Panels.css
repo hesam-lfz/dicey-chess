@@ -67,7 +67,7 @@
 /*
 	Small Device Landscape Screen
 */
-@media screen and (orientation: landscape) and (height <= 700px) {
+@media screen and (orientation: landscape) and (height <= 400px) {
   .dice-icon {
     width: calc(1.5 * 5vw);
   }

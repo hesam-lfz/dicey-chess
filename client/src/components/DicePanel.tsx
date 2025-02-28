@@ -101,6 +101,8 @@ export function DicePanel({
 
   const diceClassName =
     'dice-box-icon dice-drop-animation' + (roll === 0 ? ' dice-0' : '');
+  const itIsAITurn = isAITurn(currentGameSettings);
+  const theRoll = board.diceRoll;
   return (
     <>
       <div className="player-turn-title-box flex flex-align-center">
@@ -116,7 +118,7 @@ export function DicePanel({
         <span>'s Move</span>
       </div>
       <div className="dice-area">
-        {board.diceRoll === -1 && !isAITurn(currentGameSettings) ? (
+        {theRoll === -1 && !itIsAITurn ? (
           <span
             className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
             ref={rollDiceButtonBorderRef}>

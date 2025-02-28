@@ -188,7 +188,7 @@ dialog button {
 /*
 	Small Device Landscape Screen
 */
-@media screen and (orientation: landscape) and (height <= 700px) {
+@media screen and (orientation: landscape) and (height <= 400px) {
   .header-logo {
     width: calc(2 * 7vw);
   }

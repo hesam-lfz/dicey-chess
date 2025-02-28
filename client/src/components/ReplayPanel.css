@@ -21,7 +21,7 @@
 /*
 	Small Device Landscape Screen
 */
-@media screen and (orientation: landscape) and (height <= 700px) {
+@media screen and (orientation: landscape) and (height <= 400px) {
   .replay-controls-box {
     padding: 0 !important;
   }
