@@ -5,6 +5,10 @@
   justify-content: space-around;
 }
 
+.dice-icons-box {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
 .num-moves-left-text {
   margin: 0;
 }
@@ -39,14 +43,31 @@
 .dice-box-icon {
   width: 4vw;
   margin: 1vw;
-
-  /* transform: rotate(20deg); */
-  filter: drop-shadow(2px 4px 6px black);
+  filter: invert(10%) sepia(558%) saturate(10000%) hue-rotate(0deg)
+    brightness(90%) contrast(100%) drop-shadow(2px 4px 6px black);
 }
 
 .dice-0 {
   filter: invert(80%) sepia(68%) saturate(10000%) hue-rotate(-10deg)
     brightness(90%) contrast(100%) drop-shadow(2px 4px 6px black);
+}
+
+/* animate dropping dice */
+.dice-drop-animation {
+  animation-name: dice-drop-animation;
+  animation-duration: 0.25s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+
+@keyframes dice-drop-animation {
+  0% {
+    transform: scale(2) rotate(50deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 /*

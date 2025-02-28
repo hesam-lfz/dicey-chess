@@ -177,7 +177,7 @@ const defaultInitSettings: Settings = {
   AIPlayerIsSmart: false,
   humanPlaysColor: WHITE,
   humanPlaysColorRandomly: false,
-  AIMoveDelay: 250,
+  AIMoveDelay: 500,
   makeMoveDelay: 50,
 };
 

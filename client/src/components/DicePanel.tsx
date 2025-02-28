@@ -99,7 +99,8 @@ export function DicePanel({
     numMovesInTurn,
   ]);
 
-  const diceClassName = 'dice-box-icon' + (roll === 0 ? ' dice-0' : '');
+  const diceClassName =
+    'dice-box-icon dice-drop-animation' + (roll === 0 ? ' dice-0' : '');
   return (
     <>
       <div className="player-turn-title-box flex flex-align-center">
