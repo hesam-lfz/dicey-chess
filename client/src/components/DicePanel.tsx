@@ -10,7 +10,7 @@ type Props = {
   currTurn: Color;
   currNumMovesInTurn: number;
   currShouldAlertDiceRoll: boolean;
-  containerOnDiceRoll: (n: number) => void;
+  containerOnDiceRoll: (n: number, n1: number, n2: number) => void;
 };
 
 export function DicePanel({
@@ -29,9 +29,9 @@ export function DicePanel({
   const [numMovesInTurn, setNumMovesInTurn] =
     useState<number>(currNumMovesInTurn);
   const [AIMoveTriggered, setAIMoveTriggered] = useState<boolean>(false);
-  const [roll1, setRoll1] = useState<number>(0);
-  const [roll2, setRoll2] = useState<number>(0);
-  const [roll, setRoll] = useState<number>(0);
+  const [roll1, setRoll1] = useState<number>(board.diceRoll1);
+  const [roll2, setRoll2] = useState<number>(board.diceRoll2);
+  const [roll, setRoll] = useState<number>(board.diceRoll);
   const [dice1IconRotation, setDice1IconRotation] = useState<number>(0);
   const [dice2IconRotation, setDice2IconRotation] = useState<number>(0);
   const handleRollButtonClick = useCallback(() => {
@@ -45,7 +45,7 @@ export function DicePanel({
     setRoll(roll);
     setDice1IconRotation(Math.floor(Math.random() * 50) - 25);
     setDice2IconRotation(Math.floor(Math.random() * 50) - 25);
-    containerOnDiceRoll(roll);
+    containerOnDiceRoll(roll, roll1, roll2);
   }, [containerOnDiceRoll]);
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export function DicePanel({
             </button>
           </span>
         ) : (
-          <div className="dice-icons-box">
+          <div className="dice-icons-box" key={board.turn}>
             <img
               className={diceClassName}
               src={diceSVGs['Icon_Dice' + roll1]}

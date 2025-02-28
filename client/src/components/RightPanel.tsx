@@ -9,7 +9,7 @@ type Props = {
   currTurn: Color;
   currNumMovesInTurn: number;
   currShouldAlertDiceRoll: boolean;
-  containerOnDiceRoll: (n: number) => void;
+  containerOnDiceRoll: (n: number, n1: number, n2: number) => void;
   containerOnStepReplayMoveIndex: (n: number) => void;
 };
 

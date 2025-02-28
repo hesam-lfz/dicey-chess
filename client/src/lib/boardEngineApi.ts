@@ -71,6 +71,8 @@ export type Board = {
   //replayCurrentMoveInTurnIndex: number;
   turn: Color;
   diceRoll: number;
+  diceRoll1: number;
+  diceRoll2: number;
   numMovesInTurn: number;
   firstMoveInTurn: boolean;
   gameOver: boolean;
@@ -166,6 +168,8 @@ const initBoard: Board = {
   //replayCurrentMoveInTurnIndex: 0,
   turn: WHITE,
   diceRoll: -1,
+  diceRoll1: -1,
+  diceRoll2: -1,
   numMovesInTurn: -1,
   firstMoveInTurn: true,
   gameOver: false,
@@ -192,7 +196,7 @@ export const chessAIEngine: WebSocket | null = null; // <-- chess AI player engi
 export function loadSettings(currentGameSettings: CurrentGameSettings): void {
   const retrievedSettings = localStorage_loadSettings();
   initSettings = retrievedSettings || defaultInitSettings;
-  resetSettings(currentGameSettings);
+  resetSettings(currentGameSettings, false);
 }
 
 // Save the current settings:
@@ -203,7 +207,11 @@ export function saveSettings(setNewCurrentGameSettings: () => void): void {
 }
 
 // Reset the current settings:
-export const resetSettings = (currentGameSettings: CurrentGameSettings) => {
+export const resetSettings = (
+  currentGameSettings: CurrentGameSettings,
+  resetToDefaultSettings: boolean = false
+) => {
+  if (resetToDefaultSettings) initSettings = defaultInitSettings;
   settings = { ...initSettings };
   // set which players gets which color:
   currentGameSettings.humanPlaysColor = settings.humanPlaysColorRandomly

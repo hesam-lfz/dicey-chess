@@ -72,7 +72,7 @@ export function GamePanel({
   }, [replayModeOn]);
 
   const onDiceRoll = useCallback(
-    (roll: number) => {
+    (roll: number, roll1: number, roll2: number) => {
       async function run(theRoll: number) {
         setTurn(board.turn);
         setNumMovesInTurn(theRoll);
@@ -87,6 +87,8 @@ export function GamePanel({
         roll = -1;
       }
       board.diceRoll = roll;
+      board.diceRoll1 = roll1;
+      board.diceRoll2 = roll2;
       board.numMovesInTurn = roll;
       // add a bit of delay if the roll was 0 and we're changing turn:
       roll === -1 ? setTimeout(() => run(roll), 2000) : run(roll);

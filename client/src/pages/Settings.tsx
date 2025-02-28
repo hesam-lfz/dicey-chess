@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
-import { saveSettings, settings } from '../lib';
+import { resetSettings, saveSettings, settings } from '../lib';
 import { Color, WHITE, BLACK } from 'chess.js';
 
 export function Settings() {
-  const { setNewCurrentGameSettings } = useCurrentGameSettings();
+  const { currentGameSettings, setNewCurrentGameSettings } =
+    useCurrentGameSettings();
 
   const [onePlayer, setOnePlayer] = useState<boolean>(settings.onePlayerMode);
   const [humanPlaysColor, setHumanPlaysColor] = useState<Color | null>(
@@ -60,6 +61,15 @@ export function Settings() {
     [setNewCurrentGameSettings]
   );
 
+  const onResetSettings = useCallback(() => {
+    resetSettings(currentGameSettings, true);
+    saveSettings(setNewCurrentGameSettings);
+    setOnePlayer(settings.onePlayerMode);
+    setHumanPlaysColor(settings.humanPlaysColor);
+    setHumanPlaysColorRandomly(settings.humanPlaysColorRandomly);
+    setAIPlayerIsSmart(settings.AIPlayerIsSmart);
+  }, [currentGameSettings, setNewCurrentGameSettings]);
+
   return (
     <div className="main-panel padded-main-panel flex flex-col flex-align-center">
       <h2>Settings</h2>
@@ -109,6 +119,11 @@ export function Settings() {
           initChecked={!AIPlayerIsSmart}
           containerOnChange={(checked: boolean) => onAISmartChange(!checked)}
         />
+      </div>
+      <div className="flex flex-align-center">
+        <span className="rainbow-colored-border">
+          <button onClick={onResetSettings}>Reset Settings</button>
+        </span>
       </div>
     </div>
   );
