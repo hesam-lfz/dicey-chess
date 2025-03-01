@@ -50,7 +50,7 @@ export type CurrentGameSettings = {
   humanPlaysColor: Color;
 };
 
-export type Game = {
+export type SavedGame = {
   uniqid: number;
   duration: number;
   outcome: number;
@@ -240,7 +240,7 @@ export const resetBoard = () => {
 
 // Pre-populate all properties of board object properly based on a previously
 // saved game, in order to prepare for replaying the game:
-export function initBoardForGameReplay(game: Game): void {
+export function initBoardForGameReplay(game: SavedGame): void {
   resetBoard();
   console.log(
     'before prepping board',

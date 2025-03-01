@@ -122,6 +122,13 @@
   filter: unset;
 }
 
+.loaded-games-box {
+  max-height: 50vh;
+  overflow-y: auto;
+  margin: 20px 0;
+  cursor: pointer;
+}
+
 /*
 	Small Device Landscape Screen
 */

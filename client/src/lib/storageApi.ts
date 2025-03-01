@@ -1,9 +1,9 @@
-import { Board, Game, outcomeIds, Settings } from './boardEngineApi';
+import { Board, SavedGame, outcomeIds, Settings } from './boardEngineApi';
 
 const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
 
 // Cached saved games data retrieved from database:
-let cachedSavedGames: Game[];
+let cachedSavedGames: SavedGame[];
 
 // Retrieve saved settings from local storage:
 export function localStorage_loadSettings(): Settings | null {
@@ -19,7 +19,7 @@ export function localStorage_saveSettings(settings: Settings): void {
   localStorage.setItem(localStorageKeyPrefix + '-settings', settingsDataJSON);
 }
 
-export async function database_loadGames(): Promise<Game[]> {
+export async function database_loadGames(): Promise<SavedGame[]> {
   return new Promise((resolve) => {
     if (cachedSavedGames) {
       resolve(cachedSavedGames);
@@ -29,7 +29,7 @@ export async function database_loadGames(): Promise<Game[]> {
           localStorageKeyPrefix + '-games'
         );
         cachedSavedGames = retrievedData
-          ? ((await JSON.parse(retrievedData)) as Game[])
+          ? ((await JSON.parse(retrievedData)) as SavedGame[])
           : [];
         console.log(cachedSavedGames);
         resolve(cachedSavedGames);
@@ -37,12 +37,22 @@ export async function database_loadGames(): Promise<Game[]> {
     }
   });
 }
+
+export async function database_loadGamesAsDictionary(): Promise<{
+  [key: number]: SavedGame;
+}> {
+  const allGamesDict: { [key: number]: SavedGame } = {};
+  const allSavedGames = await database_loadGames();
+  allSavedGames.forEach((g: SavedGame) => (allGamesDict[g.uniqid] = g));
+  return allSavedGames;
+}
+
 // Save a game to local storage:
 export async function database_saveGame(board: Board): Promise<boolean> {
   return new Promise((resolve) => {
     setTimeout(async () => {
       const now = Math.floor(Date.now() / 1000);
-      const savedGameData: Game = {
+      const savedGameData: SavedGame = {
         uniqid: now,
         duration: now - board.gameStartTime,
         outcome: outcomeIds[board.outcome!],

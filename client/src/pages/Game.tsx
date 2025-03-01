@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import './Game.css';
 import { GamePanel } from '../components/GamePanel';
 import { FooterPanel } from '../components/FooterPanel';
 import { Modal } from '../components/Modal';
-import { board, resetBoard } from '../lib';
+import { board, outcomes, resetBoard, type SavedGame } from '../lib';
 import { database_loadGames, database_saveGame } from '../lib/storageApi';
 
 const infoMessageModalMessageDefault: string = 'Game saved.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Game() {
+  const [savedGames, setSavedGames] = useState<SavedGame[]>();
   const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
     useState<boolean>(false);
   const [isResetGameModalOpen, setIsResetGameModalOpen] =
@@ -29,8 +30,15 @@ export function Game() {
     console.log('Saving game!');
     handleGameOverModalClose();
     onSaveGame();
-    await database_saveGame(board);
-    console.log('Saved!');
+    setTimeout(async () => {
+      await database_saveGame(board);
+      setIsInfoMessageModalOpen(false);
+      infoMessageModalMessage = 'Game saved...';
+      setTimeout(async () => {
+        setIsInfoMessageModalOpen(true);
+      }, 200);
+    }, 200);
+    infoMessageModalMessage = 'Saving game...';
     setIsInfoMessageModalOpen(true);
   }
 
@@ -83,10 +91,11 @@ export function Game() {
         infoMessageModalMessage = 'No saved games found!';
         setIsInfoMessageModalOpen(true);
       } else {
+        setSavedGames(allSavedGames);
         setIsChooseGameToLoadModalOpen(true);
       }
       handleLoadGameModalClose();
-    }, 100);
+    }, 200);
   }
 
   function handleLoadGameModalClose(): void {
@@ -95,6 +104,19 @@ export function Game() {
 
   function handleChooseGameToLoadModalClose(): void {
     setIsChooseGameToLoadModalOpen(false);
+  }
+
+  function onGameToLoadClicked(e: React.MouseEvent<HTMLDivElement>): void {
+    const target = e.target as HTMLElement;
+    if (target.tagName !== 'P') return;
+    const $e = target as HTMLParagraphElement;
+    const gameId = +$e.dataset.uniqid!;
+    for (const g of savedGames!) {
+      if (gameId === g.uniqid) {
+        console.log('yay', g);
+        return;
+      }
+    }
   }
 
   return (
@@ -109,17 +131,19 @@ export function Game() {
       />
       <FooterPanel />
       <Modal isOpen={isGameSaveModalOpen} onClose={() => {}}>
-        <p>{board.outcome}!</p>
-        <p>Would you like to save this game?</p>
-        <div>
-          <span className="rainbow-colored-border">
-            <button onClick={handleGameOverModalClose}>No</button>
-          </span>
-          <span className="rainbow-colored-border">
-            <button onClick={handleSaveGame} autoFocus>
-              Yes
-            </button>
-          </span>
+        <div className="modal-box">
+          <p>{board.outcome}!</p>
+          <p>Would you like to save this game?</p>
+          <div className="modal-actions">
+            <span className="rainbow-colored-border">
+              <button onClick={handleGameOverModalClose}>No</button>
+            </span>
+            <span className="rainbow-colored-border">
+              <button onClick={handleSaveGame} autoFocus>
+                Yes
+              </button>
+            </span>
+          </div>
         </div>
       </Modal>
       <Modal
@@ -127,42 +151,66 @@ export function Game() {
         onClose={() => {
           setIsResetGameModalOpen(false);
         }}>
-        <p>Start a new game?</p>
-        <div>
-          <span className="rainbow-colored-border">
-            <button onClick={handleResetGameModalClose}>No</button>
-          </span>
-          <span className="rainbow-colored-border">
-            <button onClick={handleResetGame} autoFocus>
-              Yes
-            </button>
-          </span>
+        <div className="modal-box">
+          <p>Start a new game?</p>
+          <div className="modal-actions">
+            <span className="rainbow-colored-border">
+              <button onClick={handleResetGameModalClose}>No</button>
+            </span>
+            <span className="rainbow-colored-border">
+              <button onClick={handleResetGame} autoFocus>
+                Yes
+              </button>
+            </span>
+          </div>
         </div>
       </Modal>
       <Modal isOpen={isLoadGameModalOpen} onClose={() => {}}>
-        <p>Loading saved games...</p>
-        <div>
-          <span className="rainbow-colored-border">
-            <button onClick={handleLoadGameModalClose}>Cancel</button>
-          </span>
+        <div className="modal-box">
+          <p>Loading saved games...</p>
+          <div className="modal-actions">
+            <span className="rainbow-colored-border">
+              <button onClick={handleLoadGameModalClose}>Cancel</button>
+            </span>
+          </div>
         </div>
       </Modal>
       <Modal isOpen={isChooseGameToLoadModalOpen} onClose={() => {}}>
-        <p>Click on a saved game to load:</p>
-        <div>
-          <span className="rainbow-colored-border">
-            <button onClick={handleChooseGameToLoadModalClose}>Cancel</button>
-          </span>
+        <div className="modal-box">
+          <p>Click on a saved game to load:</p>
+          <div className="loaded-games-box" onClick={onGameToLoadClicked}>
+            {savedGames
+              ? savedGames!.map((g: SavedGame) => (
+                  <p
+                    className="dotted-border"
+                    data-uniqid={g.uniqid}
+                    key={g.uniqid}>
+                    {outcomes[g.outcome] +
+                      ' | (' +
+                      g.duration +
+                      ' sec.) | ' +
+                      new Date(g.uniqid * 1000).toISOString()}
+                  </p>
+                ))
+              : null}
+          </div>
+          <div className="modal-actions">
+            <span className="rainbow-colored-border">
+              <button onClick={handleChooseGameToLoadModalClose}>Cancel</button>
+            </span>
+          </div>
         </div>
       </Modal>
       <Modal isOpen={isInfoMessageModalOpen} onClose={() => {}}>
-        <p>{infoMessageModalMessage}</p>
-        <div>
-          <span className="rainbow-colored-border">
-            <button onClick={handleInfoMessageDone} autoFocus>
-              OK
-            </button>
-          </span>
+        <div className="modal-box">
+          <p>{infoMessageModalMessage}</p>
+          <div className="modal-actions">
+            <span className="rainbow-colored-border">
+              <button onClick={handleInfoMessageDone} autoFocus>
+                OK
+              </button>
+            </span>
+          </div>
         </div>
       </Modal>
     </>

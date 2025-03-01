@@ -152,11 +152,21 @@ dialog {
   color: white;
   font-size: 1.25rem;
   border-radius: 20px;
-  min-width: 300px;
+  min-width: 35vw;
+  min-height: 30vh;
+  max-height: 85vh;
 }
 
 dialog::backdrop {
   backdrop-filter: blur(5px);
+}
+
+dialog .modal-box {
+  display: flex;
+  flex-direction: column;
+  min-height: 30vh;
+  max-height: 75vh;
+  justify-content: space-between;
 }
 
 dialog button {
