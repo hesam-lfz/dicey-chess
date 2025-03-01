@@ -38,7 +38,7 @@ export function DicePanel({
     const roll1 = Math.floor(Math.random() * 6) + 1;
     const roll2 = Math.floor(Math.random() * 6) + 1;
     const roll = Math.abs(roll1 - roll2);
-    //console.log('rolled', roll);
+    console.log('rolled', roll);
     setNumMovesInTurn(roll);
     setRoll1(roll1);
     setRoll2(roll2);
@@ -72,6 +72,8 @@ export function DicePanel({
       if (!AIMoveTriggered) {
         //console.log('roll trigger');
         setAIMoveTriggered(true);
+        setRoll1(-1);
+        setRoll2(-1);
         setTimeout(handleRollButtonClick, 500);
       }
     } else setAIMoveTriggered(false);
@@ -103,6 +105,7 @@ export function DicePanel({
     'dice-box-icon dice-drop-animation' + (roll === 0 ? ' dice-0' : '');
   const itIsAITurn = isAITurn(currentGameSettings);
   const theRoll = board.diceRoll;
+  console.log('rendering dice panel', JSON.stringify(board), theRoll);
   return (
     <>
       <div className="player-turn-title-box flex flex-align-center">
@@ -128,7 +131,7 @@ export function DicePanel({
               <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
             </button>
           </span>
-        ) : (
+        ) : theRoll === -1 ? null : (
           <div className="dice-icons-box" key={board.turn}>
             <img
               className={diceClassName}
