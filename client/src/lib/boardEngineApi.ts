@@ -76,6 +76,7 @@ export type Board = {
   numMovesInTurn: number;
   firstMoveInTurn: boolean;
   gameOver: boolean;
+  isLoadedGame: boolean;
   outcome?: string;
   gameStartTime: number;
 };
@@ -173,6 +174,7 @@ const initBoard: Board = {
   numMovesInTurn: -1,
   firstMoveInTurn: true,
   gameOver: false,
+  isLoadedGame: false,
   gameStartTime: 0,
 };
 
@@ -247,37 +249,53 @@ export function initBoardForGameReplay(game: SavedGame): void {
     'game',
     JSON.stringify(game),
     'board',
-    JSON.stringify(board)
+    board
   );
   board.gameOver = true;
+  board.isLoadedGame = true;
   board.outcome = outcomes[game.outcome];
-  board.historyNumMoves = game.moveHistory.length;
   const diceRollHistory = game.diceRollHistory.split(',').map((i) => +i);
   board.diceRollHistory = diceRollHistory;
   const flatSanMoveHistory = game.moveHistory.split(',');
   board.flatSanMoveHistory = flatSanMoveHistory;
+  board.historyNumMoves = flatSanMoveHistory.length;
   const flatBoardFenHistory = board.flatBoardFenHistory;
   const flatSquareMoveHistory: Move[] = [];
   board.flatSquareMoveHistory = flatSquareMoveHistory;
-  const historyNumMoves = board.historyNumMoves;
+  const historyNumDiceRolls = diceRollHistory.length;
   let currDiceRollIdx = 0;
   let currFlatMoveIdx = 0;
-  let currTurnMoveIdx = 0;
-  while (currFlatMoveIdx < historyNumMoves) {
+  board.history = [];
+  while (currDiceRollIdx < historyNumDiceRolls) {
+    let currTurnMoveIdx = 0;
     const diceRoll = diceRollHistory[currDiceRollIdx];
+    const currMoveSet: string[] = [];
+    board.history.push(currMoveSet);
     while (currTurnMoveIdx < diceRoll) {
+      console.log(
+        currTurnMoveIdx,
+        currDiceRollIdx,
+        historyNumDiceRolls,
+        diceRoll
+      );
       // make the next move in the current turn move set:
       const move = boardEngine.move(flatSanMoveHistory[currFlatMoveIdx++]);
-      flatSquareMoveHistory.push(move);
-      flatBoardFenHistory.push(boardEngine.fen());
       // If this is not the last move in the current turn move set,
       // we need to manually change the turn back to the same player:
       if (currTurnMoveIdx < diceRoll - 1) swapTurn();
+      currMoveSet.push(move.san);
+      flatSquareMoveHistory.push(move);
+      flatBoardFenHistory.push(boardEngine.fen());
       currTurnMoveIdx += 1;
     }
     currDiceRollIdx += 1;
   }
-  console.log('done prepping board', JSON.stringify(board));
+  // Move the game back to beginning:
+  boardEngine = new Chess(board.flatBoardFenHistory[1]);
+  board.turn = boardEngine.turn();
+  if (board.diceRollHistory[0] > 1) swapTurn();
+  board.replayCurrentFlatIndex = 0;
+  console.log('done prepping board', board, boardEngine.turn());
 }
 
 export const getSquarePiece = (square: Square) => boardEngine.get(square);

@@ -5,7 +5,7 @@ import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Board } from './Board';
 import { BoardLabels } from './BoardLabels';
-import { type Color } from 'chess.js';
+import { type Square, type Color } from 'chess.js';
 import './Panels.css';
 
 type Props = {
@@ -54,11 +54,12 @@ export function GamePanel({
       currReplayModeOn
     );
     */
-    if (board.gameOver && !replayModeOn) onGameOver();
+    if (board.gameOver && !(board.isLoadedGame || replayModeOn)) onGameOver();
     setGameId(currGameId);
     setHistory(currHistory);
     setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
+    console.log('rendered GamePanel', currHistory);
   });
 
   const onMove = useCallback(() => {
@@ -106,6 +107,10 @@ export function GamePanel({
     setReplayStepMove(step);
   }, []);
 
+  const currReplayMove = board.isLoadedGame
+    ? board.flatSquareMoveHistory[board.replayCurrentFlatIndex]
+    : null;
+
   return (
     <>
       <div className="main-panel">
@@ -123,6 +128,12 @@ export function GamePanel({
             currGameId={gameId}
             currReplayModeOn={replayModeOn}
             currReplayStepMove={replayStepMove}
+            currPrevMoveFromSq={
+              board.isLoadedGame ? (currReplayMove!.from as Square) : null
+            }
+            currPrevMoveToSq={
+              board.isLoadedGame ? (currReplayMove!.to as Square) : null
+            }
             currHumanPlaysColor={currentGameSettings.humanPlaysColor}
             currShouldTriggerAITurn={shouldTriggerAITurn}
             containerOnMove={onMove}

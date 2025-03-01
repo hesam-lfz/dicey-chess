@@ -15,7 +15,9 @@ export function HistoryPanel({ currNumSingleMovesMade, currHistory }: Props) {
     historyItemsRef!.current!.scrollTop =
       historyItemsRef!.current!.scrollHeight;
     setHistory(currHistory);
+    console.log('history', currHistory);
   }, [currNumSingleMovesMade, currHistory]);
+
   const allHistoryItems: ReactElement[] = [];
   let moveCtr = 1;
   history.forEach((moveSet, msIdx) => {

@@ -30,6 +30,8 @@ type Props = {
   currGameId: number;
   currReplayModeOn: boolean;
   currReplayStepMove: number;
+  currPrevMoveFromSq: Square | null;
+  currPrevMoveToSq: Square | null;
   currHumanPlaysColor: Color;
   currShouldTriggerAITurn: boolean;
   containerOnMove: () => void;
@@ -40,6 +42,8 @@ export function Board({
   currGameId,
   currReplayModeOn,
   currReplayStepMove,
+  currPrevMoveFromSq,
+  currPrevMoveToSq,
   currHumanPlaysColor,
   currShouldTriggerAITurn,
   containerOnMove,
@@ -62,8 +66,12 @@ export function Board({
   const [pawnPromotion, setPawnPromotion] = useState<string | undefined>(
     undefined
   );
-  const [prevMoveFromSq, setPrevMoveFromSq] = useState<Square | null>(null);
-  const [prevMoveToSq, setPrevMoveToSq] = useState<Square | null>(null);
+  const [prevMoveFromSq, setPrevMoveFromSq] = useState<Square | null>(
+    currPrevMoveFromSq
+  );
+  const [prevMoveToSq, setPrevMoveToSq] = useState<Square | null>(
+    currPrevMoveToSq
+  );
 
   const handleMove = useCallback(() => {
     setPrevMoveFromSq(movingFromSq);
@@ -180,6 +188,8 @@ export function Board({
       setGameId(currGameId);
       setReplayModeOn(currReplayModeOn);
       setReplayStepMove(currReplayStepMove);
+      setPrevMoveFromSq(currPrevMoveFromSq);
+      setPrevMoveToSq(currPrevMoveToSq);
       setHumanPlaysColor(currHumanPlaysColor);
     };
     run();
@@ -200,6 +210,8 @@ export function Board({
     replayStepMove,
     replayStepMoveTriggered,
     triggerReplayStepMove,
+    currPrevMoveFromSq,
+    currPrevMoveToSq,
   ]);
 
   const squareClicked = useCallback(

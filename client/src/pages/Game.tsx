@@ -4,7 +4,13 @@ import './Game.css';
 import { GamePanel } from '../components/GamePanel';
 import { FooterPanel } from '../components/FooterPanel';
 import { Modal } from '../components/Modal';
-import { board, outcomes, resetBoard, type SavedGame } from '../lib';
+import {
+  board,
+  initBoardForGameReplay,
+  outcomes,
+  resetBoard,
+  type SavedGame,
+} from '../lib';
 import { database_loadGames, database_saveGame } from '../lib/storageApi';
 
 const infoMessageModalMessageDefault: string = 'Game saved.';
@@ -114,9 +120,14 @@ export function Game() {
     for (const g of savedGames!) {
       if (gameId === g.uniqid) {
         console.log('yay', g);
-        return;
+        initBoardForGameReplay(g);
+        break;
       }
     }
+    setGameId((id) => id + 1);
+    setReplayModeOn(true);
+    handleChooseGameToLoadModalClose();
+    setHistory(board.history);
   }
 
   return (
