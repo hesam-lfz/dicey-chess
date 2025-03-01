@@ -7,12 +7,17 @@ import { Modal } from '../components/Modal';
 import { board, resetBoard } from '../lib';
 import { database_loadGames, database_saveGame } from '../lib/storageApi';
 
+const infoMessageModalMessageDefault: string = 'Game saved.';
+let infoMessageModalMessage: string = infoMessageModalMessageDefault;
+
 export function Game() {
   const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
     useState<boolean>(false);
   const [isResetGameModalOpen, setIsResetGameModalOpen] =
     useState<boolean>(false);
   const [isLoadGameModalOpen, setIsLoadGameModalOpen] =
+    useState<boolean>(false);
+  const [isChooseGameToLoadModalOpen, setIsChooseGameToLoadModalOpen] =
     useState<boolean>(false);
   const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
     useState<boolean>(false);
@@ -60,6 +65,7 @@ export function Game() {
   }
 
   function handleInfoMessageDone() {
+    infoMessageModalMessage = infoMessageModalMessageDefault;
     setIsInfoMessageModalOpen(false);
   }
 
@@ -69,13 +75,26 @@ export function Game() {
 
   async function onLoadGame(): Promise<void> {
     console.log('Loading games!');
-    const allSavedGames = await database_loadGames();
-    console.log('saved games', allSavedGames);
     setIsLoadGameModalOpen(true);
+    setTimeout(async () => {
+      const allSavedGames = await database_loadGames();
+      console.log('saved games', allSavedGames);
+      if (allSavedGames.length === 0) {
+        infoMessageModalMessage = 'No saved games found!';
+        setIsInfoMessageModalOpen(true);
+      } else {
+        setIsChooseGameToLoadModalOpen(true);
+      }
+      handleLoadGameModalClose();
+    }, 100);
   }
 
   function handleLoadGameModalClose(): void {
     setIsLoadGameModalOpen(false);
+  }
+
+  function handleChooseGameToLoadModalClose(): void {
+    setIsChooseGameToLoadModalOpen(false);
   }
 
   return (
@@ -121,15 +140,23 @@ export function Game() {
         </div>
       </Modal>
       <Modal isOpen={isLoadGameModalOpen} onClose={() => {}}>
-        <p>Click on a saved game to load:</p>
+        <p>Loading saved games...</p>
         <div>
           <span className="rainbow-colored-border">
             <button onClick={handleLoadGameModalClose}>Cancel</button>
           </span>
         </div>
       </Modal>
+      <Modal isOpen={isChooseGameToLoadModalOpen} onClose={() => {}}>
+        <p>Click on a saved game to load:</p>
+        <div>
+          <span className="rainbow-colored-border">
+            <button onClick={handleChooseGameToLoadModalClose}>Cancel</button>
+          </span>
+        </div>
+      </Modal>
       <Modal isOpen={isInfoMessageModalOpen} onClose={() => {}}>
-        <p>Game saved.</p>
+        <p>{infoMessageModalMessage}</p>
         <div>
           <span className="rainbow-colored-border">
             <button onClick={handleInfoMessageDone} autoFocus>
