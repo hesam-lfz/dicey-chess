@@ -73,25 +73,27 @@ export function GamePanel({
 
   const onDiceRoll = useCallback(
     (roll: number, roll1: number, roll2: number) => {
-      async function run(theRoll: number) {
-        setTurn(board.turn);
-        setNumMovesInTurn(theRoll);
-        // if we're in 1-player mode and it's AI's turn, trigger AI move:
-        setShouldTriggerAITurn(theRoll !== -1 && isAITurn(currentGameSettings));
-      }
-      board.diceRollHistory.push(roll);
-      if (roll === 0) {
+      async function runSwapTurn() {
         // player gets 0 moves. Swap turn:
         swapTurn();
         board.history.push([]);
         roll = -1;
+        board.diceRoll = roll;
+        setTurn(board.turn);
+        setNumMovesInTurn(roll);
       }
+      board.diceRollHistory.push(roll);
       board.diceRoll = roll;
       board.diceRoll1 = roll1;
       board.diceRoll2 = roll2;
       board.numMovesInTurn = roll;
+      setTurn(board.turn);
+      setNumMovesInTurn(roll);
+
       // add a bit of delay if the roll was 0 and we're changing turn:
-      roll === -1 ? setTimeout(() => run(roll), 2000) : run(roll);
+      if (roll == 0) setTimeout(runSwapTurn, 2000);
+      // if we're in 1-player mode and it's AI's turn, trigger AI move:
+      else setShouldTriggerAITurn(isAITurn(currentGameSettings));
     },
     [currentGameSettings]
   );

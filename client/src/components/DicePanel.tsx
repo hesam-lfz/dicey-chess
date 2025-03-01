@@ -38,7 +38,6 @@ export function DicePanel({
     const roll1 = Math.floor(Math.random() * 6) + 1;
     const roll2 = Math.floor(Math.random() * 6) + 1;
     const roll = Math.abs(roll1 - roll2);
-    console.log('rolled', roll);
     setNumMovesInTurn(roll);
     setRoll1(roll1);
     setRoll2(roll2);
@@ -105,7 +104,6 @@ export function DicePanel({
     'dice-box-icon dice-drop-animation' + (roll === 0 ? ' dice-0' : '');
   const itIsAITurn = isAITurn(currentGameSettings);
   const theRoll = board.diceRoll;
-  console.log('rendering dice panel', JSON.stringify(board), theRoll);
   return (
     <>
       <div className="player-turn-title-box flex flex-align-center">
@@ -153,7 +151,7 @@ export function DicePanel({
       <p
         className={
           'num-moves-left-text' +
-          (board.diceRoll === -1 || numMovesInTurn === -1 ? ' invisible' : '')
+          (board.diceRoll <= 0 || numMovesInTurn === -1 ? ' invisible' : '')
         }>
         <span className="num-moves-left-num">{numMovesInTurn}</span>
         {' move' + (numMovesInTurn > 1 ? 's' : '') + ' left.'}
