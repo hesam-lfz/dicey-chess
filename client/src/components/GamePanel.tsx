@@ -106,7 +106,7 @@ export function GamePanel({
     setReplayStepMove(step);
   }, []);
 
-  const currReplayMove = board.isLoadedGame
+  const currReplayMove = board.gameOver
     ? board.flatSquareMoveHistory[board.replayCurrentFlatIndex]
     : null;
 
@@ -128,10 +128,10 @@ export function GamePanel({
             currReplayModeOn={replayModeOn}
             currReplayStepMove={replayStepMove}
             currPrevMoveFromSq={
-              board.isLoadedGame ? (currReplayMove!.from as Square) : null
+              board.gameOver ? (currReplayMove!.from as Square) : null
             }
             currPrevMoveToSq={
-              board.isLoadedGame ? (currReplayMove!.to as Square) : null
+              board.gameOver ? (currReplayMove!.to as Square) : null
             }
             currHumanPlaysColor={currentGameSettings.humanPlaysColor}
             currShouldTriggerAITurn={shouldTriggerAITurn}
