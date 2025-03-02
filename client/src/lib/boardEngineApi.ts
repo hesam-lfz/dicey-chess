@@ -192,7 +192,7 @@ const initBoard: Board = {
 
 const defaultInitSettings: Settings = {
   onePlayerMode: true,
-  AIPlayerIsSmart: false,
+  AIPlayerIsSmart: true,
   humanPlaysColor: WHITE,
   humanPlaysColorRandomly: false,
   AIMoveDelay: 500,
@@ -316,14 +316,22 @@ export function initBoardForGameReplay(game: SavedGame): void {
 export const getSquarePiece = (square: Square) => boardEngine.get(square);
 
 // Returns whether or not making move from to square is a valid move based on current board:
-export function validateMove(fromSquare: Square, toSquare: Square): boolean {
+// Note: A check move is not valid unless it's the last move in the current dice roll's move-set.
+export function validateMove(
+  fromSquare: Square,
+  toSquare: Square,
+  isLastMoveInTurn: boolean
+): boolean {
   // boardEngine accepts a move in which a king is taken! Take care of it manually here:
   const toPiece = getSquarePiece(toSquare);
   if (toPiece && toPiece.type === KING) return false;
-  const possibleMoves = boardEngine.moves({
+  let possibleMoves = boardEngine.moves({
     square: fromSquare,
     verbose: true,
   });
+  // A check move is not valid unless it's the last move in the current roll's move-set:
+  if (!isLastMoveInTurn)
+    possibleMoves = possibleMoves.filter((m) => !new Chess(m.after).inCheck());
   return possibleMoves.filter((m) => m.to === toSquare).length > 0;
 }
 

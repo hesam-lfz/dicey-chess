@@ -41,6 +41,12 @@ export function About() {
             />
             .
           </p>
+          <p>
+            A <em>check</em> move can only performed on the last move per dice
+            roll. If a player is <em>in check</em> but rolls a{' '}
+            <strong>0</strong>, the player will repeat the dice roll until a
+            none-zero roll is made.
+          </p>
         </div>
         <h2>About Creators</h2>
         <div className="">

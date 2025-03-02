@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { board, isAITurn, swapTurn } from '../lib';
+import { board, boardEngine, isAITurn, swapTurn } from '../lib';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
@@ -74,12 +74,20 @@ export function GamePanel({
   const onDiceRoll = useCallback(
     (roll: number, roll1: number, roll2: number) => {
       async function runSwapTurn() {
-        // player gets 0 moves. Swap turn:
-        swapTurn();
-        board.history.push([]);
+        // player got 0 roll, so no moves in this turn...
+        // Swap turn, unless player is in check (in which case
+        // the player rolls again):
+        const playerInCheck = boardEngine.inCheck();
+        if (playerInCheck) {
+          // pop the last roll so player in check can re-roll dice:
+          board.diceRollHistory.pop();
+        } else {
+          swapTurn();
+          board.history.push([]);
+          setTurn(board.turn);
+        }
         roll = -1;
         board.diceRoll = roll;
-        setTurn(board.turn);
         setNumMovesInTurn(roll);
       }
       board.diceRollHistory.push(roll);

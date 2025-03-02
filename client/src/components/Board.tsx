@@ -236,7 +236,10 @@ export function Board({
       const clickedPiece = getSquarePiece(square);
       if (clickedPiece && clickedPiece.color === board.turn)
         setMovingFromSq(square);
-      else if (movingFromSq && validateMove(movingFromSq, square)) {
+      else if (
+        movingFromSq &&
+        validateMove(movingFromSq, square, board.numMovesInTurn === 1)
+      ) {
         setMovingToSq(square);
         setPawnPromotion(
           promptUserIfPromotionMove(movingFromSq, square, board.turn)
