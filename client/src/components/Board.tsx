@@ -15,6 +15,7 @@ import {
   getAIMove,
   settings,
   boardReplayStepMove,
+  BasicMove,
 } from '../lib';
 import { Color, WHITE, type Piece, type Square } from 'chess.js';
 
@@ -96,7 +97,8 @@ export function Board({
 
   const triggerAIMove = useCallback(() => {
     const run = async () => {
-      const move = await getAIMove();
+      const move: BasicMove = await getAIMove();
+      //console.log('getAIMove got', move);
       setMovingFromSq(move.from);
       setMovingToSq(move.to);
       setPawnPromotion(move.promotion);

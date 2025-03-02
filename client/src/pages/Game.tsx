@@ -39,7 +39,7 @@ export function Game() {
     setTimeout(async () => {
       await database_saveGame(board);
       setIsInfoMessageModalOpen(false);
-      infoMessageModalMessage = 'Game saved...';
+      infoMessageModalMessage = 'Game saved.';
       setTimeout(async () => {
         setIsInfoMessageModalOpen(true);
       }, 200);

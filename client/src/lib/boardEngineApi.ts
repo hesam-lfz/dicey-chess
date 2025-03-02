@@ -46,8 +46,9 @@ export type Settings = {
   AIPlayerIsSmart: boolean;
   humanPlaysColor: Color | null;
   humanPlaysColorRandomly: boolean;
-  AIMoveDelay: number;
   makeMoveDelay: number;
+  AIMoveDelay: number;
+  AIEngineUsesSocket: boolean;
 };
 
 // Settings specific for a given game:
@@ -84,6 +85,12 @@ export type Board = {
   isLoadedGame: boolean;
   outcome?: string;
   gameStartTime: number;
+};
+
+export type BasicMove = {
+  from: Square;
+  to: Square;
+  promotion?: PieceSymbol;
 };
 
 export const pieceSVGs: { [key: string]: any } = {
@@ -189,6 +196,7 @@ const defaultInitSettings: Settings = {
   humanPlaysColor: WHITE,
   humanPlaysColorRandomly: false,
   AIMoveDelay: 500,
+  AIEngineUsesSocket: false,
   makeMoveDelay: 50,
 };
 
