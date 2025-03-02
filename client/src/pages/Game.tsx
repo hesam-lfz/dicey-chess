@@ -6,6 +6,7 @@ import { FooterPanel } from '../components/FooterPanel';
 import { Modal } from '../components/Modal';
 import {
   board,
+  displayGameDuration,
   initBoardForGameReplay,
   outcomes,
   resetBoard,
@@ -33,7 +34,6 @@ export function Game() {
   const [history, setHistory] = useState<string[][]>(board.history);
 
   async function handleSaveGame(): Promise<void> {
-    console.log('Saving game!');
     handleGameOverModalClose();
     onSaveGame();
     setTimeout(async () => {
@@ -88,11 +88,10 @@ export function Game() {
   }
 
   async function onLoadGame(): Promise<void> {
-    console.log('Loading games!');
     setIsLoadGameModalOpen(true);
     setTimeout(async () => {
       const allSavedGames = await database_loadGames();
-      console.log('saved games', allSavedGames);
+      //console.log('saved games', allSavedGames);
       if (allSavedGames.length === 0) {
         infoMessageModalMessage = 'No saved games found!';
         setIsInfoMessageModalOpen(true);
@@ -114,20 +113,28 @@ export function Game() {
 
   function onGameToLoadClicked(e: React.MouseEvent<HTMLDivElement>): void {
     const target = e.target as HTMLElement;
+    // Make sure we clicked on a saved game component to load:
     if (target.tagName !== 'P') return;
     const $e = target as HTMLParagraphElement;
     const gameId = +$e.dataset.uniqid!;
+    let loadedGame = false;
+    // Find the id of the saved game to load:
     for (const g of savedGames!) {
       if (gameId === g.uniqid) {
-        console.log('yay', g);
+        // Prepare the board for replay of this saved game:
         initBoardForGameReplay(g);
+        loadedGame = true;
         break;
       }
     }
-    setGameId((id) => id + 1);
-    setReplayModeOn(true);
+    if (loadedGame) {
+      setGameId((id) => id + 1);
+      setReplayModeOn(true);
+      setHistory(board.history);
+    } else {
+      resetGame();
+    }
     handleChooseGameToLoadModalClose();
-    setHistory(board.history);
   }
 
   return (
@@ -197,9 +204,9 @@ export function Game() {
                     data-uniqid={g.uniqid}
                     key={g.uniqid}>
                     {outcomes[g.outcome] +
-                      ' | (' +
-                      g.duration +
-                      ' sec.) | ' +
+                      ' ♟ (' +
+                      displayGameDuration(g.duration) +
+                      ') ♟ ' +
                       new Date(g.uniqid * 1000).toISOString()}
                   </p>
                 ))

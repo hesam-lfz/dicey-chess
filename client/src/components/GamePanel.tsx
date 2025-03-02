@@ -59,7 +59,6 @@ export function GamePanel({
     setHistory(currHistory);
     setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
-    console.log('rendered GamePanel', currHistory);
   });
 
   const onMove = useCallback(() => {

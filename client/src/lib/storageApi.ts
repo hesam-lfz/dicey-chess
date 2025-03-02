@@ -31,7 +31,7 @@ export async function database_loadGames(): Promise<SavedGame[]> {
         cachedSavedGames = retrievedData
           ? ((await JSON.parse(retrievedData)) as SavedGame[])
           : [];
-        console.log(cachedSavedGames);
+        //console.log(cachedSavedGames);
         resolve(cachedSavedGames);
       }, 2000);
     }

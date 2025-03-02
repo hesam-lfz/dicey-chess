@@ -244,6 +244,7 @@ export const resetBoard = () => {
 // saved game, in order to prepare for replaying the game:
 export function initBoardForGameReplay(game: SavedGame): void {
   resetBoard();
+  /*
   console.log(
     'before prepping board',
     'game',
@@ -251,6 +252,7 @@ export function initBoardForGameReplay(game: SavedGame): void {
     'board',
     board
   );
+  */
   board.gameOver = true;
   board.isLoadedGame = true;
   board.outcome = outcomes[game.outcome];
@@ -271,22 +273,23 @@ export function initBoardForGameReplay(game: SavedGame): void {
     const diceRoll = diceRollHistory[currDiceRollIdx];
     const currMoveSet: string[] = [];
     board.history.push(currMoveSet);
-    while (currTurnMoveIdx < diceRoll) {
-      console.log(
-        currTurnMoveIdx,
-        currDiceRollIdx,
-        historyNumDiceRolls,
-        diceRoll
-      );
-      // make the next move in the current turn move set:
-      const move = boardEngine.move(flatSanMoveHistory[currFlatMoveIdx++]);
-      // If this is not the last move in the current turn move set,
-      // we need to manually change the turn back to the same player:
-      if (currTurnMoveIdx < diceRoll - 1) swapTurn();
-      currMoveSet.push(move.san);
-      flatSquareMoveHistory.push(move);
+    if (diceRoll === 0) {
+      // roll was 0 and turn need to be given back to the other player:
+      flatBoardFenHistory.pop();
+      swapTurn();
       flatBoardFenHistory.push(boardEngine.fen());
-      currTurnMoveIdx += 1;
+    } else {
+      while (currTurnMoveIdx < diceRoll) {
+        // make the next move in the current turn move set:
+        const move = boardEngine.move(flatSanMoveHistory[currFlatMoveIdx++]);
+        // If this is not the last move in the current turn move set,
+        // we need to manually change the turn back to the same player:
+        if (currTurnMoveIdx < diceRoll - 1) swapTurn();
+        currMoveSet.push(move.san);
+        flatSquareMoveHistory.push(move);
+        flatBoardFenHistory.push(boardEngine.fen());
+        currTurnMoveIdx += 1;
+      }
     }
     currDiceRollIdx += 1;
   }
@@ -295,7 +298,7 @@ export function initBoardForGameReplay(game: SavedGame): void {
   board.turn = boardEngine.turn();
   if (board.diceRollHistory[0] > 1) swapTurn();
   board.replayCurrentFlatIndex = 0;
-  console.log('done prepping board', board, boardEngine.turn());
+  //console.log('done prepping board', board, boardEngine.turn());
 }
 
 export const getSquarePiece = (square: Square) => boardEngine.get(square);
@@ -455,4 +458,10 @@ export function swapTurn(): void {
 export function setBoard(fen: string): void {
   boardEngine = new Chess(fen);
   board.turn = boardEngine.turn();
+}
+
+export function displayGameDuration(secs: number): string {
+  const min = Math.floor(secs / 60);
+  const minDisplay = min > 0 ? min + ' min. ' : '';
+  return minDisplay + (secs - min * 60) + ' sec.';
 }
