@@ -1,8 +1,10 @@
 import { type Move } from 'chess.js';
 import { boardEngine, settings } from './boardEngineApi';
 
+export let chessAIEngine: WebSocket; // <-- chess AI player engine
+
 export async function getAIMove(): Promise<Move> {
-  return settings.AIPlayerIsSmart ? getAIRandomMove() : getAISmartMove();
+  return settings.AIPlayerIsSmart ? getAISmartMove() : getAIRandomMove();
 }
 
 async function getAIRandomMove(): Promise<Move> {
@@ -21,5 +23,25 @@ async function getAIRandomMove(): Promise<Move> {
 
 // FIXME
 async function getAISmartMove(): Promise<Move> {
+  //return getAIRandomMove();
+  chessAIEngine.send(
+    JSON.stringify({
+      fen: boardEngine.fen(),
+      maxThinkingTime: 100,
+      depth: 18,
+    })
+  );
   return getAIRandomMove();
+}
+
+export function initChessAIEngine(): void {
+  chessAIEngine = new WebSocket(import.meta.env.VITE_APP_CHESS_ENGINE_API_URL);
+  chessAIEngine.onmessage = (event) => {
+    const chessApiMessage = JSON.parse(event.data);
+    console.log('chess ai response', chessApiMessage);
+  };
+}
+
+export function closeChessAIEngine(): void {
+  (chessAIEngine as WebSocket).close();
 }

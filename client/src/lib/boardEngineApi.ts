@@ -34,6 +34,11 @@ import {
   localStorage_loadSettings,
   localStorage_saveSettings,
 } from './storageApi';
+import {
+  chessAIEngine,
+  closeChessAIEngine,
+  initChessAIEngine,
+} from './gameAiApi';
 
 // General settings:
 export type Settings = {
@@ -192,7 +197,6 @@ export let settings: Settings;
 
 export let board: Board;
 export let boardEngine: Chess; // <-- board rules engine
-export const chessAIEngine: WebSocket | null = null; // <-- chess AI player engine
 
 // Initialize settings and load any saved settings:
 export function loadSettings(currentGameSettings: CurrentGameSettings): void {
@@ -233,10 +237,10 @@ export const resetBoard = () => {
   boardEngine = new Chess(board.initPositionFen);
   board.flatBoardFenHistory.push(boardEngine.fen());
   // close the chess AI engine socket if we have one running currently:
-  if (chessAIEngine !== null) (chessAIEngine as WebSocket).close();
+  if (chessAIEngine) closeChessAIEngine();
   // If we need the chess aI engine (1-player game) set it up:
-  if (settings.onePlayerMode) {
-    //chessAIEngine = new WebSocket(import.meta.env.VITE_APP_CHESS_ENGINE_API_URL);
+  if (settings.onePlayerMode && settings.AIPlayerIsSmart) {
+    initChessAIEngine();
   }
 };
 
