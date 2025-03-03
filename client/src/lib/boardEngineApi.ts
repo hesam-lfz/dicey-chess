@@ -62,6 +62,7 @@ export type SavedGame = {
   outcome: number;
   moveHistory: string;
   diceRollHistory: string;
+  humanPlaysColor: Color;
 };
 
 export type Board = {
@@ -254,7 +255,10 @@ export const resetBoard = () => {
 
 // Pre-populate all properties of board object properly based on a previously
 // saved game, in order to prepare for replaying the game:
-export function initBoardForGameReplay(game: SavedGame): void {
+export function initBoardForGameReplay(
+  currentGameSettings: CurrentGameSettings,
+  game: SavedGame
+): void {
   resetBoard();
   /*
   console.log(
@@ -265,6 +269,7 @@ export function initBoardForGameReplay(game: SavedGame): void {
     board
   );
   */
+  currentGameSettings.humanPlaysColor = game.humanPlaysColor;
   board.gameOver = true;
   board.isLoadedGame = true;
   board.outcome = outcomes[game.outcome];

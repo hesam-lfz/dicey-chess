@@ -12,12 +12,14 @@ import {
   resetBoard,
   type SavedGame,
 } from '../lib';
+import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { database_loadGames, database_saveGame } from '../lib/storageApi';
 
 const infoMessageModalMessageDefault: string = 'Game saved.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Game() {
+  const { currentGameSettings } = useCurrentGameSettings();
   const [savedGames, setSavedGames] = useState<SavedGame[]>();
   const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
     useState<boolean>(false);
@@ -37,7 +39,7 @@ export function Game() {
     handleGameOverModalClose();
     onSaveGame();
     setTimeout(async () => {
-      await database_saveGame(board);
+      await database_saveGame(currentGameSettings, board);
       setIsInfoMessageModalOpen(false);
       infoMessageModalMessage = 'Game saved.';
       setTimeout(async () => {
@@ -122,7 +124,7 @@ export function Game() {
     for (const g of savedGames!) {
       if (gameId === g.uniqid) {
         // Prepare the board for replay of this saved game:
-        initBoardForGameReplay(g);
+        initBoardForGameReplay(currentGameSettings, g);
         loadedGame = true;
         break;
       }

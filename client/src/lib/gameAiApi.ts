@@ -55,8 +55,10 @@ async function getAISmartMove_fetch(
   };
   // If a check move is disallowed (not last move in current turn's move-set)
   // ensure the ai engine will exclude such check moves:
-  if (!isLastMoveInTurn)
-    params.searchmoves = getPossibleSanMoves(isLastMoveInTurn);
+  if (!isLastMoveInTurn) {
+    const possibleMoves = getPossibleSanMoves(isLastMoveInTurn);
+    if (possibleMoves) params.searchmoves = possibleMoves;
+  }
   const response = await fetch(chessAIEngineUrl, {
     method: 'POST',
     headers: {
