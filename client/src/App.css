@@ -83,7 +83,9 @@ dialog .rainbow-colored-border {
 
 .header-logo-holder {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 
 .header-logo {
@@ -141,6 +143,10 @@ nav li {
 
 .invisible {
   visibility: hidden;
+}
+
+.underlined {
+  text-decoration: underline green 2px;
 }
 
 .disabled:hover {
@@ -214,5 +220,23 @@ dialog button {
 
   .header-logo {
     width: calc(3.5 * 7vw);
+  }
+
+  .header-left-side ul,
+  .header-right-side ul {
+    align-items: center;
+  }
+
+  .header-left-side ul {
+    flex-direction: column;
+  }
+
+  .header-right-side ul {
+    flex-direction: column-reverse;
+  }
+
+  .header-left-side li,
+  .header-right-side li {
+    margin: 5px 0;
   }
 }

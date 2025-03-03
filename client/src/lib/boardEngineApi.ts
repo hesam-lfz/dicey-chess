@@ -325,14 +325,36 @@ export function validateMove(
   // boardEngine accepts a move in which a king is taken! Take care of it manually here:
   const toPiece = getSquarePiece(toSquare);
   if (toPiece && toPiece.type === KING) return false;
-  let possibleMoves = boardEngine.moves({
+  const possibleMoves = getPossibleMoves(isLastMoveInTurn, fromSquare);
+  return possibleMoves.filter((m) => m.to === toSquare).length > 0;
+}
+
+// Returns list of all valid moves (optionally only from the specified fromSquare):
+export function getPossibleMoves(
+  isLastMoveInTurn: boolean,
+  fromSquare?: Square
+): Move[] {
+  const params = {
     square: fromSquare,
     verbose: true,
-  });
+  };
+  if (fromSquare) params.square = fromSquare;
+  let possibleMoves = boardEngine.moves(params) as Move[];
   // A check move is not valid unless it's the last move in the current roll's move-set:
   if (!isLastMoveInTurn)
     possibleMoves = possibleMoves.filter((m) => !new Chess(m.after).inCheck());
-  return possibleMoves.filter((m) => m.to === toSquare).length > 0;
+  return possibleMoves;
+}
+
+// Returns list of all valid moves (optionally only from the specified fromSquare),
+// Iin the SAN format separated by space:
+export function getPossibleSanMoves(
+  isLastMoveInTurn: boolean,
+  fromSquare?: Square
+): string {
+  return getPossibleMoves(isLastMoveInTurn, fromSquare)
+    .map((m) => m.san)
+    .join(' ');
 }
 
 // Execute the given move from to square:

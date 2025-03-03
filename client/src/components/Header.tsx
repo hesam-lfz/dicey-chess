@@ -34,6 +34,11 @@ export function Header() {
                   Settings
                 </Link>
               </li>
+              <li className="inline-block">
+                <Link to="/dicey-chess-web/signin" className="">
+                  Sign in
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>

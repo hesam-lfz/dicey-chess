@@ -15,7 +15,8 @@ export function About() {
             N is the difference between the number of dots between the 2 dice:
           </p>
           <p>
-            For example, <strong>4</strong> moves if the dice roll was
+            For example, <strong className="underlined">4</strong> moves if the
+            dice roll was
             <img
               className="about-dice-icon"
               src={diceSVGs.Icon_Dice5}
@@ -27,7 +28,8 @@ export function About() {
               src={diceSVGs.Icon_Dice1}
               alt="dice1-logo"
             />
-            . And <strong>0</strong> moves if the dice roll was
+            . And <strong className="underlined">0</strong> moves if the dice
+            roll was
             <img
               className="about-dice-icon"
               src={diceSVGs.Icon_Dice5}
@@ -42,10 +44,10 @@ export function About() {
             .
           </p>
           <p>
-            A <em>check</em> move can only performed on the last move per dice
-            roll. If a player is <em>in check</em> but rolls a{' '}
-            <strong>0</strong>, the player will repeat the dice roll until a
-            none-zero roll is made.
+            A <em>check</em> move can only be performed on the last move per
+            dice roll. If a player is <em>in check</em> but rolls a{' '}
+            <strong className="underlined">0</strong>, the player will repeat
+            the dice roll until a <em>none-zero</em> roll is made.
           </p>
         </div>
         <h2>About Creators</h2>

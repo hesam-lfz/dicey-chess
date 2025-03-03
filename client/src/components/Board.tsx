@@ -97,7 +97,7 @@ export function Board({
 
   const triggerAIMove = useCallback(() => {
     const run = async () => {
-      const move: BasicMove = await getAIMove();
+      const move: BasicMove = await getAIMove(board.numMovesInTurn === 1);
       //console.log('getAIMove got', move);
       setMovingFromSq(move.from);
       setMovingToSq(move.to);
@@ -128,13 +128,20 @@ export function Board({
 
   useEffect(() => {
     const run = async () => {
-      /*
       console.log(
         'rendered Board',
+        'currGameId',
+        currGameId,
+        'gameId',
+        gameId,
         'movingFromSq',
         movingFromSq,
         'movingToSq',
         movingToSq,
+        'prevMoveFromSq',
+        prevMoveFromSq,
+        'prevMoveToSq',
+        prevMoveToSq,
         'currShouldTriggerAITurn',
         currShouldTriggerAITurn,
         'shouldTriggerAITurn',
@@ -151,7 +158,7 @@ export function Board({
         replayStepMoveTriggered,
         JSON.stringify(board)
       );
-      */
+
       // if the 'from' and 'to' of a move were just determined, ready to execute the move:
       if (movingFromSq && movingToSq) {
         replayModeOn
@@ -190,8 +197,9 @@ export function Board({
       setGameId(currGameId);
       setReplayModeOn(currReplayModeOn);
       setReplayStepMove(currReplayStepMove);
-      setPrevMoveFromSq(currPrevMoveFromSq);
-      setPrevMoveToSq(currPrevMoveToSq);
+      if (replayModeOn || currPrevMoveFromSq)
+        setPrevMoveFromSq(currPrevMoveFromSq);
+      if (replayModeOn || currPrevMoveToSq) setPrevMoveToSq(currPrevMoveToSq);
       setHumanPlaysColor(currHumanPlaysColor);
     };
     run();
@@ -214,6 +222,8 @@ export function Board({
     triggerReplayStepMove,
     currPrevMoveFromSq,
     currPrevMoveToSq,
+    prevMoveFromSq,
+    prevMoveToSq,
   ]);
 
   const squareClicked = useCallback(
