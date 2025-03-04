@@ -13,6 +13,7 @@ export function Header() {
                   DICEY CHESS
                 </Link>
               </li>
+              <hr className="mobile-line-separator" />
               <li className="inline-block">
                 <Link to="/dicey-chess-web/about" className="">
                   About
@@ -34,6 +35,7 @@ export function Header() {
                   Settings
                 </Link>
               </li>
+              <hr className="mobile-line-separator" />
               <li className="inline-block">
                 <Link to="/dicey-chess-web/signin" className="">
                   Sign in

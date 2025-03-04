@@ -153,6 +153,10 @@ nav li {
   border-color: unset;
 }
 
+.mobile-line-separator {
+  display: none;
+}
+
 dialog {
   background-color: black;
   color: white;
@@ -238,5 +242,10 @@ dialog button {
   .header-left-side li,
   .header-right-side li {
     margin: 5px 0;
+  }
+
+  .mobile-line-separator {
+    display: inline-block;
+    width: 75%;
   }
 }
