@@ -66,6 +66,11 @@ async function getAISmartMove_fetch(
     },
     body: JSON.stringify(params),
   });
+  // Ensure the response status indicates success:
+  if (!response.ok) {
+    // If the status code is not in the successful range, throw an error:
+    throw new Error(`AI engine API fetch error: ${response.status}`);
+  }
   const chessApiMessage = await response.json();
   chessAIEngineResponseMove = {
     from: chessApiMessage.from,
@@ -111,12 +116,12 @@ async function awaitChessAIEngineMove_socket(
   });
 }
 
-export function initChessAIEngine(): void {
-  if (settings.AIEngineUsesSocket)
-    chessAIEngineUrl = 'wss:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
-  else
-    chessAIEngineUrl = 'https:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
+// Sets up proper URLs and preparations for AI engine API communication:
+export async function initChessAIEngine(): Promise<void> {
   if (settings.AIEngineUsesSocket) {
+    // AI Engine API uses: socket
+    chessAIEngineUrl = 'wss:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
+    // Set up socket communication:
     chessAIEngine = new WebSocket(chessAIEngineUrl);
     chessAIEngine.onmessage = (event) => {
       const chessApiMessage = JSON.parse(event.data);
@@ -129,6 +134,21 @@ export function initChessAIEngine(): void {
         };
       }
     };
+  } else {
+    // AI Engine API uses: fetch
+    chessAIEngineUrl = 'https:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
+    // Run a one-time test to see we can talk to the API through fetch call
+    // If we get an error (due to CORS proxy limitations), update the API
+    // URL to use a CORS proxy server...
+    try {
+      const move = await getAISmartMove_fetch(true);
+      console.log('Test of AI engine API fetch succeeded', move);
+    } catch (error) {
+      console.error('Test of AI engine API fetch encountered error:', error);
+      console.log('Enabling use of proxy CORS server for fetching...');
+      chessAIEngineUrl =
+        import.meta.env.VITE_APP_FETCH_CORS_PROXY_SERVER + chessAIEngineUrl;
+    }
   }
 }
 
