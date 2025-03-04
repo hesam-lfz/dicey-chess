@@ -51,7 +51,7 @@ export async function database_loadGamesAsDictionary(): Promise<{
 }> {
   const allGamesDict: { [key: number]: SavedGame } = {};
   const allSavedGames = await database_loadGames();
-  allSavedGames.forEach((g: SavedGame) => (allGamesDict[g.uniqid] = g));
+  allSavedGames.forEach((g: SavedGame) => (allGamesDict[g.at] = g));
   return allSavedGames;
 }
 
@@ -64,7 +64,7 @@ export async function database_saveGame(
     setTimeout(async () => {
       const now = Math.floor(Date.now() / 1000);
       const savedGameData: SavedGame = {
-        uniqid: now,
+        at: now,
         userId: 0,
         duration: now - board.gameStartTime,
         outcome: outcomeIds[board.outcome!],
@@ -75,6 +75,24 @@ export async function database_saveGame(
       console.log(savedGameData);
       const allSavedGames = cachedSavedGames || (await database_loadGames());
       allSavedGames.unshift(savedGameData);
+      const savedGamesDataJSON = JSON.stringify(allSavedGames);
+      localStorage.setItem(
+        localStorageKeyPrefix + '-games',
+        savedGamesDataJSON
+      );
+      resolve(true);
+    }, 1000);
+  });
+}
+
+// Delete a game by the user (stored locally on device):
+export async function database_deleteGame(gameId: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      const allSavedGames = (
+        cachedSavedGames || (await database_loadGames())
+      ).filter((g) => g.at !== gameId);
+      cachedSavedGames = allSavedGames;
       const savedGamesDataJSON = JSON.stringify(allSavedGames);
       localStorage.setItem(
         localStorageKeyPrefix + '-games',

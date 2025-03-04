@@ -16,7 +16,7 @@ type Auth = {
 };
 
 type SavedGame = {
-  uniqid: number;
+  at: number;
   userId: number;
   duration: number;
   outcome: number;
@@ -71,7 +71,7 @@ app.get('/api/games/:userId', async (req, res, next) => {
 app.post('/api/games', async (req, res, next) => {
   try {
     const {
-      uniqid,
+      at,
       userId,
       duration,
       outcome,
@@ -80,7 +80,7 @@ app.post('/api/games', async (req, res, next) => {
       humanPlaysWhite,
     } = req.body;
     if (
-      typeof uniqid !== 'number' ||
+      typeof at !== 'number' ||
       typeof userId !== 'number' ||
       typeof duration !== 'number' ||
       !outcome ||
@@ -90,17 +90,17 @@ app.post('/api/games', async (req, res, next) => {
     ) {
       throw new ClientError(
         400,
-        'Proper params for uniqid, userId, duration, outcome, moveHistory, diceRollHistory, and humanPlaysWhite are required.'
+        'Proper params for at, userId, duration, outcome, moveHistory, diceRollHistory, and humanPlaysWhite are required.'
       );
     }
     const sql = `
-      insert into "games" ("uniqid", "userId", "duration", "outcome", "moveHistory", "diceRollHistory", "humanPlaysWhite")
+      insert into "games" ("at", "userId", "duration", "outcome", "moveHistory", "diceRollHistory", "humanPlaysWhite")
         values ($1, $2, $3, $4, $5, $6, $7)
         returning *
     `;
     const params = [
       userId,
-      uniqid,
+      at,
       duration,
       outcome,
       moveHistory,

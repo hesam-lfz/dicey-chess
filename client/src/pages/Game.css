@@ -129,6 +129,20 @@
   cursor: pointer;
 }
 
+.delete-button {
+  display: flex;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  color: black;
+  background-color: white;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+  font-size: xx-large;
+  align-self: center;
+}
+
 /*
 	Small Device Landscape Screen
 */

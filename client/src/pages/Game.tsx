@@ -13,7 +13,11 @@ import {
   type SavedGame,
 } from '../lib';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
-import { database_loadGames, database_saveGame } from '../lib/storageApi';
+import {
+  database_deleteGame,
+  database_loadGames,
+  database_saveGame,
+} from '../lib/storageApi';
 
 const infoMessageModalMessageDefault: string = 'Game saved.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
@@ -29,9 +33,12 @@ export function Game() {
     useState<boolean>(false);
   const [isChooseGameToLoadModalOpen, setIsChooseGameToLoadModalOpen] =
     useState<boolean>(false);
+  const [isGameDeleteModalOpen, setIsGameDeleteModalOpen] =
+    useState<boolean>(false);
   const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
     useState<boolean>(false);
   const [gameId, setGameId] = useState<number>(0);
+  const [gameIdToDelete, setGameIdToDelete] = useState<number>(0);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(board.gameOver);
   const [history, setHistory] = useState<string[][]>(board.history);
 
@@ -113,30 +120,59 @@ export function Game() {
     setIsChooseGameToLoadModalOpen(false);
   }
 
-  function onGameToLoadClicked(e: React.MouseEvent<HTMLDivElement>): void {
+  function handleGameDeleteModalClose(): void {
+    setIsGameDeleteModalOpen(false);
+  }
+
+  async function handleDeleteGame(): Promise<void> {
+    await database_deleteGame(gameIdToDelete);
+    handleGameDeleteModalClose();
+  }
+
+  // A saved game is clicked either to load or delete:
+  function onGameToLoadOrDeleteClicked(
+    e: React.MouseEvent<HTMLDivElement>
+  ): void {
     const target = e.target as HTMLElement;
     // Make sure we clicked on a saved game component to load:
-    if (target.tagName !== 'P') return;
-    const $e = target as HTMLParagraphElement;
-    const gameId = +$e.dataset.uniqid!;
-    let loadedGame = false;
-    // Find the id of the saved game to load:
-    for (const g of savedGames!) {
-      if (gameId === g.uniqid) {
-        // Prepare the board for replay of this saved game:
-        initBoardForGameReplay(currentGameSettings, g);
-        loadedGame = true;
-        break;
+    if (target.tagName === 'P') {
+      console.log('Loading game...');
+      // Loading a game....
+      const $e = target as HTMLParagraphElement;
+      const gameId = +$e.dataset.at!;
+      let loadedGame = false;
+      // Find the id of the saved game to load:
+      for (const g of savedGames!) {
+        if (gameId === g.at) {
+          // Prepare the board for replay of this saved game:
+          initBoardForGameReplay(currentGameSettings, g);
+          loadedGame = true;
+          break;
+        }
+      }
+      if (loadedGame) {
+        setGameId((id) => id + 1);
+        setReplayModeOn(true);
+        setHistory(board.history);
+      } else {
+        resetGame();
+      }
+      handleChooseGameToLoadModalClose();
+    } else if (target.tagName === 'SPAN') {
+      console.log('deleting game...');
+      // Deleting a game....
+      const $e = target as HTMLSpanElement;
+      const gameId = +$e.dataset.at!;
+      // Find the id of the saved game to delete:
+      for (const g of savedGames!) {
+        if (gameId === g.at) {
+          // Prepare the board for replay of this saved game:
+          setGameIdToDelete(gameId);
+          setIsGameDeleteModalOpen(true);
+          break;
+        }
       }
     }
-    if (loadedGame) {
-      setGameId((id) => id + 1);
-      setReplayModeOn(true);
-      setHistory(board.history);
-    } else {
-      resetGame();
-    }
-    handleChooseGameToLoadModalClose();
   }
 
   return (
@@ -198,25 +234,48 @@ export function Game() {
       <Modal isOpen={isChooseGameToLoadModalOpen} onClose={() => {}}>
         <div className="modal-box">
           <p>Click on a saved game to load:</p>
-          <div className="loaded-games-box" onClick={onGameToLoadClicked}>
+          <div
+            className="loaded-games-box"
+            onClick={onGameToLoadOrDeleteClicked}>
             {savedGames
               ? savedGames!.map((g: SavedGame) => (
-                  <p
-                    className="dotted-border"
-                    data-uniqid={g.uniqid}
-                    key={g.uniqid}>
-                    {outcomes[g.outcome] +
-                      ' ♟ (' +
-                      displayGameDuration(g.duration) +
-                      ') ♟ ' +
-                      new Date(g.uniqid * 1000).toISOString()}
-                  </p>
+                  <div className="loaded-game-box flex" key={'box-' + g.at}>
+                    <p className="dotted-border" data-at={g.at} key={g.at}>
+                      {outcomes[g.outcome] +
+                        ' ♟ (' +
+                        displayGameDuration(g.duration) +
+                        ') ♟ ' +
+                        new Date(g.at * 1000).toISOString()}
+                    </p>
+                    <div
+                      className="delete-button"
+                      data-at={g.at}
+                      key={'delete-' + g.at}>
+                      ✕
+                    </div>
+                  </div>
                 ))
               : null}
           </div>
           <div className="modal-actions">
             <span className="rainbow-colored-border">
               <button onClick={handleChooseGameToLoadModalClose}>Cancel</button>
+            </span>
+          </div>
+        </div>
+      </Modal>
+      <Modal isOpen={isGameDeleteModalOpen} onClose={() => {}}>
+        <div className="modal-box">
+          <p>{board.outcome}!</p>
+          <p>Do you want to delete this game?</p>
+          <div className="modal-actions">
+            <span className="rainbow-colored-border">
+              <button onClick={handleGameDeleteModalClose}>No</button>
+            </span>
+            <span className="rainbow-colored-border">
+              <button onClick={handleDeleteGame} autoFocus>
+                Yes
+              </button>
             </span>
           </div>
         </div>

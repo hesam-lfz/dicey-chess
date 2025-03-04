@@ -16,12 +16,12 @@ create table "public"."users" (
 );
 
 create table "public"."games" (
-  "uniqid"      serial,
+  "at"      integer        not null,
   "userId"      integer        not null,
   "duration"      integer        not null,
   "outcome"        text           not null,
   "moveHistory"        text           not null,
   "diceRollHistory"        text           not null,
   "humanPlaysWhite"        boolean           not null,
-  primary key ("uniqid", "userId")
+  primary key ("at", "userId")
 );

@@ -57,7 +57,7 @@ export type CurrentGameSettings = {
 };
 
 export type SavedGame = {
-  uniqid: number;
+  at: number;
   userId: number;
   duration: number;
   outcome: number;
