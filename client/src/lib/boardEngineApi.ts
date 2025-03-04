@@ -58,11 +58,12 @@ export type CurrentGameSettings = {
 
 export type SavedGame = {
   uniqid: number;
+  userId: number;
   duration: number;
   outcome: number;
   moveHistory: string;
   diceRollHistory: string;
-  humanPlaysColor: Color;
+  humanPlaysWhite: boolean;
 };
 
 export type Board = {
@@ -269,7 +270,7 @@ export function initBoardForGameReplay(
     board
   );
   */
-  currentGameSettings.humanPlaysColor = game.humanPlaysColor;
+  currentGameSettings.humanPlaysColor = game.humanPlaysWhite ? WHITE : BLACK;
   board.gameOver = true;
   board.isLoadedGame = true;
   board.outcome = outcomes[game.outcome];

@@ -5,3 +5,23 @@ set client_min_messages to warning;
 drop schema "public" cascade;
 
 create schema "public";
+
+create table "public"."users" (
+  "userId"         serial,
+  "username"       text not null,
+  "hashedPassword" text not null,
+  "createdAt"      timestamptz(6) not null default now(),
+  primary key ("userId"),
+  unique ("username")
+);
+
+create table "public"."games" (
+  "uniqid"      serial,
+  "userId"      integer        not null,
+  "duration"      integer        not null,
+  "outcome"        text           not null,
+  "moveHistory"        text           not null,
+  "diceRollHistory"        text           not null,
+  "humanPlaysWhite"        boolean           not null,
+  primary key ("uniqid", "userId")
+);

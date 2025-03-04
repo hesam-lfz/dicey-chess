@@ -1,3 +1,4 @@
+import { WHITE } from 'chess.js';
 import {
   Board,
   SavedGame,
@@ -64,11 +65,12 @@ export async function database_saveGame(
       const now = Math.floor(Date.now() / 1000);
       const savedGameData: SavedGame = {
         uniqid: now,
+        userId: 0,
         duration: now - board.gameStartTime,
         outcome: outcomeIds[board.outcome!],
         moveHistory: board.flatSanMoveHistory.join(','),
         diceRollHistory: board.diceRollHistory.join(','),
-        humanPlaysColor: currentGameSettings.humanPlaysColor,
+        humanPlaysWhite: currentGameSettings.humanPlaysColor === WHITE,
       };
       console.log(savedGameData);
       const allSavedGames = cachedSavedGames || (await database_loadGames());
