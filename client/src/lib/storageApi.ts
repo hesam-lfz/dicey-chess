@@ -25,6 +25,7 @@ export function localStorage_saveSettings(settings: Settings): void {
   localStorage.setItem(localStorageKeyPrefix + '-settings', settingsDataJSON);
 }
 
+// Load all games saved by the user (stored locally on device):
 export async function database_loadGames(): Promise<SavedGame[]> {
   return new Promise((resolve) => {
     if (cachedSavedGames) {
@@ -53,7 +54,7 @@ export async function database_loadGamesAsDictionary(): Promise<{
   return allSavedGames;
 }
 
-// Save a game to local storage:
+// Save a game by the user (stored locally on device):
 export async function database_saveGame(
   currentGameSettings: CurrentGameSettings,
   board: Board
