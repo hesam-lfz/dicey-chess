@@ -140,6 +140,7 @@ export async function initChessAIEngine(): Promise<void> {
     // Run a one-time test to see we can talk to the API through fetch call
     // If we get an error (due to CORS proxy limitations), update the API
     // URL to use a CORS proxy server...
+    // If fetch still fails fall back to random move stupid AI mode...
     try {
       const move = await getAISmartMove_fetch(true);
       console.log('Test of AI engine API fetch succeeded', move);
@@ -148,6 +149,20 @@ export async function initChessAIEngine(): Promise<void> {
       console.log('Enabling use of proxy CORS server for fetching...');
       chessAIEngineUrl =
         import.meta.env.VITE_APP_FETCH_CORS_PROXY_SERVER + chessAIEngineUrl;
+      try {
+        const move = await getAISmartMove_fetch(true);
+        console.log(
+          'Test of AI engine API with proxy CORS fetch succeeded',
+          move
+        );
+      } catch (error) {
+        console.error(
+          'Test of AI engine API with proxy CORS fetch encountered error:',
+          error
+        );
+        console.log('Falling back to stupid random move AI...');
+        settings.AIPlayerIsSmart = false;
+      }
     }
   }
 }

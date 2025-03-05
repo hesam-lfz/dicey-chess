@@ -30,10 +30,7 @@ import {
   type Move,
 } from 'chess.js';
 
-import {
-  localStorage_loadSettings,
-  localStorage_saveSettings,
-} from './storageApi';
+import { storageApi_loadSettings, storageApi_saveSettings } from './storageApi';
 import {
   chessAIEngine,
   closeChessAIEngine,
@@ -210,14 +207,14 @@ export let boardEngine: Chess; // <-- board rules engine
 
 // Initialize settings and load any saved settings:
 export function loadSettings(currentGameSettings: CurrentGameSettings): void {
-  const retrievedSettings = localStorage_loadSettings();
+  const retrievedSettings = storageApi_loadSettings();
   initSettings = retrievedSettings || defaultInitSettings;
   resetSettings(currentGameSettings, false);
 }
 
 // Save the current settings:
 export function saveSettings(setNewCurrentGameSettings: () => void): void {
-  localStorage_saveSettings(settings);
+  storageApi_saveSettings(settings);
   // trigger resetting the current game settings and board reset:
   setNewCurrentGameSettings();
 }
