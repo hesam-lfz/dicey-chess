@@ -271,7 +271,6 @@ export function Game() {
       </Modal>
       <Modal isOpen={isGameDeleteModalOpen} onClose={() => {}}>
         <div className="modal-box">
-          <p>{board.outcome}!</p>
           <p>Do you want to delete this game?</p>
           <div className="modal-actions">
             <span className="rainbow-colored-border">

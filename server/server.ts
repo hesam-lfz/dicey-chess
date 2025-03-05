@@ -33,6 +33,7 @@ const db = new pg.Pool({
 });
 
 const app = express();
+app.use(express.json());
 
 // Create paths for static directories
 const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
@@ -58,10 +59,9 @@ app.get('/api/games/:userId', async (req, res, next) => {
     `;
     const params = [userId];
     const result = await db.query(sql, params);
-    if (!result.rows[0]) {
+    if (!result.rows[0])
       throw new ClientError(404, `cannot find user ${userId}`);
-    }
-    res.json(result.rows[0]);
+    res.json(result.rows);
   } catch (err) {
     next(err);
   }
