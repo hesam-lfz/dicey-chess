@@ -126,6 +126,10 @@ export function Game() {
 
   async function handleDeleteGame(): Promise<void> {
     await database_deleteGame(gameIdToDelete);
+    infoMessageModalMessage = 'Game deleted.';
+    setTimeout(async () => {
+      setIsInfoMessageModalOpen(true);
+    }, 200);
     handleGameDeleteModalClose();
   }
 
@@ -158,7 +162,7 @@ export function Game() {
         resetGame();
       }
       handleChooseGameToLoadModalClose();
-    } else if (target.tagName === 'SPAN') {
+    } else if (target.tagName === 'DIV') {
       console.log('deleting game...');
       // Deleting a game....
       const $e = target as HTMLSpanElement;
@@ -172,6 +176,7 @@ export function Game() {
           break;
         }
       }
+      handleChooseGameToLoadModalClose();
     }
   }
 
