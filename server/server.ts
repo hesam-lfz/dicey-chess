@@ -83,10 +83,10 @@ app.post('/api/games', async (req, res, next) => {
       typeof at !== 'number' ||
       typeof userId !== 'number' ||
       typeof duration !== 'number' ||
-      !outcome ||
+      typeof outcome !== 'number' ||
       !moveHistory ||
       !diceRollHistory ||
-      humanPlaysWhite !== 'boolean'
+      typeof humanPlaysWhite !== 'boolean'
     ) {
       throw new ClientError(
         400,
@@ -99,8 +99,8 @@ app.post('/api/games', async (req, res, next) => {
         returning *
     `;
     const params = [
-      userId,
       at,
+      userId,
       duration,
       outcome,
       moveHistory,

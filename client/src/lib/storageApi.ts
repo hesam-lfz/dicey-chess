@@ -170,18 +170,17 @@ async function database_saveGame(savedGameData: SavedGame): Promise<boolean> {
   return new Promise((resolve) => {
     const run = async (): Promise<boolean> => {
       console.log(savedGameData);
-
       const req = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(savedGameData),
       };
-      console.log('req', req);
-      const res = await fetch('/api/games/', req);
-      console.log('result from db', res);
+      //console.log('req', req);
+      const res = await fetch('/api/games', req);
+      //console.log('result from db', res);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
-      const retrievedData = (await res.json()) as SavedGame;
-      console.log(retrievedData);
+      (await res.json()) as SavedGame;
+      //console.log(retrievedData);
       return true;
     };
     resolve(run());

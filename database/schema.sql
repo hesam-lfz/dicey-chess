@@ -19,7 +19,7 @@ create table "public"."games" (
   "at"      integer        not null,
   "userId"      integer        not null,
   "duration"      integer        not null,
-  "outcome"        text           not null,
+  "outcome"        integer           not null,
   "moveHistory"        text           not null,
   "diceRollHistory"        text           not null,
   "humanPlaysWhite"        boolean           not null,
