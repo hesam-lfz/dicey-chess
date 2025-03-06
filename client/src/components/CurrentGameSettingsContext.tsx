@@ -57,6 +57,7 @@ export function CurrentGameSettingsProvider({ children }: Props) {
     handleSignOut,
   };
 
+  // Read any pre-existing user session stored in local storage:
   useEffect(() => {
     setUser(readUser());
     setToken(readToken());

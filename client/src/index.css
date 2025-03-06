@@ -60,3 +60,22 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
+input {
+  color: rgb(0, 255, 208);
+  border-radius: 10px;
+  border: 2px dotted gray;
+  padding: 0.6em;
+  margin: 0.5em;
+  font-size: 1.2em;
+  font-weight: 300;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  transition: border-color 0.25s;
+  display: inline-block;
+  min-width: 100px;
+}
+
+nav {
+  font-size: larger;
+}

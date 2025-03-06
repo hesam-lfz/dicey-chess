@@ -22,7 +22,7 @@ export function ToggleSwitch({ label, initChecked, containerOnChange }: Props) {
   );
 
   return (
-    <div className="toggle-switch-container">
+    <div className="input-element-container toggle-switch-container">
       <span>{label}</span>
       <div className="toggle-switch-toggle-switch">
         <input

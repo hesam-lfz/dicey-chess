@@ -39,7 +39,7 @@
   border-style: dotted;
   padding: 10px;
   border-radius: 15px;
-  margin: 5px 0;
+  margin: 10px 0;
 }
 
 .rainbow-colored {
@@ -109,6 +109,15 @@ dialog .rainbow-colored-border {
 .header-logo-name {
   text-decoration: underline green 4px;
   font-size: larger;
+}
+
+.input-element-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  font-size: 1.25em;
+  padding: 1vw;
 }
 
 nav ul {

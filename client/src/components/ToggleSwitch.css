@@ -17,6 +17,10 @@
   /* top: 8px; */
 }
 
+.toggle-switch-container > span {
+  text-align: start;
+}
+
 .toggle-switch-checkbox {
   display: none;
 }
