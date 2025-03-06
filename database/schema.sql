@@ -25,3 +25,5 @@ create table "public"."games" (
   "humanPlaysWhite"        boolean           not null,
   primary key ("userId", "at")
 );
+
+alter table "games" add constraint "user_games" foreign key ("userId") references "users" ("userId");
