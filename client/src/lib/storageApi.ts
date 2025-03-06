@@ -6,15 +6,9 @@ import {
   Settings,
   CurrentGameSettings,
 } from './boardEngineApi';
+import { type User, readToken } from './auth';
 
 const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
-
-interface UserSession {
-  userId: number;
-  username: string;
-}
-
-export const userSession: UserSession | null = { userId: 0, username: 'blah' };
 
 // Cached saved games data retrieved from database:
 let cachedSavedGames: SavedGame[];
@@ -36,13 +30,15 @@ export function storageApi_saveSettings(settings: Settings): void {
 // Load all games saved by the user.
 // If user in session and database access possible load from database.
 // Otherwise load games stored locally on device:
-export async function storageApi_loadGames(): Promise<SavedGame[]> {
+export async function storageApi_loadGames(
+  user: User | undefined
+): Promise<SavedGame[]> {
   return new Promise((resolve) => {
     if (cachedSavedGames) {
       resolve(cachedSavedGames);
     } else {
       const run = async (): Promise<SavedGame[]> => {
-        if (!userSession) {
+        if (!user) {
           console.log(
             'No user session. Retrieving saved game from local storage....'
           );
@@ -84,7 +80,13 @@ async function localStorage_loadGames(): Promise<SavedGame[]> {
 async function database_loadGames(): Promise<SavedGame[]> {
   return new Promise((resolve) => {
     const run = async (): Promise<SavedGame[]> => {
-      const res = await fetch('/api/games/' + userSession!.userId);
+      const req = {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${readToken()}`,
+        },
+      };
+      const res = await fetch('/api/games', req); // + userSession!.userId);
       //console.log('result from db', res);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
       const retrievedData = (await res.json()) as SavedGame[];
@@ -99,11 +101,13 @@ async function database_loadGames(): Promise<SavedGame[]> {
 // Load all games saved by the user as a dictionary of saved game data
 // If user in session and database access possible load from database.
 // Otherwise load games stored locally on device:
-export async function storageApi_loadGamesAsDictionary(): Promise<{
+export async function storageApi_loadGamesAsDictionary(
+  user: User | undefined
+): Promise<{
   [key: number]: SavedGame;
 }> {
   const allGamesDict: { [key: number]: SavedGame } = {};
-  const allSavedGames = await storageApi_loadGames();
+  const allSavedGames = await storageApi_loadGames(user);
   allSavedGames.forEach((g: SavedGame) => (allGamesDict[g.at] = g));
   return allSavedGames;
 }
@@ -113,11 +117,12 @@ export async function storageApi_loadGamesAsDictionary(): Promise<{
 // Otherwise load games stored locally on device:
 export async function storageApi_saveGame(
   currentGameSettings: CurrentGameSettings,
+  user: User | undefined,
   board: Board
 ): Promise<boolean> {
   const now = Math.floor(Date.now() / 1000);
   const savedGameData: SavedGame = {
-    userId: userSession?.userId || 0,
+    userId: user?.userId || 0,
     at: now,
     duration: now - board.gameStartTime,
     outcome: outcomeIds[board.outcome!],
@@ -128,10 +133,11 @@ export async function storageApi_saveGame(
   console.log(savedGameData);
   return new Promise((resolve) => {
     const run = async (): Promise<boolean> => {
-      const allSavedGames = cachedSavedGames || (await storageApi_loadGames());
+      const allSavedGames =
+        cachedSavedGames || (await storageApi_loadGames(user));
       allSavedGames.unshift(savedGameData);
       cachedSavedGames = allSavedGames;
-      if (!userSession) {
+      if (!user) {
         console.log('No user session. Saving game on local storage....');
         return await localStorage_saveGame(allSavedGames);
       } else {
@@ -175,7 +181,10 @@ async function database_saveGame(savedGameData: SavedGame): Promise<boolean> {
       console.log(savedGameData);
       const req = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${readToken()}`,
+        },
         body: JSON.stringify(savedGameData),
       };
       //console.log('req', req);
@@ -191,20 +200,23 @@ async function database_saveGame(savedGameData: SavedGame): Promise<boolean> {
 }
 
 // Delete a game by the user (stored either in database or locally on device):
-export async function storageApi_deleteGame(gameId: number): Promise<boolean> {
+export async function storageApi_deleteGame(
+  user: User | undefined,
+  gameId: number
+): Promise<boolean> {
   return new Promise((resolve) => {
     const run = async (): Promise<boolean> => {
       const allSavedGames = (
-        cachedSavedGames || (await storageApi_loadGames())
+        cachedSavedGames || (await storageApi_loadGames(user))
       ).filter((g) => g.at !== gameId);
       cachedSavedGames = allSavedGames;
-      if (!userSession) {
+      if (!user) {
         console.log('No user session. Deleting game on local storage...');
         return await localStorage_deleteGame(allSavedGames);
       } else {
         try {
           console.log('Trying to delete game on db...');
-          return await database_deleteGame(gameId);
+          return await database_deleteGame(user, gameId);
         } catch (e) {
           console.error(
             'Failed deleting game on db. Trying to delete on local storage...'
@@ -234,16 +246,22 @@ async function localStorage_deleteGame(
 }
 
 // Delete a game by the user (stored on database):
-async function database_deleteGame(gameId: number): Promise<boolean> {
+async function database_deleteGame(
+  user: User | undefined,
+  gameId: number
+): Promise<boolean> {
   const deletedGameData = {
-    userId: userSession?.userId || 0,
+    userId: user?.userId || 0,
     at: gameId,
   };
   return new Promise((resolve) => {
     const run = async (): Promise<boolean> => {
       const req = {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${readToken()}`,
+        },
         body: JSON.stringify(deletedGameData),
       };
       console.log('delete req', req);

@@ -105,18 +105,19 @@ app.post('/api/auth/sign-in', async (req, res, next) => {
 });
 
 // Load all games saved by the user (stored in database):
-app.get('/api/games/:userId', async (req, res, next) => {
+app.get('/api/games', authMiddleware, async (req, res, next) => {
   try {
-    const userId = Number(req.params.userId);
+    // const userId = Number(req.params.userId);
     const sql = `
       select *
       from "games"
       where "userId" = $1
+      order by "at" desc
     `;
-    const params = [userId];
+    const params = [req.user?.userId];
     const result = await db.query(sql, params);
     if (!result.rows[0])
-      throw new ClientError(404, `cannot find user ${userId}`);
+      throw new ClientError(404, `Cannot find user ${req.user?.userId}!`);
     res.json(result.rows);
   } catch (err) {
     next(err);
@@ -124,7 +125,7 @@ app.get('/api/games/:userId', async (req, res, next) => {
 });
 
 // Save a game by the user (store on database):
-app.post('/api/games', async (req, res, next) => {
+app.post('/api/games', authMiddleware, async (req, res, next) => {
   try {
     const {
       userId,
@@ -149,13 +150,19 @@ app.post('/api/games', async (req, res, next) => {
         'Proper params for userId, at, duration, outcome, moveHistory, diceRollHistory, and humanPlaysWhite are required.'
       );
     }
+    if (req.user?.userId !== userId) {
+      throw new ClientError(
+        400,
+        'Params userId does not match userId in authentication.'
+      );
+    }
     const sql = `
       insert into "games" ("userId", "at", "duration", "outcome", "moveHistory", "diceRollHistory", "humanPlaysWhite")
         values ($1, $2, $3, $4, $5, $6, $7)
         returning *
     `;
     const params = [
-      userId,
+      req.user?.userId,
       at,
       duration,
       outcome,
@@ -172,7 +179,7 @@ app.post('/api/games', async (req, res, next) => {
 });
 
 // Delete a game by the user (stored on database):
-app.delete('/api/games', async (req, res, next) => {
+app.delete('/api/games', authMiddleware, async (req, res, next) => {
   try {
     const { userId, at } = req.body;
     if (typeof userId !== 'number' || typeof at !== 'number') {
@@ -181,12 +188,18 @@ app.delete('/api/games', async (req, res, next) => {
         'Proper params for userId and at are required.'
       );
     }
+    if (req.user?.userId !== userId) {
+      throw new ClientError(
+        400,
+        'Params userId does not match userId in authentication.'
+      );
+    }
     const sql = `
       delete from "games"
         where "userId" = $1 and "at" = $2
         returning *
     `;
-    const params = [userId, at];
+    const params = [req.user?.userId, at];
     const result = await db.query<SavedGame>(sql, params);
     const [deletedGame] = result.rows;
     res.status(201).json(deletedGame);

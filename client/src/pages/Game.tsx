@@ -23,7 +23,7 @@ const infoMessageModalMessageDefault: string = 'Game saved.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Game() {
-  const { currentGameSettings } = useCurrentGameSettings();
+  const { currentGameSettings, user } = useCurrentGameSettings();
   const [savedGames, setSavedGames] = useState<SavedGame[]>();
   const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
     useState<boolean>(false);
@@ -48,6 +48,7 @@ export function Game() {
     setTimeout(async () => {
       const savedOnDatabase = await storageApi_saveGame(
         currentGameSettings,
+        user,
         board
       );
       setIsInfoMessageModalOpen(false);
@@ -106,7 +107,7 @@ export function Game() {
   async function onLoadGame(): Promise<void> {
     setIsLoadGameModalOpen(true);
     setTimeout(async () => {
-      const allSavedGames = await storageApi_loadGames();
+      const allSavedGames = await storageApi_loadGames(user);
       //console.log('saved games', allSavedGames);
       if (allSavedGames.length === 0) {
         infoMessageModalMessage = 'No saved games found!';
@@ -133,7 +134,7 @@ export function Game() {
 
   async function handleDeleteGame(): Promise<void> {
     console.log('deleting game...');
-    await storageApi_deleteGame(gameIdToDelete);
+    await storageApi_deleteGame(user, gameIdToDelete);
     infoMessageModalMessage = 'Game deleted.';
     setTimeout(async () => {
       setIsInfoMessageModalOpen(true);
