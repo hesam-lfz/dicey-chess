@@ -46,9 +46,16 @@ export function Game() {
     handleGameOverModalClose();
     onSaveGame();
     setTimeout(async () => {
-      await storageApi_saveGame(currentGameSettings, board);
+      const savedOnDatabase = await storageApi_saveGame(
+        currentGameSettings,
+        board
+      );
       setIsInfoMessageModalOpen(false);
-      infoMessageModalMessage = 'Game saved.';
+      infoMessageModalMessage =
+        'Game saved.' +
+        (savedOnDatabase
+          ? ''
+          : ' Sign in to save your games across all your devices.');
       setTimeout(async () => {
         setIsInfoMessageModalOpen(true);
       }, 200);
@@ -125,6 +132,7 @@ export function Game() {
   }
 
   async function handleDeleteGame(): Promise<void> {
+    console.log('deleting game...');
     await storageApi_deleteGame(gameIdToDelete);
     infoMessageModalMessage = 'Game deleted.';
     setTimeout(async () => {
@@ -163,7 +171,6 @@ export function Game() {
       }
       handleChooseGameToLoadModalClose();
     } else if (target.tagName === 'DIV') {
-      console.log('deleting game...');
       // Deleting a game....
       const $e = target as HTMLSpanElement;
       const gameId = +$e.dataset.at!;

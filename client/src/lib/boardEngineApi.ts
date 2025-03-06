@@ -54,8 +54,8 @@ export type CurrentGameSettings = {
 };
 
 export type SavedGame = {
-  at: number;
   userId: number;
+  at: number;
   duration: number;
   outcome: number;
   moveHistory: string;
@@ -72,8 +72,6 @@ export type Board = {
   diceRollHistory: number[];
   historyNumMoves: number;
   replayCurrentFlatIndex: number;
-  //replayCurrentTurnIndex: number;
-  //replayCurrentMoveInTurnIndex: number;
   turn: Color;
   diceRoll: number;
   diceRoll1: number;
@@ -176,8 +174,6 @@ const initBoard: Board = {
   diceRollHistory: [],
   historyNumMoves: 0,
   replayCurrentFlatIndex: -1,
-  //replayCurrentTurnIndex: 0,
-  //replayCurrentMoveInTurnIndex: 0,
   turn: WHITE,
   diceRoll: -1,
   diceRoll1: -1,
@@ -384,8 +380,6 @@ export function makeMove(
     board.numMovesInTurn = -1;
     board.firstMoveInTurn = true;
     board.history.push([]);
-    //board.replayCurrentTurnIndex += 1;
-    //board.replayCurrentMoveInTurnIndex = 0;
   } else {
     // The player still has moves left in the current turn, according to the dice roll:
     board.firstMoveInTurn = false;

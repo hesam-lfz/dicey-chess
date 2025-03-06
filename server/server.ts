@@ -16,8 +16,8 @@ type Auth = {
 };
 
 type SavedGame = {
-  at: number;
   userId: number;
+  at: number;
   duration: number;
   outcome: number;
   moveHistory: string;
@@ -33,7 +33,6 @@ const db = new pg.Pool({
 });
 
 const app = express();
-app.use(express.json());
 
 // Create paths for static directories
 const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
@@ -71,8 +70,8 @@ app.get('/api/games/:userId', async (req, res, next) => {
 app.post('/api/games', async (req, res, next) => {
   try {
     const {
-      at,
       userId,
+      at,
       duration,
       outcome,
       moveHistory,
@@ -80,8 +79,8 @@ app.post('/api/games', async (req, res, next) => {
       humanPlaysWhite,
     } = req.body;
     if (
-      typeof at !== 'number' ||
       typeof userId !== 'number' ||
+      typeof at !== 'number' ||
       typeof duration !== 'number' ||
       typeof outcome !== 'number' ||
       !moveHistory ||
@@ -90,17 +89,17 @@ app.post('/api/games', async (req, res, next) => {
     ) {
       throw new ClientError(
         400,
-        'Proper params for at, userId, duration, outcome, moveHistory, diceRollHistory, and humanPlaysWhite are required.'
+        'Proper params for userId, at, duration, outcome, moveHistory, diceRollHistory, and humanPlaysWhite are required.'
       );
     }
     const sql = `
-      insert into "games" ("at", "userId", "duration", "outcome", "moveHistory", "diceRollHistory", "humanPlaysWhite")
+      insert into "games" ("userId", "at", "duration", "outcome", "moveHistory", "diceRollHistory", "humanPlaysWhite")
         values ($1, $2, $3, $4, $5, $6, $7)
         returning *
     `;
     const params = [
-      at,
       userId,
+      at,
       duration,
       outcome,
       moveHistory,
@@ -110,6 +109,30 @@ app.post('/api/games', async (req, res, next) => {
     const result = await db.query<SavedGame>(sql, params);
     const [savedGame] = result.rows;
     res.status(201).json(savedGame);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Delete a game by the user (stored on database):
+app.delete('/api/games', async (req, res, next) => {
+  try {
+    const { userId, at } = req.body;
+    if (typeof userId !== 'number' || typeof at !== 'number') {
+      throw new ClientError(
+        400,
+        'Proper params for userId and at are required.'
+      );
+    }
+    const sql = `
+      delete from "games"
+        where "userId" = $1 and "at" = $2
+        returning *
+    `;
+    const params = [userId, at];
+    const result = await db.query<SavedGame>(sql, params);
+    const [deletedGame] = result.rows;
+    res.status(201).json(deletedGame);
   } catch (err) {
     next(err);
   }

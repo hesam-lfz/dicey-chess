@@ -117,8 +117,8 @@ export async function storageApi_saveGame(
 ): Promise<boolean> {
   const now = Math.floor(Date.now() / 1000);
   const savedGameData: SavedGame = {
-    at: now,
     userId: userSession?.userId || 0,
+    at: now,
     duration: now - board.gameStartTime,
     outcome: outcomeIds[board.outcome!],
     moveHistory: board.flatSanMoveHistory.join(','),
@@ -130,16 +130,17 @@ export async function storageApi_saveGame(
     const run = async (): Promise<boolean> => {
       const allSavedGames = cachedSavedGames || (await storageApi_loadGames());
       allSavedGames.unshift(savedGameData);
+      cachedSavedGames = allSavedGames;
       if (!userSession) {
         console.log('No user session. Saving game on local storage....');
         return await localStorage_saveGame(allSavedGames);
       } else {
         try {
-          console.log('trying to save game on db...');
+          console.log('Trying to save game on db...');
           return await database_saveGame(savedGameData);
         } catch (e) {
           console.error(
-            'failed saving game on db. Trying to save on local storage...'
+            'Failed saving game on db. Trying to save on local storage...'
           );
           return await localStorage_saveGame(allSavedGames);
         }
@@ -150,6 +151,7 @@ export async function storageApi_saveGame(
 }
 
 // Save a game by the user (stored locally on device):
+// Returns false to flag that the game was not saved on the database (rather, on local storage).
 export async function localStorage_saveGame(
   allSavedGames: SavedGame[]
 ): Promise<boolean> {
@@ -160,12 +162,13 @@ export async function localStorage_saveGame(
         localStorageKeyPrefix + '-games',
         savedGamesDataJSON
       );
-      resolve(true);
+      resolve(false);
     }, 1000);
   });
 }
 
 // Save a game by the user (stored on database):
+// Returns true to flag that the game was saved on the database (rather than on local storage).
 async function database_saveGame(savedGameData: SavedGame): Promise<boolean> {
   return new Promise((resolve) => {
     const run = async (): Promise<boolean> => {
@@ -187,14 +190,39 @@ async function database_saveGame(savedGameData: SavedGame): Promise<boolean> {
   });
 }
 
-// Delete a game by the user (stored locally on device):
+// Delete a game by the user (stored either in database or locally on device):
 export async function storageApi_deleteGame(gameId: number): Promise<boolean> {
   return new Promise((resolve) => {
-    setTimeout(async () => {
+    const run = async (): Promise<boolean> => {
       const allSavedGames = (
         cachedSavedGames || (await storageApi_loadGames())
       ).filter((g) => g.at !== gameId);
       cachedSavedGames = allSavedGames;
+      if (!userSession) {
+        console.log('No user session. Deleting game on local storage...');
+        return await localStorage_deleteGame(allSavedGames);
+      } else {
+        try {
+          console.log('Trying to delete game on db...');
+          return await database_deleteGame(gameId);
+        } catch (e) {
+          console.error(
+            'Failed deleting game on db. Trying to delete on local storage...'
+          );
+          return await localStorage_deleteGame(allSavedGames);
+        }
+      }
+    };
+    resolve(run());
+  });
+}
+
+// Delete a game by the user (stored locally on device):
+async function localStorage_deleteGame(
+  allSavedGames: SavedGame[]
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    setTimeout(async () => {
       const savedGamesDataJSON = JSON.stringify(allSavedGames);
       localStorage.setItem(
         localStorageKeyPrefix + '-games',
@@ -202,5 +230,30 @@ export async function storageApi_deleteGame(gameId: number): Promise<boolean> {
       );
       resolve(true);
     }, 1000);
+  });
+}
+
+// Delete a game by the user (stored on database):
+async function database_deleteGame(gameId: number): Promise<boolean> {
+  const deletedGameData = {
+    userId: userSession?.userId || 0,
+    at: gameId,
+  };
+  return new Promise((resolve) => {
+    const run = async (): Promise<boolean> => {
+      const req = {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(deletedGameData),
+      };
+      console.log('delete req', req);
+      const res = await fetch('/api/games', req);
+      console.log('result from db', res);
+      if (!res.ok) throw new Error(`fetch Error ${res.status}`);
+      const retrievedData = (await res.json()) as SavedGame;
+      console.log(retrievedData);
+      return true;
+    };
+    resolve(run());
   });
 }
