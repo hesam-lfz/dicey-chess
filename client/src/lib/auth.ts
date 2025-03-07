@@ -1,5 +1,3 @@
-const authKey = 'um.auth';
-
 export type User = {
   userId: number;
   username: string;
@@ -9,6 +7,9 @@ type Auth = {
   user: User;
   token: string;
 };
+
+const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
+const authKey = localStorageKeyPrefix + '-auth';
 
 export function saveAuth(user: User, token: string): void {
   const auth: Auth = { user, token };
