@@ -5,6 +5,7 @@ import { Game } from './pages/Game';
 import { About } from './pages/About';
 import { Settings } from './pages/Settings';
 import { Signin } from './pages/Signin';
+import { Register } from './pages/Register';
 import { NotFound } from './pages/NotFound';
 
 import './App.css';
@@ -20,6 +21,7 @@ export default function App() {
           <Route path={AppSubdomain + 'about'} element={<About />} />
           <Route path={AppSubdomain + 'settings'} element={<Settings />} />
           <Route path={AppSubdomain + 'signin'} element={<Signin />} />
+          <Route path={AppSubdomain + 'register'} element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

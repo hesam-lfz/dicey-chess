@@ -53,7 +53,7 @@ app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello, World!' });
 });
 
-app.post('/api/auth/sign-up', async (req, res, next) => {
+app.post('/api/auth/register', async (req, res, next) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -74,7 +74,7 @@ app.post('/api/auth/sign-up', async (req, res, next) => {
   }
 });
 
-app.post('/api/auth/sign-in', async (req, res, next) => {
+app.post('/api/auth/signin', async (req, res, next) => {
   try {
     const { username, password } = req.body as Partial<Auth>;
     if (!username || !password) {

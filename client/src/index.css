@@ -79,3 +79,7 @@ input {
 nav {
   font-size: larger;
 }
+
+form p {
+  font-size: 1.25em;
+}

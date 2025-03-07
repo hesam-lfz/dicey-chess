@@ -3,7 +3,7 @@ export type User = {
   username: string;
 };
 
-type Auth = {
+export type Auth = {
   user: User;
   token: string;
 };

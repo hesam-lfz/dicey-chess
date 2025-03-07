@@ -1,7 +1,10 @@
 import { Link, Outlet } from 'react-router-dom';
 import LogoIcon from '../assets/dicey-chess-logo-c.png';
+import { useCurrentGameSettings } from './useCurrentGameSettings';
 
 export function Header() {
+  const { user } = useCurrentGameSettings();
+
   return (
     <>
       <div className="header rainbow-colored">
@@ -38,7 +41,7 @@ export function Header() {
               <hr className="mobile-line-separator" />
               <li className="inline-block">
                 <Link to="/dicey-chess-web/signin" className="">
-                  Sign in
+                  {user ? 'Sign out (' + user.username + ')' : 'Sign in'}
                 </Link>
               </li>
             </ul>
