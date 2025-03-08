@@ -6,13 +6,13 @@ A full-stack TypeScript ReactJS website featuring a variation of the game of che
 
 ![Logo](https://hesam-lfz.github.io/dicey-chess-web/assets/dicey-chess-logo-c-DZNgtflK.png)
 
-Dicey Chess is a variation of the game of chess. On each turn, the player rolls 2 dice and then makes 
+Dicey Chess is a variation of the game of chess. On each turn, the player rolls 2 dice and then makes
 N consecutive chess moves, where N is the difference between the number of dots between the 2 dice:
-For example, *4* moves if the dice roll was 5 & 1, and *0* moves if the dice roll was 5 & 5. 
+For example, _4_ moves if the dice roll was 5 & 1, and _0_ moves if the dice roll was 5 & 5.
 
 ## Live Website
 
-Play at: [Dicey Chess](https://hesam-lfz.github.io/dicey-chess-web/) 
+Play at: [Dicey Chess](http://ec2-35-162-79-167.us-west-2.compute.amazonaws.com/)
 
 ## Getting Started
 

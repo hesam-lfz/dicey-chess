@@ -52,7 +52,7 @@ export function About() {
         </div>
         <h2>About Creators</h2>
         <div className="">
-          This chess variation game and (<em>to be updated:</em>)
+          This chess variation game and
           <a href="https://github.com/hesam-lfz/dicey-chess-web/">
             open-source
           </a>{' '}
