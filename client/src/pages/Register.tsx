@@ -87,7 +87,10 @@ export function Register() {
   return (
     <div className="main-panel padded-main-panel flex flex-col flex-align-center">
       <h2>Register</h2>
-
+      <h2 className="red">
+        Warning: USE FAKE USERNAMES AND PASSWORDS ONLY. DON'T USE YOUR REAL
+        USERNAMES AND PASSWORDS AS THIS CONNECTION IS NOT SECURE.
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="dotted-border">
           <div className="input-element-container">

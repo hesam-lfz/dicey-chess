@@ -7,7 +7,6 @@ export function Header() {
   const { user, handleSignOut } = useCurrentGameSettings();
   const navigate = useNavigate();
 
-  console.log('user', user);
   return (
     <>
       <div className="header rainbow-colored">
