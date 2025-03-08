@@ -2,9 +2,10 @@ import { type FormEvent, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type User } from '../lib';
 import { Modal } from '../components/Modal';
+import { AppSubdomain } from '../App';
 
 const infoMessageModalMessageDefault: string =
-  'Register failed. Please try again!';
+  'Registering failed. Please try again!';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Register() {
@@ -80,7 +81,7 @@ export function Register() {
   }
 
   function handleSuccessMessageDone() {
-    navigate('/dicey-chess-web/signin');
+    navigate(AppSubdomain + 'signin');
   }
 
   return (

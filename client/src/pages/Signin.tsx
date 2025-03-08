@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { type Auth } from '../lib';
 import { Modal } from '../components/Modal';
+import { AppSubdomain } from '../App';
 
 const infoMessageModalMessageDefault: string =
   'Sign in incorrect. Please try again!';
@@ -38,7 +39,8 @@ export function Signin() {
       handleSignIn(user, token);
       console.log('Signed In', user);
       console.log('Received token:', token);
-      navigate('/dicey-chess-web/');
+
+      navigate(AppSubdomain);
     } catch (err) {
       console.error(`Error signing in: ${err}`);
       handleInfoMessageOpen();
@@ -98,7 +100,7 @@ export function Signin() {
           </button>
         </span>
         <p>
-          Need an account? <Link to="/dicey-chess-web/register">Sign up</Link>
+          Need an account? <Link to={AppSubdomain + 'register'}>Sign up</Link>
         </p>
       </form>
       <Modal isOpen={isInfoMessageModalOpen} onClose={() => {}}>

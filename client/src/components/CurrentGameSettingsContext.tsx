@@ -10,6 +10,7 @@ import {
   removeAuth,
   saveAuth,
   User,
+  storageApi_handleSignInOut,
 } from '../lib';
 import { WHITE } from 'chess.js';
 
@@ -67,12 +68,14 @@ export function CurrentGameSettingsProvider({ children }: Props) {
     setUser(user);
     setToken(token);
     saveAuth(user, token);
+    storageApi_handleSignInOut();
   }
 
   function handleSignOut() {
     setUser(undefined);
     setToken(undefined);
     removeAuth();
+    storageApi_handleSignInOut();
   }
 
   // At page refresh or each time a setting is changed, we want to reset/reload the current

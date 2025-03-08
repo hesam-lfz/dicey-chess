@@ -11,7 +11,7 @@ import { type User, readToken } from './auth';
 const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
 
 // Cached saved games data retrieved from database:
-let cachedSavedGames: SavedGame[];
+let cachedSavedGames: SavedGame[] | undefined = undefined;
 
 // Retrieve saved settings from local storage:
 export function storageApi_loadSettings(): Settings | null {
@@ -275,3 +275,8 @@ async function database_deleteGame(
     resolve(run());
   });
 }
+
+// Resets cache of saved games on signin and signout:
+export const storageApi_handleSignInOut = (): void => {
+  cachedSavedGames = undefined;
+};

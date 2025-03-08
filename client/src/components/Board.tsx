@@ -24,7 +24,14 @@ function renderOccupyingPiece(piece?: Piece) {
   const color = piece.color;
   const type = piece.type;
   const pieceName = 'Icon_' + (color + type);
-  return <img src={pieceSVGs[pieceName]} className="piece" alt={pieceName} />;
+  return (
+    <img
+      src={pieceSVGs[pieceName]}
+      className="piece"
+      alt={pieceName}
+      draggable="false"
+    />
+  );
 }
 
 type Props = {

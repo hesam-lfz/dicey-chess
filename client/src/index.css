@@ -80,6 +80,10 @@ nav {
   font-size: larger;
 }
 
+nav span {
+  cursor: pointer;
+}
+
 form p {
   font-size: 1.25em;
 }
