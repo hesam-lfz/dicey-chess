@@ -1,6 +1,7 @@
 export type User = {
   userId: number;
   username: string;
+  rank: number;
 };
 
 export type Auth = {

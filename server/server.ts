@@ -11,6 +11,7 @@ type User = {
   userId: number;
   username: string;
   hashedPassword: string;
+  rank: number;
 };
 
 type Auth = {
@@ -27,6 +28,9 @@ type SavedGame = {
   diceRollHistory: string;
   humanPlaysWhite: boolean;
 };
+
+// Initial player rank assigned to a new user:
+const userInitRank = 400;
 
 const db = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
@@ -61,11 +65,11 @@ app.post('/api/auth/register', async (req, res, next) => {
     }
     const hashedPassword = await argon2.hash(password);
     const sql = `
-      insert into "users" ("username", "hashedPassword")
-      values ($1, $2)
+      insert into "users" ("username", "hashedPassword", "rank")
+      values ($1, $2, $3)
       returning "userId", "username", "createdAt"
     `;
-    const params = [username, hashedPassword];
+    const params = [username, hashedPassword, userInitRank];
     const result = await db.query<User>(sql, params);
     const [user] = result.rows;
     res.status(201).json(user);
@@ -82,7 +86,8 @@ app.post('/api/auth/signin', async (req, res, next) => {
     }
     const sql = `
     select "userId",
-           "hashedPassword"
+           "hashedPassword",
+           "rank"
       from "users"
      where "username" = $1
   `;
@@ -92,11 +97,11 @@ app.post('/api/auth/signin', async (req, res, next) => {
     if (!user) {
       throw new ClientError(401, 'invalid login -- User not found!');
     }
-    const { userId, hashedPassword } = user;
+    const { userId, hashedPassword, rank } = user;
     if (!(await argon2.verify(hashedPassword, password))) {
       throw new ClientError(401, 'invalid login -- Wrong password!');
     }
-    const payload = { userId, username };
+    const payload = { userId, username, rank };
     const token = jwt.sign(payload, hashKey);
     res.json({ token, user: payload });
   } catch (err) {
