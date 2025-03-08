@@ -12,7 +12,7 @@ For example, _4_ moves if the dice roll was 5 & 1, and _0_ moves if the dice rol
 
 ## Live Website
 
-Play at: [Dicey Chess](http://ec2-35-162-79-167.us-west-2.compute.amazonaws.com/)
+Play at: [Dicey Chess](http://www.diceychess.com/)
 
 ## Getting Started
 
