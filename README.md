@@ -62,42 +62,14 @@ If your project will _not_ be using a database, edit `package.json` to remove th
 
 1. In your browser navigate to the site you used for your database design.
 1. Export your database as PostgreSQL, this should generate the SQL code for creating your database tables.
-   - Reach out to an instructor if you have any issues with this step
-1. Copy the generated SQL code and paste it into `database/schema.sql` below the preexisting sql code in the file. The end result should look something like: _(You will likely have more tables)_
-
-   ```SQL
-   set client_min_messages to warning;
-
-   -- DANGER: this is NOT how to do it in the real world.
-   -- `drop schema` INSTANTLY ERASES EVERYTHING.
-   drop schema "public" cascade;
-
-   create schema "public";
-
-   create table "todos" (
-       "todoId"      serial PRIMARY KEY,
-       "task"        text not null,
-       "isCompleted" boolean not null,
-       "createdAt"   timestamptz not null DEFAULT now(),
-       "updatedAt"   timestamptz not null DEFAULT now()
-   );
-   ```
-
 1. In a separate terminal, run `npm run db:import` to create your tables
-1. Use `psql` to verify your tables were created successfully (see [LFZ Database Guide](https://lms.learningfuze.com/code-guides/Learning-Fuze/curriculum/database) for tips). Your database and tables should be listed; if not, stop here and reach out to an instructor for help
-1. At this point your database is setup and you are good to start using it. However there is no data in your database, which isn't necessarily a bad thing, but if you want some starting data in your database you need to add insert statements into the `database/data.sql` file. You can add whatever starting data you need/want. Here is an example:
-   ```SQL
-   insert into "todos" ("task", "isCompleted")
-   values
-       ('Learn to code', false),
-       ('Build projects', false),
-       ('Get a job', false);
-   ```
+1. Use `psql` to verify your tables were created successfully. Your database and tables should be listed; if not, stop here and reach out to an instructor for help
+1. At this point your database is setup and you are good to start using it. However there is no data in your database, which isn't necessarily a bad thing, but if you want some starting data in your database you need to add insert statements into the `database/data.sql` file. You can add whatever starting data you need/want.
 1. After any changes to `database/schema.sql` or `database/data.sql` re-run the `npm run db:import` command to update your database. Use `psql` to verify your changes were successfully applied.
 
 ## Deployment
 
-Once your template is set up and functional, deploy it. This will get all the deployment issues ironed out early. During development, you should re-deploy frequently to make sure that your code works properly in your production environment. Deployment instructions can be found [HERE](https://lms.learningfuze.com/code-guides/Learning-Fuze/curriculum/Full-Stack-Project_Deploy-To-EC2)
+Once your template is set up and functional, deploy it. This will get all the deployment issues ironed out early. During development, you should re-deploy frequently to make sure that your code works properly in your production environment.
 
 ---
 
