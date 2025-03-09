@@ -8,12 +8,14 @@ type Props = {
 
 export function HistoryPanel({ currNumSingleMovesMade, currHistory }: Props) {
   const historyItemsRef = useRef<null | HTMLDivElement>(null);
+  const [, setNumSingleMovesMade] = useState<number>(currNumSingleMovesMade);
   const [history, setHistory] = useState<string[][]>(currHistory);
 
   // scroll to the bottom of the history:
   useEffect(() => {
     historyItemsRef!.current!.scrollTop =
       historyItemsRef!.current!.scrollHeight;
+    setNumSingleMovesMade(currNumSingleMovesMade);
     setHistory(currHistory);
   }, [currNumSingleMovesMade, currHistory]);
 
