@@ -9,7 +9,11 @@ type Props = {
   containerOnStepReplayMoveIndex: (step: number) => void;
 };
 
-export function ReplayPanel({ containerOnStepReplayMoveIndex }: Props) {
+export function ReplayPanel({
+  currGameId,
+  containerOnStepReplayMoveIndex,
+}: Props) {
+  const [gameId, setGameId] = useState<number>(currGameId);
   const [replayMoveIndex, setReplayMoveIndex] = useState<number>(
     board.replayCurrentFlatIndex
   );
@@ -18,7 +22,12 @@ export function ReplayPanel({ containerOnStepReplayMoveIndex }: Props) {
   // turn moving replay position back on after a short delay to avoid bugs:
   useEffect(() => {
     if (!readyToMoveIndex) setTimeout(() => setReadyToMoveIndex(true), 250);
-  }, [readyToMoveIndex, setReadyToMoveIndex]);
+    // if we've just loaded another game, reset the replay index:
+    if (gameId !== currGameId) {
+      setReplayMoveIndex(board.replayCurrentFlatIndex);
+      setGameId(currGameId);
+    }
+  }, [currGameId, gameId, readyToMoveIndex, setReadyToMoveIndex]);
 
   const stepReplayMoveIndex = useCallback(
     (step: number) => {
