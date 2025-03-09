@@ -108,12 +108,6 @@ export function About() {
             https://www.svgrepo.com/vectors/
           </a>
         </div>
-        <div className="">
-          Dice graphics/lib by:{' '}
-          <a href="https://github.com/Upmostly/react-dice">
-            https://github.com/Upmostly/react-dice
-          </a>
-        </div>
         <div className="">Logo by: ChatGPT</div>
       </div>
     </div>
