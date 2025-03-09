@@ -10,7 +10,6 @@ import './Panels.css';
 
 type Props = {
   currGameId: number;
-  currHistory: string[][];
   currReplayModeOn: boolean;
   onGameOver: () => void;
   onNewGame: () => void;
@@ -19,7 +18,6 @@ type Props = {
 
 export function GamePanel({
   currGameId,
-  currHistory,
   currReplayModeOn,
   onGameOver,
   onNewGame,
@@ -37,7 +35,6 @@ export function GamePanel({
   const [numMovesInTurn, setNumMovesInTurn] = useState<number>(
     board.numMovesInTurn
   );
-  const [history, setHistory] = useState<string[][]>(currHistory);
   const [shouldAlertDiceRoll, setShouldAlertDiceRoll] =
     useState<boolean>(false);
 
@@ -56,7 +53,6 @@ export function GamePanel({
     */
     if (board.gameOver && !(board.isLoadedGame || replayModeOn)) onGameOver();
     setGameId(currGameId);
-    setHistory(currHistory);
     setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
   });
@@ -123,7 +119,6 @@ export function GamePanel({
       <div className="main-panel">
         <LeftPanel
           currNumSingleMovesMade={numSingleMovesMade}
-          currHistory={history}
           containerOnNewGame={onNewGame}
           containerOnLoadGame={onLoadGame}
         />

@@ -40,7 +40,6 @@ export function Game() {
   const [gameId, setGameId] = useState<number>(0);
   const [gameIdToDelete, setGameIdToDelete] = useState<number>(0);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(board.gameOver);
-  const [history, setHistory] = useState<string[][]>(board.history);
 
   async function handleSaveGame(): Promise<void> {
     handleGameOverModalClose();
@@ -92,7 +91,6 @@ export function Game() {
     resetBoard();
     setGameId((id) => id + 1);
     setReplayModeOn(false);
-    setHistory([...board.history]);
   }
 
   function handleInfoMessageDone() {
@@ -166,7 +164,6 @@ export function Game() {
       if (loadedGame) {
         setGameId((id) => id + 1);
         setReplayModeOn(true);
-        setHistory(board.history);
       } else {
         resetGame();
       }
@@ -192,7 +189,6 @@ export function Game() {
     <>
       <GamePanel
         currGameId={gameId}
-        currHistory={history}
         currReplayModeOn={replayModeOn}
         onGameOver={onGameOver}
         onNewGame={onResetGame}
