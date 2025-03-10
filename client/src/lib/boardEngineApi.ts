@@ -1,4 +1,3 @@
-import Icon_favicon from '../assets/favicon.ico'; // import this one so favicon shows up in the dist assets...
 import Icon_wk from '../assets/king_w.svg';
 import Icon_bk from '../assets/king_b.svg';
 import Icon_wq from '../assets/queen_w.svg';
@@ -118,7 +117,6 @@ export const diceSVGs: { [key: string]: any } = {
 export const playerIconSVGs = {
   w: pieceSVGs['Icon_wp'],
   b: pieceSVGs['Icon_bp'],
-  favicon: Icon_favicon,
 };
 
 export const allColors: Color[] = [WHITE, BLACK];
