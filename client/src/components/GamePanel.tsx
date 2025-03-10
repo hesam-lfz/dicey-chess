@@ -85,6 +85,7 @@ export function GamePanel({
         roll = -1;
         board.diceRoll = roll;
         setNumMovesInTurn(roll);
+        setShouldTriggerAITurn(isAITurn(currentGameSettings));
       }
       board.diceRollHistory.push(roll);
       board.diceRoll = roll;

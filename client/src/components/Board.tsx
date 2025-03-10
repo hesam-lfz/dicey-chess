@@ -18,6 +18,7 @@ import {
   BasicMove,
 } from '../lib';
 import { Color, WHITE, type Piece, type Square } from 'chess.js';
+import { DebugOn } from '../App';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -135,36 +136,37 @@ export function Board({
 
   useEffect(() => {
     const run = async () => {
-      console.log(
-        'rendered Board',
-        'currGameId',
-        currGameId,
-        'gameId',
-        gameId,
-        'movingFromSq',
-        movingFromSq,
-        'movingToSq',
-        movingToSq,
-        'prevMoveFromSq',
-        prevMoveFromSq,
-        'prevMoveToSq',
-        prevMoveToSq,
-        'currShouldTriggerAITurn',
-        currShouldTriggerAITurn,
-        'shouldTriggerAITurn',
-        shouldTriggerAITurn,
-        'isAITurn()',
-        isAITurn(currentGameSettings),
-        'replayModeOn',
-        replayModeOn,
-        'replayStepMove',
-        replayStepMove,
-        'currReplayStepMove',
-        currReplayStepMove,
-        'replayStepMoveTriggered',
-        replayStepMoveTriggered,
-        JSON.stringify(board)
-      );
+      if (DebugOn)
+        console.log(
+          'rendered Board',
+          'currGameId',
+          currGameId,
+          'gameId',
+          gameId,
+          'movingFromSq',
+          movingFromSq,
+          'movingToSq',
+          movingToSq,
+          'prevMoveFromSq',
+          prevMoveFromSq,
+          'prevMoveToSq',
+          prevMoveToSq,
+          'currShouldTriggerAITurn',
+          currShouldTriggerAITurn,
+          'shouldTriggerAITurn',
+          shouldTriggerAITurn,
+          'isAITurn()',
+          isAITurn(currentGameSettings),
+          'replayModeOn',
+          replayModeOn,
+          'replayStepMove',
+          replayStepMove,
+          'currReplayStepMove',
+          currReplayStepMove,
+          'replayStepMoveTriggered',
+          replayStepMoveTriggered,
+          JSON.stringify(board)
+        );
 
       // if the 'from' and 'to' of a move were just determined, ready to execute the move:
       if (movingFromSq && movingToSq) {

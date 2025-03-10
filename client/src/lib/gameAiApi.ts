@@ -1,3 +1,4 @@
+import { DebugOn } from '../App';
 import {
   type BasicMove,
   boardEngine,
@@ -53,11 +54,13 @@ async function getAISmartMove_fetch(
     maxThinkingTime: 100,
     depth: 18,
   };
+  let possibleMoves;
   // If a check move is disallowed (not last move in current turn's move-set)
   // ensure the ai engine will exclude such check moves:
   if (!isLastMoveInTurn) {
-    const possibleMoves = getPossibleSanMoves(isLastMoveInTurn);
+    possibleMoves = getPossibleSanMoves(isLastMoveInTurn);
     if (possibleMoves) params.searchmoves = possibleMoves;
+    if (DebugOn) console.log('added searchmoves:', possibleMoves);
   }
   const response = await fetch(chessAIEngineUrl, {
     method: 'POST',
@@ -72,6 +75,16 @@ async function getAISmartMove_fetch(
     throw new Error(`AI engine API fetch error: ${response.status}`);
   }
   const chessApiMessage = await response.json();
+  // The chess AI engine has a bug that it ignores the 'searchmoves' param and returns
+  // a move that wasn't in the allowed move set. If that happens, fallback to random
+  // move here:
+  if (possibleMoves && !possibleMoves.includes(chessApiMessage.san)) {
+    if (DebugOn)
+      console.log(
+        `oops. AI engine returned an invalid move. ${chessApiMessage.san} Falling back to a random move...`
+      );
+    return await getAIRandomMove(isLastMoveInTurn);
+  }
   chessAIEngineResponseMove = {
     from: chessApiMessage.from,
     to: chessApiMessage.to,
@@ -143,7 +156,7 @@ export async function initChessAIEngine(): Promise<void> {
     // If fetch still fails fall back to random move stupid AI mode...
     try {
       const move = await getAISmartMove_fetch(true);
-      console.log('Test of AI engine API fetch succeeded', move);
+      if (DebugOn) console.log('Test of AI engine API fetch succeeded', move);
     } catch (error) {
       console.error('Test of AI engine API fetch encountered error:', error);
       console.log('Enabling use of proxy CORS server for fetching...');
