@@ -136,7 +136,11 @@ export function Board({
 
   useEffect(() => {
     const run = async () => {
-      if (DebugOn)
+      if (DebugOn) {
+        const smh = board.flatSquareMoveHistory;
+        const fmh = board.flatBoardFenHistory;
+        board.flatSquareMoveHistory = [];
+        board.flatBoardFenHistory = [];
         console.log(
           'rendered Board',
           'currGameId',
@@ -167,6 +171,9 @@ export function Board({
           replayStepMoveTriggered,
           JSON.stringify(board)
         );
+        board.flatSquareMoveHistory = smh;
+        board.flatBoardFenHistory = fmh;
+      }
 
       // if the 'from' and 'to' of a move were just determined, ready to execute the move:
       if (movingFromSq && movingToSq) {
