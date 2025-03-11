@@ -1,10 +1,10 @@
-import { DebugOn } from '../App';
 import {
   type BasicMove,
   boardEngine,
   getPossibleMoves,
   getPossibleSanMoves,
   settings,
+  DebugOn,
 } from './boardEngineApi';
 
 interface AIEngineParams {

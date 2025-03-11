@@ -16,9 +16,9 @@ import {
   settings,
   boardReplayStepMove,
   BasicMove,
+  DebugOn,
 } from '../lib';
 import { Color, WHITE, type Piece, type Square } from 'chess.js';
-import { DebugOn } from '../App';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;

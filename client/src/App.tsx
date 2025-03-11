@@ -11,7 +11,6 @@ import { NotFound } from './pages/NotFound';
 import './App.css';
 
 export const AppSubdomain = '/' + import.meta.env.VITE_APP_SUB_DOMAIN;
-export const DebugOn = false;
 
 export default function App() {
   return (

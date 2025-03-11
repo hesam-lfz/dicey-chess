@@ -198,6 +198,9 @@ const defaultInitSettings: Settings = {
 };
 
 let initSettings: Settings;
+
+export const DebugOn = window.location.search.includes('debugOn=true');
+
 export let settings: Settings;
 
 export let board: Board;
