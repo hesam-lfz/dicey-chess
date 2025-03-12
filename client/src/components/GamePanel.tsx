@@ -37,6 +37,7 @@ export function GamePanel({
   );
   const [shouldAlertDiceRoll, setShouldAlertDiceRoll] =
     useState<boolean>(false);
+  const [isMovingDisabled, setIsMovingDisabled] = useState<boolean>(false);
 
   useEffect(() => {
     /*
@@ -89,6 +90,7 @@ export function GamePanel({
         board.diceRoll = roll;
         setNumMovesInTurn(roll);
         //setShouldTriggerAITurn(isAITurn(currentGameSettings));
+        setIsMovingDisabled(false);
       }
       board.diceRollHistory.push(roll);
       board.diceRoll = roll;
@@ -97,14 +99,27 @@ export function GamePanel({
       board.numMovesInTurn = roll;
       setTurn(board.turn);
       setNumMovesInTurn(roll);
-      if (DebugOn) console.log('onroll', 'roll', roll, '<-', roll1, roll2);
+      if (DebugOn)
+        console.log(
+          'onroll',
+          'roll',
+          roll,
+          '<-',
+          roll1,
+          roll2,
+          'shouldTriggerAITurn',
+          shouldTriggerAITurn
+        );
 
       // add a bit of delay if the roll was 0 and we're changing turn:
-      if (roll == 0) setTimeout(runSwapTurn, 2000);
+      if (roll == 0) {
+        setIsMovingDisabled(true);
+        setTimeout(runSwapTurn, 2000);
+      }
       // if we're in 1-player mode and it's AI's turn, trigger AI move:
       else setShouldTriggerAITurn(isAITurn(currentGameSettings));
     },
-    [currentGameSettings]
+    [currentGameSettings, shouldTriggerAITurn]
   );
 
   const onAlertDiceRoll = useCallback(() => {
@@ -143,6 +158,8 @@ export function GamePanel({
             }
             currHumanPlaysColor={currentGameSettings.humanPlaysColor}
             currShouldTriggerAITurn={shouldTriggerAITurn}
+            currNumDiceRollsMade={board.diceRollHistory.length}
+            currIsMovingDisabled={isMovingDisabled}
             containerOnMove={onMove}
             containerOnAlertDiceRoll={onAlertDiceRoll}
           />

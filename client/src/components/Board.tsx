@@ -43,6 +43,8 @@ type Props = {
   currPrevMoveToSq: Square | null;
   currHumanPlaysColor: Color;
   currShouldTriggerAITurn: boolean;
+  currNumDiceRollsMade: number;
+  currIsMovingDisabled: boolean;
   containerOnMove: () => void;
   containerOnAlertDiceRoll: () => void;
 };
@@ -55,6 +57,8 @@ export function Board({
   currPrevMoveToSq,
   currHumanPlaysColor,
   currShouldTriggerAITurn,
+  currNumDiceRollsMade,
+  currIsMovingDisabled,
   containerOnMove,
   containerOnAlertDiceRoll,
 }: Props) {
@@ -81,6 +85,8 @@ export function Board({
   const [prevMoveToSq, setPrevMoveToSq] = useState<Square | null>(
     currPrevMoveToSq
   );
+  const [isMovingDisabled, setIsMovingDisabled] =
+    useState<boolean>(currIsMovingDisabled);
 
   const handleMove = useCallback(() => {
     setPrevMoveFromSq(movingFromSq);
@@ -217,6 +223,7 @@ export function Board({
         setPrevMoveFromSq(currPrevMoveFromSq);
       if (replayModeOn || currPrevMoveToSq) setPrevMoveToSq(currPrevMoveToSq);
       setHumanPlaysColor(currHumanPlaysColor);
+      setIsMovingDisabled(currIsMovingDisabled);
     };
     run();
   }, [
@@ -240,10 +247,14 @@ export function Board({
     currPrevMoveToSq,
     prevMoveFromSq,
     prevMoveToSq,
+    currNumDiceRollsMade,
+    currIsMovingDisabled,
   ]);
 
   const squareClicked = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
+      // if board move is disabled, clicking is not allowed:
+      if (isMovingDisabled) return;
       // if the game is over or we're in replay mode, clicking is not allowed:
       if (board.gameOver) return;
       // if dice isn't rolled yet clicking is not allowed:
@@ -272,7 +283,12 @@ export function Board({
         );
       }
     },
-    [movingFromSq, currentGameSettings, containerOnAlertDiceRoll]
+    [
+      isMovingDisabled,
+      currentGameSettings,
+      movingFromSq,
+      containerOnAlertDiceRoll,
+    ]
   );
 
   // Draw the chess board:
