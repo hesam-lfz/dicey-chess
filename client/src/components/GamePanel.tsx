@@ -89,7 +89,6 @@ export function GamePanel({
         roll = -1;
         board.diceRoll = roll;
         setNumMovesInTurn(roll);
-        //setShouldTriggerAITurn(isAITurn(currentGameSettings));
         setIsMovingDisabled(false);
       }
       board.diceRollHistory.push(roll);
@@ -159,7 +158,6 @@ export function GamePanel({
             }
             currHumanPlaysColor={currentGameSettings.humanPlaysColor}
             currShouldTriggerAITurn={shouldTriggerAITurn}
-            //currNumDiceRollsMade={board.diceRollHistory.length}
             currIsMovingDisabled={isMovingDisabled}
             containerOnMove={onMove}
             containerOnAlertDiceRoll={onAlertDiceRoll}
