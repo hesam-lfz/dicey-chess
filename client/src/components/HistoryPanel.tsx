@@ -19,7 +19,7 @@ export function HistoryPanel({ currNumSingleMovesMade }: Props) {
     let moveCtr = 1;
     board.history.forEach((moveSet, msIdx) => {
       const whiteMove = msIdx % 2 === 0;
-      const liClass = 'justify-self-' + (whiteMove ? 'start' : 'end');
+      const liClass = 'text-align-' + (whiteMove ? 'start' : 'end');
       const moveSetLabel = 'history-moveset-' + msIdx + '-';
       if (whiteMove)
         allHistoryItems.push(

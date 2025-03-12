@@ -149,6 +149,14 @@ nav li {
   justify-self: flex-end;
 }
 
+.text-align-start {
+  text-align: left;
+}
+
+.text-align-end {
+  text-align: right;
+}
+
 .rotate180 {
   transform: rotate(180deg);
 }

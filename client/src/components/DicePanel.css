@@ -43,12 +43,10 @@
 .dice-box-icon {
   width: 4vw;
   margin: 1vw;
-  filter: invert(10%) sepia(558%) saturate(10000%) hue-rotate(0deg)
-    brightness(90%) contrast(100%) drop-shadow(2px 4px 6px black);
 }
 
 .dice-0 {
-  filter: invert(80%) sepia(68%) saturate(10000%) hue-rotate(-10deg)
+  filter: invert(80%) sepia(68%) saturate(10000%) hue-rotate(90deg)
     brightness(90%) contrast(100%) drop-shadow(2px 4px 6px black);
 }
 
