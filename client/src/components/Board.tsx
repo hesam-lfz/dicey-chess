@@ -43,7 +43,7 @@ type Props = {
   currPrevMoveToSq: Square | null;
   currHumanPlaysColor: Color;
   currShouldTriggerAITurn: boolean;
-  currNumDiceRollsMade: number;
+  //currNumDiceRollsMade: number;
   currIsMovingDisabled: boolean;
   containerOnMove: () => void;
   containerOnAlertDiceRoll: () => void;
@@ -57,7 +57,7 @@ export function Board({
   currPrevMoveToSq,
   currHumanPlaysColor,
   currShouldTriggerAITurn,
-  currNumDiceRollsMade,
+  //currNumDiceRollsMade,
   currIsMovingDisabled,
   containerOnMove,
   containerOnAlertDiceRoll,
@@ -247,7 +247,7 @@ export function Board({
     currPrevMoveToSq,
     prevMoveFromSq,
     prevMoveToSq,
-    currNumDiceRollsMade,
+    //currNumDiceRollsMade,
     currIsMovingDisabled,
   ]);
 

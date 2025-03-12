@@ -114,6 +114,7 @@ export function GamePanel({
       // add a bit of delay if the roll was 0 and we're changing turn:
       if (roll == 0) {
         setIsMovingDisabled(true);
+        setShouldTriggerAITurn(false);
         setTimeout(runSwapTurn, 2000);
       }
       // if we're in 1-player mode and it's AI's turn, trigger AI move:
@@ -158,7 +159,7 @@ export function GamePanel({
             }
             currHumanPlaysColor={currentGameSettings.humanPlaysColor}
             currShouldTriggerAITurn={shouldTriggerAITurn}
-            currNumDiceRollsMade={board.diceRollHistory.length}
+            //currNumDiceRollsMade={board.diceRollHistory.length}
             currIsMovingDisabled={isMovingDisabled}
             containerOnMove={onMove}
             containerOnAlertDiceRoll={onAlertDiceRoll}
