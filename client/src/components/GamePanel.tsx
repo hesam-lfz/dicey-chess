@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { board, boardEngine, isAITurn, swapTurn } from '../lib';
+import { board, boardEngine, DebugOn, isAITurn, swapTurn } from '../lib';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
@@ -85,7 +85,7 @@ export function GamePanel({
         roll = -1;
         board.diceRoll = roll;
         setNumMovesInTurn(roll);
-        setShouldTriggerAITurn(isAITurn(currentGameSettings));
+        //setShouldTriggerAITurn(isAITurn(currentGameSettings));
       }
       board.diceRollHistory.push(roll);
       board.diceRoll = roll;
@@ -94,6 +94,7 @@ export function GamePanel({
       board.numMovesInTurn = roll;
       setTurn(board.turn);
       setNumMovesInTurn(roll);
+      if (DebugOn) console.log('onroll', 'roll', roll, '<-', roll1, roll2);
 
       // add a bit of delay if the roll was 0 and we're changing turn:
       if (roll == 0) setTimeout(runSwapTurn, 2000);

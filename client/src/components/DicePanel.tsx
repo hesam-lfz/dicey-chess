@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
-import { board, diceSVGs, isAITurn, playerIconSVGs } from '../lib';
+import { board, DebugOn, diceSVGs, isAITurn, playerIconSVGs } from '../lib';
 import { type Color } from 'chess.js';
 import Icon_dice from '../assets/dice.svg';
 import './DicePanel.css';
@@ -51,25 +51,24 @@ export function DicePanel({
     setTurn(board.turn);
     setGameId(currGameId);
     setNumMovesInTurn(currNumMovesInTurn);
-    /*
-    console.log(
-      'rendered RightPanel',
-      currGameId,
-      'currTurn',
-      currTurn,
-      'currNumMovesInTurn',
-      currNumMovesInTurn,
-      'AIMoveTriggered',
-      AIMoveTriggered,
-      'isAITurn()',
-      isAITurn(currentGameSettings),
-      JSON.stringify(board)
-    );
-    */
+    if (DebugOn)
+      console.log(
+        'rendered DicePanel',
+        currGameId,
+        'currTurn',
+        currTurn,
+        'currNumMovesInTurn',
+        currNumMovesInTurn,
+        'AIMoveTriggered',
+        AIMoveTriggered,
+        'isAITurn()',
+        isAITurn(currentGameSettings)
+        //JSON.stringify(board)
+      );
     // If it's AI's turn, trigger dice roll automatically:
     if (isAITurn(currentGameSettings) && !board.gameOver) {
       if (!AIMoveTriggered) {
-        //console.log('roll trigger');
+        if (DebugOn) console.log('roll trigger');
         setAIMoveTriggered(true);
         setRoll1(-1);
         setRoll2(-1);
