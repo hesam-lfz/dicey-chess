@@ -346,7 +346,7 @@ export function getPossibleMoves(
   let possibleMoves = boardEngine.moves(params) as Move[];
   // A check move is not valid unless it's the last move in the current roll's move-set:
   if (!isLastMoveInTurn)
-    possibleMoves = possibleMoves.filter((m) => !new Chess(m.after).inCheck());
+    possibleMoves = possibleMoves.filter((m) => !inCheck(m.after));
   return possibleMoves;
 }
 
@@ -503,6 +503,9 @@ export function setBoard(fen: string): void {
   boardEngine = new Chess(fen);
   board.turn = boardEngine.turn();
 }
+
+// Given board fen position, is the player with turn in check:
+export const inCheck = (fen: string): boolean => !new Chess(fen).inCheck();
 
 export function displayGameDuration(secs: number): string {
   const min = Math.floor(secs / 60);
