@@ -22,7 +22,7 @@ export function About() {
               src={diceSVGs.Icon_Dice5}
               alt="dice5-logo"
             />
-            and
+            &amp;
             <img
               className="about-dice-icon"
               src={diceSVGs.Icon_Dice1}
@@ -35,7 +35,7 @@ export function About() {
               src={diceSVGs.Icon_Dice5}
               alt="dice5-logo"
             />
-            and
+            &amp;
             <img
               className="about-dice-icon"
               src={diceSVGs.Icon_Dice5}
