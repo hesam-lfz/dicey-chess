@@ -75,10 +75,13 @@ async function getAISmartMove_fetch(
     throw new Error(`AI engine API fetch error: ${response.status}`);
   }
   const chessApiMessage = await response.json();
-  // The chess AI engine has a bug that it ignores the 'searchmoves' param and returns
-  // a move that wasn't in the allowed move set. If that happens, fallback to random
-  // move here:
-  if (possibleMoves && !possibleMoves.includes(chessApiMessage.san)) {
+  // The chess AI engine may not return a move. It also has a bug that it ignores the
+  // 'searchmoves' param and returns a move that wasn't in the allowed move set.
+  // If that happens, fallback to random move here:
+  if (
+    !chessApiMessage.san ||
+    (possibleMoves && !possibleMoves.includes(chessApiMessage.san))
+  ) {
     if (DebugOn)
       console.log(
         `oops. AI engine returned an invalid move. ${chessApiMessage.san} Falling back to a random move...`

@@ -61,11 +61,14 @@ export function GamePanel({
     if (replayModeOn) {
       setReplayStepMove(0);
     } else {
+      if (DebugOn) console.log('onmove', board.turn, board.numMovesInTurn);
       setTurn(board.turn);
       setNumMovesInTurn(board.numMovesInTurn);
+      if (board.numMovesInTurn === -1 && isAITurn(currentGameSettings))
+        setShouldTriggerAITurn(false);
       setNumSingleMovesMade((n) => n + 1);
     }
-  }, [replayModeOn]);
+  }, [currentGameSettings, replayModeOn]);
 
   const onDiceRoll = useCallback(
     (roll: number, roll1: number, roll2: number) => {
