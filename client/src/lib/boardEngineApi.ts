@@ -505,7 +505,7 @@ export function setBoard(fen: string): void {
 }
 
 // Given board fen position, is the player with turn in check:
-export const inCheck = (fen: string): boolean => !new Chess(fen).inCheck();
+export const inCheck = (fen: string): boolean => new Chess(fen).inCheck();
 
 export function displayGameDuration(secs: number): string {
   const min = Math.floor(secs / 60);
