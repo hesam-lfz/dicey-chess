@@ -33,6 +33,8 @@ export function DicePanel({
   const [shouldTriggerAIRoll, setShouldTriggerAIRoll] = useState<boolean>(
     currShouldTriggerAIRoll
   );
+  const [alreadyTriggeredAIRoll, setAlreadyTriggeredAIRoll] =
+    useState<boolean>(false);
   const [AIMoveTriggered, setAIMoveTriggered] = useState<boolean>(false);
   const [roll1, setRoll1] = useState<number>(board.diceRoll1);
   const [roll2, setRoll2] = useState<number>(board.diceRoll2);
@@ -40,9 +42,12 @@ export function DicePanel({
   const [dice1IconRotation, setDice1IconRotation] = useState<number>(0);
   const [dice2IconRotation, setDice2IconRotation] = useState<number>(0);
   const handleRollButtonClick = useCallback(() => {
-    const roll1 = Math.floor(Math.random() * 6) + 1;
-    const roll2 = Math.floor(Math.random() * 6) + 1;
+    const roll1 = Math.floor(Math.random() * 2) + 1;
+    const roll2 = Math.floor(Math.random() * 2) + 1;
     const roll = Math.abs(roll1 - roll2);
+    // If we re-rolled due to an AI 0 roll on check, and again we got a 0,
+    // then force another re-roll:
+    if (roll === 0 && alreadyTriggeredAIRoll) setAlreadyTriggeredAIRoll(false);
     setNumMovesInTurn(roll);
     setRoll1(roll1);
     setRoll2(roll2);
@@ -50,14 +55,12 @@ export function DicePanel({
     setDice1IconRotation(Math.floor(Math.random() * 50) - 25);
     setDice2IconRotation(Math.floor(Math.random() * 50) - 25);
     containerOnDiceRoll(roll, roll1, roll2);
-  }, [containerOnDiceRoll]);
+  }, [alreadyTriggeredAIRoll, containerOnDiceRoll]);
 
   useEffect(() => {
     setTurn(board.turn);
     setGameId(currGameId);
     setNumMovesInTurn(currNumMovesInTurn);
-    if (currShouldTriggerAIRoll && !shouldTriggerAIRoll)
-      setShouldTriggerAIRoll(true);
     if (DebugOn)
       console.log(
         'rendered DicePanel',
@@ -82,7 +85,10 @@ export function DicePanel({
       if (AIMoveTriggered) {
         if (shouldTriggerAIRoll) {
           setAIMoveTriggered(false);
-        } else if (currShouldTriggerAIRoll) setShouldTriggerAIRoll(true);
+        } else if (currShouldTriggerAIRoll && !alreadyTriggeredAIRoll) {
+          setAlreadyTriggeredAIRoll(true);
+          setShouldTriggerAIRoll(true);
+        }
       } else {
         if (DebugOn) console.log('roll trigger');
         setAIMoveTriggered(true);

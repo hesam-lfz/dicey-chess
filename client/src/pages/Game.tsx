@@ -171,9 +171,10 @@ export function Game() {
       handleChooseGameToLoadModalClose();
       if (!loadSuccess) {
         infoMessageModalMessage =
-          'Loading game failed! The game was not saved properly and will be removed.';
+          'Loading game failed! The game was not saved properly and will be deleted.';
         setTimeout(async () => {
           setIsInfoMessageModalOpen(true);
+          await storageApi_deleteGame(user, gameId);
         }, 200);
       }
     } else if (target.tagName === 'DIV') {
