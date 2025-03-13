@@ -42,8 +42,8 @@ export function DicePanel({
   const [dice1IconRotation, setDice1IconRotation] = useState<number>(0);
   const [dice2IconRotation, setDice2IconRotation] = useState<number>(0);
   const handleRollButtonClick = useCallback(() => {
-    const roll1 = Math.floor(Math.random() * 2) + 1;
-    const roll2 = Math.floor(Math.random() * 2) + 1;
+    const roll1 = Math.floor(Math.random() * 6) + 1;
+    const roll2 = Math.floor(Math.random() * 6) + 1;
     const roll = Math.abs(roll1 - roll2);
     // If we re-rolled due to an AI 0 roll on check, and again we got a 0,
     // then force another re-roll:
