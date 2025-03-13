@@ -151,23 +151,31 @@ export function Game() {
       // Loading a game....
       const $e = target as HTMLParagraphElement;
       const gameId = +$e.dataset.at!;
-      let loadedGame = false;
+      let loadedGame = false,
+        loadSuccess = false;
       // Find the id of the saved game to load:
       for (const g of savedGames!) {
         if (gameId === g.at) {
           // Prepare the board for replay of this saved game:
-          initBoardForGameReplay(currentGameSettings, g);
+          loadSuccess = initBoardForGameReplay(currentGameSettings, g);
           loadedGame = true;
           break;
         }
       }
-      if (loadedGame) {
+      if (loadedGame && loadSuccess) {
         setGameId((id) => id + 1);
         setReplayModeOn(true);
       } else {
         resetGame();
       }
       handleChooseGameToLoadModalClose();
+      if (!loadSuccess) {
+        infoMessageModalMessage =
+          'Loading game failed! The game was not saved properly and will be removed.';
+        setTimeout(async () => {
+          setIsInfoMessageModalOpen(true);
+        }, 200);
+      }
     } else if (target.tagName === 'DIV') {
       // Deleting a game....
       const $e = target as HTMLSpanElement;
@@ -249,7 +257,10 @@ export function Game() {
             {savedGames
               ? savedGames!.map((g: SavedGame) => (
                   <div className="loaded-game-box flex" key={'box-' + g.at}>
-                    <p className="dotted-border" data-at={g.at} key={g.at}>
+                    <p
+                      className="loaded-game-title dotted-border"
+                      data-at={g.at}
+                      key={g.at}>
                       {outcomes[g.outcome] +
                         ' ♟ (' +
                         displayGameDuration(g.duration) +

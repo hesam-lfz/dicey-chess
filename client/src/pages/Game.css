@@ -129,6 +129,10 @@
   cursor: pointer;
 }
 
+.loaded-game-box {
+  justify-content: space-between;
+}
+
 .delete-button {
   display: flex;
   border-radius: 50%;
@@ -193,5 +197,9 @@
   .chessboard-rank-labels {
     left: calc(2.5 * -3vw);
     top: calc(2.5 * 0.3vw);
+  }
+
+  .loaded-game-title {
+    max-width: calc(100% * 3 / 4);
   }
 }

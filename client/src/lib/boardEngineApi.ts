@@ -255,10 +255,11 @@ export const resetBoard = () => {
 
 // Pre-populate all properties of board object properly based on a previously
 // saved game, in order to prepare for replaying the game:
+// Returns false if fails
 export function initBoardForGameReplay(
   currentGameSettings: CurrentGameSettings,
   game: SavedGame
-): void {
+): boolean {
   resetBoard();
   /*
   console.log(
@@ -285,37 +286,47 @@ export function initBoardForGameReplay(
   let currDiceRollIdx = 0;
   let currFlatMoveIdx = 0;
   board.history = [];
-  while (currDiceRollIdx < historyNumDiceRolls) {
-    let currTurnMoveIdx = 0;
-    const diceRoll = diceRollHistory[currDiceRollIdx];
-    const currMoveSet: string[] = [];
-    board.history.push(currMoveSet);
-    if (diceRoll === 0) {
-      // roll was 0 and turn need to be given back to the other player:
-      flatBoardFenHistory.pop();
-      swapTurn();
-      flatBoardFenHistory.push(boardEngine.fen());
-    } else {
-      while (currTurnMoveIdx < diceRoll) {
-        // make the next move in the current turn move set:
-        const move = boardEngine.move(flatSanMoveHistory[currFlatMoveIdx++]);
-        // If this is not the last move in the current turn move set,
-        // we need to manually change the turn back to the same player:
-        if (currTurnMoveIdx < diceRoll - 1) swapTurn();
-        currMoveSet.push(move.san);
-        flatSquareMoveHistory.push(move);
+  try {
+    while (currDiceRollIdx < historyNumDiceRolls) {
+      let currTurnMoveIdx = 0;
+      const diceRoll = diceRollHistory[currDiceRollIdx];
+      const currMoveSet: string[] = [];
+      board.history.push(currMoveSet);
+      if (diceRoll === 0) {
+        // roll was 0 and turn need to be given back to the other player:
+        flatBoardFenHistory.pop();
+        swapTurn();
         flatBoardFenHistory.push(boardEngine.fen());
-        currTurnMoveIdx += 1;
+      } else {
+        while (currTurnMoveIdx < diceRoll) {
+          // make the next move in the current turn move set:
+          const move = boardEngine.move(flatSanMoveHistory[currFlatMoveIdx++]);
+          // If this is not the last move in the current turn move set,
+          // we need to manually change the turn back to the same player:
+          if (currTurnMoveIdx < diceRoll - 1) swapTurn();
+          currMoveSet.push(move.san);
+          flatSquareMoveHistory.push(move);
+          flatBoardFenHistory.push(boardEngine.fen());
+          currTurnMoveIdx += 1;
+        }
       }
+      currDiceRollIdx += 1;
     }
-    currDiceRollIdx += 1;
+    // Move the game back to beginning:
+    boardEngine = new Chess(board.flatBoardFenHistory[1]);
+    board.turn = boardEngine.turn();
+    if (board.diceRollHistory[0] > 1) swapTurn();
+    board.replayCurrentFlatIndex = 0;
+    //console.log('done prepping board', board, boardEngine.turn());
+    return true;
+  } catch (error) {
+    console.error(
+      'Loading the saved game failed. The game was not saved properly and will be removed: ',
+      error
+    );
+    resetBoard();
+    return false;
   }
-  // Move the game back to beginning:
-  boardEngine = new Chess(board.flatBoardFenHistory[1]);
-  board.turn = boardEngine.turn();
-  if (board.diceRollHistory[0] > 1) swapTurn();
-  board.replayCurrentFlatIndex = 0;
-  //console.log('done prepping board', board, boardEngine.turn());
 }
 
 export const getSquarePiece = (square: Square) => boardEngine.get(square);
