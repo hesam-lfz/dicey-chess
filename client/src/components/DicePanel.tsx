@@ -119,6 +119,7 @@ export function DicePanel({
     numMovesInTurn,
     currShouldTriggerAIRoll,
     shouldTriggerAIRoll,
+    alreadyTriggeredAIRoll,
   ]);
 
   const diceClassName =
