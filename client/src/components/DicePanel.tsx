@@ -9,6 +9,7 @@ type Props = {
   currGameId: number;
   currTurn: Color;
   currNumMovesInTurn: number;
+  currShouldTriggerAIRoll: boolean;
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number, n1: number, n2: number) => void;
 };
@@ -17,6 +18,7 @@ export function DicePanel({
   currGameId,
   currTurn,
   currNumMovesInTurn,
+  currShouldTriggerAIRoll,
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
 }: Props) {
@@ -28,6 +30,9 @@ export function DicePanel({
   const [turn, setTurn] = useState<Color>(board.turn);
   const [numMovesInTurn, setNumMovesInTurn] =
     useState<number>(currNumMovesInTurn);
+  const [shouldTriggerAIRoll, setShouldTriggerAIRoll] = useState<boolean>(
+    currShouldTriggerAIRoll
+  );
   const [AIMoveTriggered, setAIMoveTriggered] = useState<boolean>(false);
   const [roll1, setRoll1] = useState<number>(board.diceRoll1);
   const [roll2, setRoll2] = useState<number>(board.diceRoll2);
@@ -51,6 +56,8 @@ export function DicePanel({
     setTurn(board.turn);
     setGameId(currGameId);
     setNumMovesInTurn(currNumMovesInTurn);
+    if (currShouldTriggerAIRoll && !shouldTriggerAIRoll)
+      setShouldTriggerAIRoll(true);
     if (DebugOn)
       console.log(
         'rendered DicePanel',
@@ -61,17 +68,24 @@ export function DicePanel({
         currNumMovesInTurn,
         'AIMoveTriggered',
         AIMoveTriggered,
+        'currShouldTriggerAIRoll',
+        currShouldTriggerAIRoll,
+        'shouldTriggerAIRoll',
+        shouldTriggerAIRoll,
         'isAITurn()',
         isAITurn(currentGameSettings)
         //JSON.stringify(board)
       );
     // If it's AI's turn, trigger dice roll automatically:
+    setShouldTriggerAIRoll(false);
     if (isAITurn(currentGameSettings) && !board.gameOver) {
-      if (!AIMoveTriggered) {
+      if (AIMoveTriggered) {
+        if (shouldTriggerAIRoll) {
+          setAIMoveTriggered(false);
+        } else if (currShouldTriggerAIRoll) setShouldTriggerAIRoll(true);
+      } else {
         if (DebugOn) console.log('roll trigger');
         setAIMoveTriggered(true);
-        setRoll1(-1);
-        setRoll2(-1);
         setTimeout(handleRollButtonClick, 500);
       }
     } else setAIMoveTriggered(false);

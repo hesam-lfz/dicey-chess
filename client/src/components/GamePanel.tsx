@@ -31,6 +31,8 @@ export function GamePanel({
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
     board.diceRoll !== -1 && isAITurn(currentGameSettings)
   );
+  const [shouldTriggerAIRoll, setShouldTriggerAIRoll] =
+    useState<boolean>(false);
   const [numSingleMovesMade, setNumSingleMovesMade] = useState<number>(0);
   const [numMovesInTurn, setNumMovesInTurn] = useState<number>(
     board.numMovesInTurn
@@ -81,6 +83,7 @@ export function GamePanel({
         if (playerInCheck) {
           // pop the last roll so player in check can re-roll dice:
           board.diceRollHistory.pop();
+          setShouldTriggerAIRoll(isAITurn(currentGameSettings));
         } else {
           swapTurn();
           board.history.push([]);
@@ -109,7 +112,7 @@ export function GamePanel({
           'shouldTriggerAITurn',
           shouldTriggerAITurn
         );
-
+      setShouldTriggerAIRoll(false);
       // add a bit of delay if the roll was 0 and we're changing turn:
       if (roll == 0) {
         setIsMovingDisabled(true);
@@ -168,6 +171,7 @@ export function GamePanel({
           currReplayModeOn={replayModeOn}
           currTurn={turn}
           currNumMovesInTurn={numMovesInTurn}
+          currShouldTriggerAIRoll={shouldTriggerAIRoll}
           currShouldAlertDiceRoll={shouldAlertDiceRoll}
           containerOnDiceRoll={onDiceRoll}
           containerOnStepReplayMoveIndex={onStepReplayMoveIndex}

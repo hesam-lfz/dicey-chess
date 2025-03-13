@@ -168,7 +168,7 @@ export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
 
 const initBoard: Board = {
-  initPositionFen: undefined,
+  initPositionFen: undefined, //'rnbqkbnr/pppp1ppp/8/8/8/8/PPP1QPPP/RNB1KBNR b KQkq - 0 1', //undefined
   history: [[]],
   flatSanMoveHistory: [],
   flatSquareMoveHistory: [],
@@ -243,6 +243,7 @@ export const resetBoard = () => {
   board.diceRollHistory = [];
   board.gameStartTime = Math.floor(Date.now() / 1000);
   boardEngine = new Chess(board.initPositionFen);
+  board.turn = boardEngine.turn();
   board.flatBoardFenHistory.push(boardEngine.fen());
   // close the chess AI engine socket if we have one running currently:
   if (chessAIEngine) closeChessAIEngine();

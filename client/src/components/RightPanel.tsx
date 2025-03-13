@@ -8,6 +8,7 @@ type Props = {
   currReplayModeOn: boolean;
   currTurn: Color;
   currNumMovesInTurn: number;
+  currShouldTriggerAIRoll: boolean;
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number, n1: number, n2: number) => void;
   containerOnStepReplayMoveIndex: (n: number) => void;
@@ -18,6 +19,7 @@ export function RightPanel({
   currReplayModeOn,
   currTurn,
   currNumMovesInTurn,
+  currShouldTriggerAIRoll,
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
   containerOnStepReplayMoveIndex,
@@ -40,6 +42,7 @@ export function RightPanel({
           currGameId={currGameId}
           currTurn={currTurn}
           currNumMovesInTurn={currNumMovesInTurn}
+          currShouldTriggerAIRoll={currShouldTriggerAIRoll}
           currShouldAlertDiceRoll={currShouldAlertDiceRoll}
           containerOnDiceRoll={containerOnDiceRoll}
         />
