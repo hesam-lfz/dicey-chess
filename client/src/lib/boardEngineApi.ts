@@ -168,7 +168,7 @@ export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
 
 const initBoard: Board = {
-  initPositionFen: 'rnbqkbnr/pppp1ppp/8/8/8/8/PPP1QPPP/RNB1KBNR b KQkq - 0 1', //undefined
+  initPositionFen: undefined, //'rnbqkbnr/pppp1ppp/8/8/8/8/PPP1QPPP/RNB1KBNR b KQkq - 0 1', //undefined
   history: [[]],
   flatSanMoveHistory: [],
   flatSquareMoveHistory: [],
