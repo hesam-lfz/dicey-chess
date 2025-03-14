@@ -64,6 +64,11 @@
   padding: 10px;
 }
 
+.player-rank {
+  font-size: 1.75em !important;
+  color: pink;
+}
+
 /*
 	Small Device Landscape Screen
 */

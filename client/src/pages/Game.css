@@ -130,7 +130,7 @@
 }
 
 .loaded-game-box {
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 .delete-button {
