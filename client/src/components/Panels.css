@@ -73,8 +73,16 @@
 	Small Device Landscape Screen
 */
 @media screen and (orientation: landscape) and (height <= 400px) {
+  .right-panel {
+    padding: 1vw 0;
+  }
+
   .dice-icon {
     width: calc(1.5 * 5vw);
+  }
+
+  .replay-controls-box button {
+    padding: 0.3em;
   }
 }
 

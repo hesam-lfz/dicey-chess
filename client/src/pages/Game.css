@@ -130,7 +130,11 @@
 }
 
 .loaded-game-box {
-  justify-content: flex-end;
+  justify-content: center;
+}
+
+.loaded-game-title {
+  flex-basis: calc(100% * 3 / 4);
 }
 
 .delete-button {

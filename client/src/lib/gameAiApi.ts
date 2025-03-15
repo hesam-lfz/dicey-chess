@@ -5,6 +5,7 @@ import {
   getPossibleSanMoves,
   settings,
   DebugOn,
+  internalSettings,
 } from './boardEngineApi';
 
 interface AIEngineParams {
@@ -27,7 +28,7 @@ export async function getAIMove(isLastMoveInTurn: boolean): Promise<BasicMove> {
 
 // Stupid AI mode: Makes a random move with a bit of delay:
 async function getAIRandomMove(isLastMoveInTurn: boolean): Promise<BasicMove> {
-  const seconds = (settings.AIMoveDelay * 5 * Math.random()) / 1000;
+  const seconds = (internalSettings.AIMoveDelay * 5 * Math.random()) / 1000;
   return new Promise((resolve) => {
     setTimeout(() => {
       const possibleMoves = getPossibleMoves(isLastMoveInTurn);
@@ -40,7 +41,7 @@ async function getAIRandomMove(isLastMoveInTurn: boolean): Promise<BasicMove> {
 
 // Smart AI mode: Calls a chess engine API:
 async function getAISmartMove(isLastMoveInTurn: boolean): Promise<BasicMove> {
-  return settings.AIEngineUsesSocket
+  return internalSettings.AIEngineUsesSocket
     ? getAISmartMove_socket(isLastMoveInTurn)
     : getAISmartMove_fetch(isLastMoveInTurn);
 }
@@ -134,7 +135,7 @@ async function awaitChessAIEngineMove_socket(
 
 // Sets up proper URLs and preparations for AI engine API communication:
 export async function initChessAIEngine(): Promise<void> {
-  if (settings.AIEngineUsesSocket) {
+  if (internalSettings.AIEngineUsesSocket) {
     // AI Engine API uses: socket
     chessAIEngineUrl = 'wss:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
     // Set up socket communication:
@@ -184,5 +185,5 @@ export async function initChessAIEngine(): Promise<void> {
 }
 
 export function closeChessAIEngine(): void {
-  if (settings.AIEngineUsesSocket) (chessAIEngine as WebSocket).close();
+  if (internalSettings.AIEngineUsesSocket) (chessAIEngine as WebSocket).close();
 }

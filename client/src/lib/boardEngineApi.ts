@@ -31,22 +31,33 @@ import {
   type Move,
 } from 'chess.js';
 
-import { storageApi_loadSettings, storageApi_saveSettings } from './storageApi';
+import {
+  storageApi_loadSettings,
+  storageApi_saveSettings,
+  storageApi_updatePlayerRank,
+} from './storageApi';
 import {
   chessAIEngine,
   closeChessAIEngine,
   initChessAIEngine,
 } from './gameAiApi';
+import { readToken, saveAuth, User } from './auth';
 
-// General settings:
+// General internal game settings:
+export type InternalSettings = {
+  initPlayerRank: number;
+  rankPerGameUpdateIncrement: number;
+  makeMoveDelay: number;
+  AIMoveDelay: number;
+  AIEngineUsesSocket: boolean;
+};
+
+// General user controlled settings:
 export type Settings = {
   onePlayerMode: boolean;
   AIPlayerIsSmart: boolean;
   humanPlaysColor: Color | null;
   humanPlaysColorRandomly: boolean;
-  makeMoveDelay: number;
-  AIMoveDelay: number;
-  AIEngineUsesSocket: boolean;
 };
 
 // Settings specific for a given game:
@@ -187,14 +198,19 @@ const initBoard: Board = {
   gameStartTime: 0,
 };
 
+export const internalSettings: InternalSettings = {
+  initPlayerRank: 400,
+  rankPerGameUpdateIncrement: 12,
+  AIMoveDelay: 500,
+  AIEngineUsesSocket: false,
+  makeMoveDelay: 50,
+};
+
 const defaultInitSettings: Settings = {
   onePlayerMode: true,
   AIPlayerIsSmart: true,
   humanPlaysColor: WHITE,
   humanPlaysColorRandomly: false,
-  AIMoveDelay: 500,
-  AIEngineUsesSocket: false,
-  makeMoveDelay: 50,
 };
 
 let initSettings: Settings;
@@ -376,6 +392,7 @@ export function getPossibleSanMoves(
 // Execute the given move from to square:
 export function makeMove(
   currentGameSettings: CurrentGameSettings,
+  user: User | undefined,
   fromSquare: Square,
   toSquare: Square,
   promotion?: string
@@ -409,7 +426,7 @@ export function makeMove(
 
   // After each move we need to check for game over because if player has moves left
   // in the turn but has no valid moves then it's a draw:
-  checkForGameOver(currentGameSettings);
+  checkForGameOver(currentGameSettings, user);
 }
 
 /*
@@ -445,8 +462,12 @@ export const isAITurn: (currentGameSettings: CurrentGameSettings) => boolean = (
 
 // Is the game over based on the current board. If so, set the outcome:
 export const checkForGameOver: (
-  currentGameSettings: CurrentGameSettings
-) => void = (currentGameSettings: CurrentGameSettings) => {
+  currentGameSettings: CurrentGameSettings,
+  user: User | undefined
+) => void = (
+  currentGameSettings: CurrentGameSettings,
+  user: User | undefined
+) => {
   if (boardEngine.isCheckmate()) {
     board.gameOver = true;
     const isWhiteWinner = board.turn === BLACK;
@@ -461,11 +482,40 @@ export const checkForGameOver: (
       ? 1
       : 2;
     board.outcome = outcomes[outcomeId];
+    // if user in session update player rank:
+    if (user) calculateAndStorePlayerNewRank(user, isAIWinner);
   } else if (boardEngine.isDraw() || isDiceyChessDraw()) {
     board.gameOver = true;
     board.outcome = outcomes[0];
   }
 };
+
+// When the game is over and user in session, if this was a game which
+// affects player rank (currently: if played against smart AI) update
+// the rank in memory and in db storage:
+export async function calculateAndStorePlayerNewRank(
+  user: User,
+  isAIWinner: boolean
+): Promise<boolean> {
+  // Nothing to do if this game should not affect player rank:
+  if (!gameAffectsPlayerRank()) return true;
+  user.rank = Math.max(
+    internalSettings.initPlayerRank,
+    user.rank +
+      (isAIWinner ? -1 : 1) * internalSettings.rankPerGameUpdateIncrement
+  );
+  if (DebugOn) console.log('updating user rank to', user.rank);
+  if (await storageApi_updatePlayerRank(user)) {
+    saveAuth(user, readToken()!);
+    return true;
+  }
+  return false;
+}
+
+// Returns whether based on the recent game settings the player rank
+// should be updated (currently: if played against smart AI):
+const gameAffectsPlayerRank: () => boolean = () =>
+  settings.onePlayerMode && settings.AIPlayerIsSmart;
 
 // Is this a draw situation for Dicey chess, since player still hasn't played all
 // moves in the current turn (based on the dice roll), but has no valid move to make:

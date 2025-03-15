@@ -13,10 +13,10 @@ import {
   board,
   isAITurn,
   getAIMove,
-  settings,
   boardReplayStepMove,
   BasicMove,
   DebugOn,
+  internalSettings,
 } from '../lib';
 import { Color, WHITE, type Piece, type Square } from 'chess.js';
 
@@ -60,7 +60,7 @@ export function Board({
   containerOnMove,
   containerOnAlertDiceRoll,
 }: Props) {
-  const { currentGameSettings } = useCurrentGameSettings();
+  const { currentGameSettings, user } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [replayStepMove, setReplayStepMove] =
@@ -94,17 +94,24 @@ export function Board({
     if (replayModeOn) {
       setReplayStepMoveTriggered(false);
     } else {
-      makeMove(currentGameSettings, movingFromSq!, movingToSq!, pawnPromotion);
+      makeMove(
+        currentGameSettings,
+        user,
+        movingFromSq!,
+        movingToSq!,
+        pawnPromotion
+      );
       setShouldTriggerAITurn(false);
     }
     containerOnMove();
   }, [
     movingFromSq,
     movingToSq,
-    pawnPromotion,
     replayModeOn,
-    currentGameSettings,
     containerOnMove,
+    user,
+    currentGameSettings,
+    pawnPromotion,
   ]);
 
   const triggerAIMove = useCallback(() => {
@@ -183,7 +190,7 @@ export function Board({
       if (movingFromSq && movingToSq) {
         replayModeOn
           ? handleMove()
-          : setTimeout(handleMove, settings.makeMoveDelay);
+          : setTimeout(handleMove, internalSettings.makeMoveDelay);
         return;
       }
 
@@ -200,7 +207,7 @@ export function Board({
         // mechanism to trigger AI move automatically, if needed (part two):
         if (shouldTriggerAITurn) {
           //console.log('triggering move');
-          setTimeout(triggerAIMove, settings.AIMoveDelay);
+          setTimeout(triggerAIMove, internalSettings.AIMoveDelay);
           return;
         }
         // mechanism to trigger AI move automatically, if needed (part one)

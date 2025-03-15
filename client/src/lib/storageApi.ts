@@ -5,6 +5,7 @@ import {
   outcomeIds,
   Settings,
   CurrentGameSettings,
+  DebugOn,
 } from './boardEngineApi';
 import { type User, readToken } from './auth';
 
@@ -130,7 +131,7 @@ export async function storageApi_saveGame(
     diceRollHistory: board.diceRollHistory.join(','),
     humanPlaysWhite: currentGameSettings.humanPlaysColor === WHITE,
   };
-  console.log(savedGameData);
+  if (DebugOn) console.log('game to save', savedGameData);
   return new Promise((resolve) => {
     const run = async (): Promise<boolean> => {
       const allSavedGames =
@@ -178,7 +179,7 @@ export async function localStorage_saveGame(
 async function database_saveGame(savedGameData: SavedGame): Promise<boolean> {
   return new Promise((resolve) => {
     const run = async (): Promise<boolean> => {
-      console.log(savedGameData);
+      if (DebugOn) console.log('savedGameData', savedGameData);
       const req = {
         method: 'POST',
         headers: {
@@ -264,12 +265,38 @@ async function database_deleteGame(
         },
         body: JSON.stringify(deletedGameData),
       };
-      console.log('delete req', req);
+      //console.log('delete req', req);
       const res = await fetch('/api/games', req);
-      console.log('result from db', res);
+      //console.log('result from db', res);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
-      const retrievedData = (await res.json()) as SavedGame;
-      console.log(retrievedData);
+      //const retrievedData = (await res.json()) as SavedGame;
+      //console.log(retrievedData);
+      return true;
+    };
+    resolve(run());
+  });
+}
+
+// Save a game by the user (stored on database):
+// Returns true to flag that the game was saved on the database (rather than on local storage).
+export async function storageApi_updatePlayerRank(
+  user: User
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const run = async (): Promise<boolean> => {
+      if (DebugOn) console.log('updatePlayerRank', user, user.rank);
+      const req = {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${readToken()}`,
+        },
+        body: JSON.stringify({ rank: user.rank }),
+      };
+      //console.log('req', req);
+      const res = await fetch(`/api/users/${user.userId}`, req);
+      //console.log('result from db', res);
+      if (!res.ok) throw new Error(`fetch Error ${res.status}`);
       return true;
     };
     resolve(run());

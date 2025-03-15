@@ -266,7 +266,7 @@ export function Game() {
                         ' ♟ (' +
                         displayGameDuration(g.duration) +
                         ') ♟ ' +
-                        new Date(g.at * 1000).toISOString()}
+                        new Date(g.at * 1000).toLocaleString()}
                     </p>
                     <div
                       className="delete-button"

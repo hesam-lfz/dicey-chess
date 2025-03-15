@@ -30,7 +30,7 @@ type SavedGame = {
 };
 
 // Initial player rank assigned to a new user:
-const userInitRank = 400;
+const initPlayerRank = 400;
 
 const db = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
@@ -69,7 +69,7 @@ app.post('/api/auth/register', async (req, res, next) => {
       values ($1, $2, $3)
       returning "userId", "username", "createdAt"
     `;
-    const params = [username, hashedPassword, userInitRank];
+    const params = [username, hashedPassword, initPlayerRank];
     const result = await db.query<User>(sql, params);
     const [user] = result.rows;
     res.status(201).json(user);
@@ -208,6 +208,41 @@ app.delete('/api/games', authMiddleware, async (req, res, next) => {
     const result = await db.query<SavedGame>(sql, params);
     const [deletedGame] = result.rows;
     res.status(201).json(deletedGame);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Update a user's stored rank in the database:
+app.put('/api/users/:userId', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = Number(req.params.userId);
+    if (!Number.isInteger(userId) || userId < 0) {
+      throw new ClientError(400, 'userId must be a natural number');
+    }
+    const { rank } = req.body;
+    if (typeof rank !== 'number') {
+      throw new ClientError(400, 'rank (number) is required');
+    }
+    if (req.user?.userId !== userId) {
+      throw new ClientError(
+        400,
+        'Params userId does not match userId in authentication.'
+      );
+    }
+    const sql = `
+      update "users"
+        set "rank" = $1
+        where "userId" = $2
+        returning *
+    `;
+    const params = [rank, req.user?.userId];
+    const result = await db.query(sql, params);
+    const [user] = result.rows;
+    if (!user) {
+      throw new ClientError(404, `Cannot find user with userId ${userId}`);
+    }
+    res.json({ userId: user.userId, rank: user.rank });
   } catch (err) {
     next(err);
   }
