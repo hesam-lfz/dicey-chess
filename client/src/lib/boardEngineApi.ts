@@ -265,7 +265,7 @@ export const resetBoard = () => {
   if (chessAIEngine) closeChessAIEngine();
   // If we need the chess aI engine (1-player game) set it up:
   if (settings.onePlayerMode && settings.AIPlayerIsSmart) {
-    initChessAIEngine();
+    initChessAIEngine(0);
   }
 };
 
