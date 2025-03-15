@@ -134,7 +134,7 @@ async function awaitChessAIEngineMove_socket(
 }
 
 // Sets up proper URLs and preparations for AI engine API communication:
-export async function initChessAIEngine(attemptsSoFar: number): Promise<void> {
+export async function initChessAIEngine(): Promise<void> {
   if (internalSettings.AIEngineUsesSocket) {
     // AI Engine API uses: socket
     chessAIEngineUrl = 'wss:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
@@ -162,11 +162,15 @@ export async function initChessAIEngine(attemptsSoFar: number): Promise<void> {
       const move = await getAISmartMove_fetch(true);
       if (DebugOn) console.log('Test of AI engine API fetch succeeded', move);
     } catch (error) {
-      console.error(
-        `Test of AI engine API fetch encountered error (attempt #${attemptsSoFar}):`,
-        error
-      );
-      if (attemptsSoFar < 3) return await initChessAIEngine(attemptsSoFar + 1);
+      console.error('Test of AI engine API fetch encountered error):', error);
+
+      if (await reattemptInitChessAIEngine()) {
+        if (DebugOn)
+          console.log(
+            'Test of AI engine API fetch succeeded after 2nd attempt'
+          );
+        return;
+      }
       console.log('Enabling use of proxy CORS server for fetching...');
       chessAIEngineUrl =
         import.meta.env.VITE_APP_FETCH_CORS_PROXY_SERVER + chessAIEngineUrl;
@@ -186,6 +190,20 @@ export async function initChessAIEngine(attemptsSoFar: number): Promise<void> {
       }
     }
   }
+}
+
+// Reattempts a connection test to AI engine API
+async function reattemptInitChessAIEngine(): Promise<boolean> {
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      try {
+        await getAISmartMove_fetch(true);
+        resolve(true);
+      } catch (error) {
+        resolve(false);
+      }
+    }, 1000);
+  });
 }
 
 export function closeChessAIEngine(): void {
