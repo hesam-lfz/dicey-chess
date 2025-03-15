@@ -6,6 +6,7 @@ import {
   Settings,
   CurrentGameSettings,
   DebugOn,
+  internalSettings,
 } from './boardEngineApi';
 import { type User, readToken } from './auth';
 
@@ -19,7 +20,18 @@ export function storageApi_loadSettings(): Settings | null {
   const retrievedData = localStorage.getItem(
     localStorageKeyPrefix + '-settings'
   );
-  return retrievedData ? (JSON.parse(retrievedData) as Settings) : null;
+  // legacy code fix: Remove old props already removed from the settings
+  // and moved to internal settings (in case a user has stale cached
+  // settings in their local storage):
+  if (retrievedData) {
+    const retrievedSettingsData = JSON.parse(retrievedData);
+    if (retrievedSettingsData) {
+      for (const prop in internalSettings) delete retrievedSettingsData[prop];
+      return retrievedSettingsData as Settings;
+    }
+    return null;
+  }
+  return null;
 }
 
 // Save current settings to local storage:

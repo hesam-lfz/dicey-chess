@@ -499,12 +499,13 @@ export async function calculateAndStorePlayerNewRank(
 ): Promise<boolean> {
   // Nothing to do if this game should not affect player rank:
   if (!gameAffectsPlayerRank()) return true;
-  user.rank = Math.max(
+  const newRank = Math.max(
     internalSettings.initPlayerRank,
     user.rank +
       (isAIWinner ? -1 : 1) * internalSettings.rankPerGameUpdateIncrement
   );
-  if (DebugOn) console.log('updating user rank to', user.rank);
+  if (newRank === user.rank) return true;
+  if (DebugOn) console.log('updating player rank to', user.rank);
   if (await storageApi_updatePlayerRank(user)) {
     saveAuth(user, readToken()!);
     return true;

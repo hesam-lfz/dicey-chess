@@ -177,7 +177,7 @@ export async function initChessAIEngine(): Promise<void> {
           'Test of AI engine API with proxy CORS fetch encountered error:',
           error
         );
-        console.log('Falling back to stupid random move AI for 10 seconds...');
+        console.log('Falling back to stupid random move AI...');
         settings.AIPlayerIsSmart = false;
       }
     }
