@@ -505,6 +505,7 @@ export async function calculateAndStorePlayerNewRank(
       (isAIWinner ? -1 : 1) * internalSettings.rankPerGameUpdateIncrement
   );
   if (newRank === user.rank) return true;
+  user.rank = newRank;
   if (DebugOn) console.log('updating player rank to', user.rank);
   if (await storageApi_updatePlayerRank(user)) {
     saveAuth(user, readToken()!);
