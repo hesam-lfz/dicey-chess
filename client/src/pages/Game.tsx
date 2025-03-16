@@ -262,7 +262,7 @@ export function Game() {
                       className="loaded-game-title dotted-border"
                       data-at={g.at}
                       key={g.at}>
-                      {outcomes[g.outcome] +
+                      {outcomes[g.outcome].replace('$OPPONENT', g.opponent) +
                         ' ♟ (' +
                         displayGameDuration(g.duration) +
                         ') ♟ ' +

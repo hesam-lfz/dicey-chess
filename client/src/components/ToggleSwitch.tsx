@@ -5,9 +5,15 @@ type Props = {
   label: string;
   initChecked: boolean;
   containerOnChange: (e: any) => void;
+  disabled?: boolean;
 };
 
-export function ToggleSwitch({ label, initChecked, containerOnChange }: Props) {
+export function ToggleSwitch({
+  label,
+  initChecked,
+  containerOnChange,
+  disabled,
+}: Props) {
   const [checked, setChecked] = useState<boolean>(initChecked);
 
   useEffect(() => setChecked(initChecked), [initChecked]);
@@ -32,6 +38,7 @@ export function ToggleSwitch({ label, initChecked, containerOnChange }: Props) {
           id={label}
           checked={checked}
           onChange={onChange}
+          disabled={disabled ? true : false}
         />
         <label className="toggle-switch-label" htmlFor={label}>
           <span className="toggle-switch-inner" />

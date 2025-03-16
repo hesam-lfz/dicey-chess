@@ -30,9 +30,6 @@ type SavedGame = {
   userPlaysWhite: boolean;
 };
 
-// Initial player rank assigned to a new user:
-const initPlayerRank = 400;
-
 const db = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -60,7 +57,7 @@ app.get('/api/hello', (req, res) => {
 
 app.post('/api/auth/register', async (req, res, next) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, rank } = req.body;
     if (!username || !password) {
       throw new ClientError(400, 'username and password are required fields');
     }
@@ -70,7 +67,7 @@ app.post('/api/auth/register', async (req, res, next) => {
       values ($1, $2, $3)
       returning "userId", "username", "createdAt"
     `;
-    const params = [username, hashedPassword, initPlayerRank];
+    const params = [username, hashedPassword, rank];
     const result = await db.query<User>(sql, params);
     const [user] = result.rows;
     res.status(201).json(user);

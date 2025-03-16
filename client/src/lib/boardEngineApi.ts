@@ -171,8 +171,8 @@ export const outcomes: string[] = [
   'Draw', // 0
   'White (You) won', // 1
   'Black (You) won', // 2
-  'White (AI) won', // 3
-  'Black (AI) won', // 4
+  'White ($OPPONENT) won', // 3
+  'Black ($OPPONENT) won', // 4
 ];
 
 export const outcomeIds: { [o: string]: number } = {};
@@ -299,7 +299,10 @@ export function initBoardForGameReplay(
   currentGameSettings.userPlaysColor = game.userPlaysWhite ? WHITE : BLACK;
   board.gameOver = true;
   board.isLoadedGame = true;
-  board.outcome = outcomes[game.outcome];
+  board.outcome = outcomes[game.outcome].replace(
+    '$OPPONENT',
+    currentGameSettings.opponent
+  );
   const diceRollHistory = game.diceRollHistory.split(',').map((i) => +i);
   board.diceRollHistory = diceRollHistory;
   const flatSanMoveHistory = game.moveHistory.split(',');
@@ -490,7 +493,10 @@ export const checkForGameOver: (
       : isWhiteWinner
       ? 1
       : 2;
-    board.outcome = outcomes[outcomeId];
+    board.outcome = outcomes[outcomeId].replace(
+      '$OPPONENT',
+      currentGameSettings.opponent
+    );
     // if user in session update player rank:
     if (user && gameAffectsPlayerRank())
       calculateAndStorePlayerNewRank(user, !isOpponentWinner);

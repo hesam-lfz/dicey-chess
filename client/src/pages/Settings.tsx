@@ -89,7 +89,8 @@ export function Settings() {
         />
         <ToggleSwitch
           label="Play vs. Online Friend"
-          initChecked={onePlayer}
+          initChecked={onePlayer && !opponentIsAI}
+          disabled={true}
           containerOnChange={(checked: boolean) =>
             onPlayerModeChange(checked, false)
           }

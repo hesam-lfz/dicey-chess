@@ -13,4 +13,4 @@ alter sequence "users_userId_seq" restart with 3;
 insert into "games"
    ("userId", "at", "duration", "opponent", "outcome", "moveHistory", "diceRollHistory", "userPlaysWhite")
     values
-      (0, 1741112992, 32, "AI", 1, 'e3,Qf3,Bc4,Qf4,Qf6,e5,Ne7,h6,Qf5,Qxf7#', '3,0,2,3,2', true);
+      (0, 1741112992, 32, 'AI', 1, 'e3,Qf3,Bc4,Qf4,Qf6,e5,Ne7,h6,Qf5,Qxf7#', '3,0,2,3,2', true);

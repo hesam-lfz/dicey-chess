@@ -10,37 +10,32 @@ import {
 import { type User, readToken } from './auth';
 
 const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
+const appVersion = import.meta.env.VITE_APP_VERSION;
 
 // Cached saved games data retrieved from database:
 let cachedSavedGames: SavedGame[] | undefined = undefined;
 
 // Retrieve saved settings from local storage:
 export function storageApi_loadSettings(): Settings | null {
-  //FIXME: REMOVE SOON --
-  //TEMP: FORCING CLEARING LOCAL STORAGE CACHE DUE TO CHANGES TO TYPES/PROPS:
-  localStorage.removeItem(localStorageKeyPrefix + '-settings');
+  //-- FIXME: REMOVE SOON --
+  //TEMP: FORCING CLEARING LOCAL STORAGE CACHE DUE TO CHANGES TO CACHED PROPS:
+  if (
+    !localStorage.getItem(
+      localStorageKeyPrefix + '-cache-flush-done-' + appVersion
+    )
+  ) {
+    localStorage.setItem(
+      localStorageKeyPrefix + '-cache-flush-done-' + appVersion,
+      'true'
+    );
+    localStorage.removeItem(localStorageKeyPrefix + '-settings');
+    localStorage.removeItem(localStorageKeyPrefix + '-games');
+  }
 
   const retrievedData = localStorage.getItem(
     localStorageKeyPrefix + '-settings'
   );
-  // legacy code fix: Remove old props already removed from the settings
-  // and moved to internal settings (in case a user has stale cached
-  // settings in their local storage):
-  if (retrievedData) {
-    const retrievedSettingsData = JSON.parse(retrievedData);
-    if (retrievedSettingsData) {
-      /*
-      for (const prop in internalSettings) delete retrievedSettingsData[prop];
-      // legacy code fix: This setting prop was added later. Add it in case
-      // of use stale cached settings:
-      if (retrievedSettingsData.opponentIsAI == null)
-        retrievedSettingsData.opponentIsAI = true;
-      */
-      return retrievedSettingsData as Settings;
-    }
-    return null;
-  }
-  return null;
+  return retrievedData ? (JSON.parse(retrievedData) as Settings) : null;
 }
 
 // Save current settings to local storage:

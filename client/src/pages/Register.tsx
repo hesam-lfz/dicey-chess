@@ -1,6 +1,6 @@
 import { type FormEvent, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { type User } from '../lib';
+import { internalSettings, type User } from '../lib';
 import { Modal } from '../components/Modal';
 import { AppSubdomain } from '../App';
 
@@ -25,7 +25,9 @@ export function Register() {
     try {
       setIsLoading(true);
       const formData = new FormData(event.currentTarget);
-      const userData = Object.fromEntries(formData);
+      const userData = Object.fromEntries(formData) as Record<any, any>;
+      // add the initial player rank to user data:
+      userData.rank = internalSettings.initPlayerRank;
       if ((userData.username as string).length < 5) {
         formCheckError = 1;
         infoMessageModalMessage = 'Username is too short. Please try again!';
