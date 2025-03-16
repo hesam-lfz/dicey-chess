@@ -30,7 +30,10 @@ export function ToggleSwitch({
   return (
     <div className="input-element-container toggle-switch-container">
       <span>{label}</span>
-      <div className="toggle-switch-toggle-switch">
+      <div
+        className={
+          'toggle-switch-toggle-switch' + (disabled ? ' disabled' : '')
+        }>
         <input
           type="checkbox"
           className="toggle-switch-checkbox"

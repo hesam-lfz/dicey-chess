@@ -169,10 +169,10 @@ export const allRanksReversed: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[] = [
 
 export const outcomes: string[] = [
   'Draw', // 0
-  'White (You) won', // 1
-  'Black (You) won', // 2
-  'White ($OPPONENT) won', // 3
-  'Black ($OPPONENT) won', // 4
+  'White (You) won vs. $OPPONENT', // 1
+  'Black (You) won vs. $OPPONENT', // 2
+  'White ($OPPONENT) won vs. You', // 3
+  'Black ($OPPONENT) won vs. You', // 4
 ];
 
 export const outcomeIds: { [o: string]: number } = {};
@@ -252,7 +252,7 @@ export const resetSettings = (
     ? settings.opponentIsAI
       ? 'AI'
       : 'user-?'
-    : 'you';
+    : 'You';
   // set which players gets which color:
   currentGameSettings.userPlaysColor = settings.userPlaysColorRandomly
     ? allColors[Math.floor(Math.random() * 2)]
@@ -297,12 +297,10 @@ export function initBoardForGameReplay(
   );
   */
   currentGameSettings.userPlaysColor = game.userPlaysWhite ? WHITE : BLACK;
+  currentGameSettings.opponent = game.opponent;
   board.gameOver = true;
   board.isLoadedGame = true;
-  board.outcome = outcomes[game.outcome].replace(
-    '$OPPONENT',
-    currentGameSettings.opponent
-  );
+  board.outcome = outcomes[game.outcome].replace('$OPPONENT', game.opponent);
   const diceRollHistory = game.diceRollHistory.split(',').map((i) => +i);
   board.diceRollHistory = diceRollHistory;
   const flatSanMoveHistory = game.moveHistory.split(',');
