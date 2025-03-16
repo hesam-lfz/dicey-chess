@@ -147,7 +147,7 @@ export function GamePanel({
         />
         <div className="board-panel">
           <BoardLabels
-            currHumanPlaysColor={currentGameSettings.humanPlaysColor}
+            currUserPlaysColor={currentGameSettings.userPlaysColor}
           />
           <Board
             currGameId={gameId}
@@ -159,7 +159,7 @@ export function GamePanel({
             currPrevMoveToSq={
               board.gameOver ? (currReplayMove!.to as Square) : null
             }
-            currHumanPlaysColor={currentGameSettings.humanPlaysColor}
+            currUserPlaysColor={currentGameSettings.userPlaysColor}
             currShouldTriggerAITurn={shouldTriggerAITurn}
             currIsMovingDisabled={isMovingDisabled}
             containerOnMove={onMove}

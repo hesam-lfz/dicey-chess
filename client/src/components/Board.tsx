@@ -41,7 +41,7 @@ type Props = {
   currReplayStepMove: number;
   currPrevMoveFromSq: Square | null;
   currPrevMoveToSq: Square | null;
-  currHumanPlaysColor: Color;
+  currUserPlaysColor: Color;
   currShouldTriggerAITurn: boolean;
   currIsMovingDisabled: boolean;
   containerOnMove: () => void;
@@ -54,7 +54,7 @@ export function Board({
   currReplayStepMove,
   currPrevMoveFromSq,
   currPrevMoveToSq,
-  currHumanPlaysColor,
+  currUserPlaysColor,
   currShouldTriggerAITurn,
   currIsMovingDisabled,
   containerOnMove,
@@ -67,8 +67,8 @@ export function Board({
     useState<number>(currReplayStepMove);
   const [replayStepMoveTriggered, setReplayStepMoveTriggered] =
     useState<boolean>(false);
-  const [humanPlaysColor, setHumanPlaysColor] =
-    useState<Color>(currHumanPlaysColor);
+  const [userPlaysColor, setUserPlaysColor] =
+    useState<Color>(currUserPlaysColor);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
     currShouldTriggerAITurn
   );
@@ -227,7 +227,7 @@ export function Board({
       if (replayModeOn || currPrevMoveFromSq)
         setPrevMoveFromSq(currPrevMoveFromSq);
       if (replayModeOn || currPrevMoveToSq) setPrevMoveToSq(currPrevMoveToSq);
-      setHumanPlaysColor(currHumanPlaysColor);
+      setUserPlaysColor(currUserPlaysColor);
       setIsMovingDisabled(currIsMovingDisabled);
     };
     run();
@@ -236,7 +236,7 @@ export function Board({
     movingToSq,
     handleMove,
     currGameId,
-    currHumanPlaysColor,
+    currUserPlaysColor,
     currShouldTriggerAITurn,
     shouldTriggerAITurn,
     gameId,
@@ -296,8 +296,8 @@ export function Board({
   );
 
   // Draw the chess board:
-  const ranks = humanPlaysColor === WHITE ? allRanks : allRanksReversed;
-  const files = humanPlaysColor === WHITE ? allFiles : allFilesReversed;
+  const ranks = userPlaysColor === WHITE ? allRanks : allRanksReversed;
+  const files = userPlaysColor === WHITE ? allFiles : allFilesReversed;
   return (
     <div className="chessboard" onClick={(e) => squareClicked(e)}>
       {ranks.map((r) => (

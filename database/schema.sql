@@ -20,10 +20,11 @@ create table "public"."games" (
   "userId"      integer        not null,
   "at"      integer        not null,
   "duration"      integer        not null,
+  "opponent"       text not null,
   "outcome"        integer           not null,
   "moveHistory"        text           not null,
   "diceRollHistory"        text           not null,
-  "humanPlaysWhite"        boolean           not null,
+  "userPlaysWhite"        boolean           not null,
   primary key ("userId", "at")
 );
 

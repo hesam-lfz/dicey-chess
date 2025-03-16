@@ -9,25 +9,31 @@ export function Settings() {
     useCurrentGameSettings();
 
   const [onePlayer, setOnePlayer] = useState<boolean>(settings.onePlayerMode);
-  const [humanPlaysColor, setHumanPlaysColor] = useState<Color | null>(
-    settings.humanPlaysColor
+  const [opponentIsAI, setOpponentIsAI] = useState<boolean>(
+    settings.opponentIsAI
   );
-  const [humanPlaysColorRandomly, setHumanPlaysColorRandomly] =
-    useState<boolean>(settings.humanPlaysColorRandomly);
+  const [userPlaysColor, setUserPlaysColor] = useState<Color | null>(
+    settings.userPlaysColor
+  );
+  const [userPlaysColorRandomly, setUserPlaysColorRandomly] = useState<boolean>(
+    settings.userPlaysColorRandomly
+  );
   const [AIPlayerIsSmart, setAIPlayerIsSmart] = useState<boolean>(
     settings.AIPlayerIsSmart
   );
 
-  const onOnePlayerChange = useCallback(
-    (checked: boolean) => {
-      setOnePlayer(checked);
-      settings.onePlayerMode = checked;
+  const onPlayerModeChange = useCallback(
+    (onePlayer: boolean, isOpponentAI: boolean) => {
+      setOnePlayer(onePlayer);
+      setOpponentIsAI(isOpponentAI);
+      settings.onePlayerMode = onePlayer;
+      settings.opponentIsAI = isOpponentAI;
       saveSettings(setNewCurrentGameSettings);
     },
     [setNewCurrentGameSettings]
   );
 
-  const onHumanPlaysColorChange = useCallback(
+  const onUserPlaysColorChange = useCallback(
     (color: Color | null, checked: boolean) => {
       let colorToSet: Color | null = null;
       let randomOn: boolean = false;
@@ -43,10 +49,10 @@ export function Settings() {
           randomOn = true;
         }
       }
-      setHumanPlaysColor(colorToSet);
-      setHumanPlaysColorRandomly(randomOn);
-      settings.humanPlaysColor = colorToSet;
-      settings.humanPlaysColorRandomly = randomOn;
+      setUserPlaysColor(colorToSet);
+      setUserPlaysColorRandomly(randomOn);
+      settings.userPlaysColor = colorToSet;
+      settings.userPlaysColorRandomly = randomOn;
       saveSettings(setNewCurrentGameSettings);
     },
     [setNewCurrentGameSettings]
@@ -65,8 +71,8 @@ export function Settings() {
     resetSettings(currentGameSettings, true);
     saveSettings(setNewCurrentGameSettings);
     setOnePlayer(settings.onePlayerMode);
-    setHumanPlaysColor(settings.humanPlaysColor);
-    setHumanPlaysColorRandomly(settings.humanPlaysColorRandomly);
+    setUserPlaysColor(settings.userPlaysColor);
+    setUserPlaysColorRandomly(settings.userPlaysColorRandomly);
     setAIPlayerIsSmart(settings.AIPlayerIsSmart);
   }, [currentGameSettings, setNewCurrentGameSettings]);
 
@@ -75,36 +81,47 @@ export function Settings() {
       <h2>Settings</h2>
       <div className="dotted-border">
         <ToggleSwitch
-          label="1-Player — Play vs. AI"
-          initChecked={onePlayer}
-          containerOnChange={(checked: boolean) => onOnePlayerChange(checked)}
+          label="Play vs. AI"
+          initChecked={onePlayer && opponentIsAI}
+          containerOnChange={(checked: boolean) =>
+            onPlayerModeChange(checked, true)
+          }
         />
         <ToggleSwitch
-          label="2-Player — Play vs. Human"
+          label="Play vs. Online Friend"
+          initChecked={onePlayer}
+          containerOnChange={(checked: boolean) =>
+            onPlayerModeChange(checked, false)
+          }
+        />
+        <ToggleSwitch
+          label="Play vs. Yourself"
           initChecked={!onePlayer}
-          containerOnChange={(checked: boolean) => onOnePlayerChange(!checked)}
+          containerOnChange={(checked: boolean) =>
+            onPlayerModeChange(!checked, false)
+          }
         />
       </div>
       <div className="dotted-border">
         <ToggleSwitch
           label="Play White"
-          initChecked={!humanPlaysColorRandomly && humanPlaysColor === WHITE}
+          initChecked={!userPlaysColorRandomly && userPlaysColor === WHITE}
           containerOnChange={(checked: boolean) =>
-            onHumanPlaysColorChange(WHITE, checked)
+            onUserPlaysColorChange(WHITE, checked)
           }
         />
         <ToggleSwitch
           label="Play Black"
-          initChecked={!humanPlaysColorRandomly && humanPlaysColor !== WHITE}
+          initChecked={!userPlaysColorRandomly && userPlaysColor !== WHITE}
           containerOnChange={(checked: boolean) =>
-            onHumanPlaysColorChange(BLACK, checked)
+            onUserPlaysColorChange(BLACK, checked)
           }
         />
         <ToggleSwitch
           label="Play White/Black randomly"
-          initChecked={humanPlaysColorRandomly}
+          initChecked={userPlaysColorRandomly}
           containerOnChange={(checked: boolean) =>
-            onHumanPlaysColorChange(null, checked)
+            onUserPlaysColorChange(null, checked)
           }
         />
       </div>

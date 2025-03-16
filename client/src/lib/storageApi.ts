@@ -6,7 +6,6 @@ import {
   Settings,
   CurrentGameSettings,
   DebugOn,
-  internalSettings,
 } from './boardEngineApi';
 import { type User, readToken } from './auth';
 
@@ -17,6 +16,10 @@ let cachedSavedGames: SavedGame[] | undefined = undefined;
 
 // Retrieve saved settings from local storage:
 export function storageApi_loadSettings(): Settings | null {
+  //FIXME: REMOVE SOON --
+  //TEMP: FORCING CLEARING LOCAL STORAGE CACHE DUE TO CHANGES TO TYPES/PROPS:
+  localStorage.removeItem(localStorageKeyPrefix + '-settings');
+
   const retrievedData = localStorage.getItem(
     localStorageKeyPrefix + '-settings'
   );
@@ -26,7 +29,13 @@ export function storageApi_loadSettings(): Settings | null {
   if (retrievedData) {
     const retrievedSettingsData = JSON.parse(retrievedData);
     if (retrievedSettingsData) {
+      /*
       for (const prop in internalSettings) delete retrievedSettingsData[prop];
+      // legacy code fix: This setting prop was added later. Add it in case
+      // of use stale cached settings:
+      if (retrievedSettingsData.opponentIsAI == null)
+        retrievedSettingsData.opponentIsAI = true;
+      */
       return retrievedSettingsData as Settings;
     }
     return null;
@@ -138,10 +147,11 @@ export async function storageApi_saveGame(
     userId: user?.userId || 0,
     at: now,
     duration: now - board.gameStartTime,
+    opponent: currentGameSettings.opponent,
     outcome: outcomeIds[board.outcome!],
     moveHistory: board.flatSanMoveHistory.join(','),
     diceRollHistory: board.diceRollHistory.join(','),
-    humanPlaysWhite: currentGameSettings.humanPlaysColor === WHITE,
+    userPlaysWhite: currentGameSettings.userPlaysColor === WHITE,
   };
   if (DebugOn) console.log('game to save', savedGameData);
   return new Promise((resolve) => {

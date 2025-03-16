@@ -23,10 +23,11 @@ type SavedGame = {
   userId: number;
   at: number;
   duration: number;
+  opponent: string;
   outcome: number;
   moveHistory: string;
   diceRollHistory: string;
-  humanPlaysWhite: boolean;
+  userPlaysWhite: boolean;
 };
 
 // Initial player rank assigned to a new user:
@@ -136,23 +137,25 @@ app.post('/api/games', authMiddleware, async (req, res, next) => {
       userId,
       at,
       duration,
+      opponent,
       outcome,
       moveHistory,
       diceRollHistory,
-      humanPlaysWhite,
+      userPlaysWhite,
     } = req.body;
     if (
       typeof userId !== 'number' ||
       typeof at !== 'number' ||
       typeof duration !== 'number' ||
+      typeof opponent !== 'string' ||
       typeof outcome !== 'number' ||
       !moveHistory ||
       !diceRollHistory ||
-      typeof humanPlaysWhite !== 'boolean'
+      typeof userPlaysWhite !== 'boolean'
     ) {
       throw new ClientError(
         400,
-        'Proper params for userId, at, duration, outcome, moveHistory, diceRollHistory, and humanPlaysWhite are required.'
+        'Proper params for userId, at, duration, opponent, outcome, moveHistory, diceRollHistory, and userPlaysWhite are required.'
       );
     }
     if (req.user?.userId !== userId) {
@@ -162,18 +165,19 @@ app.post('/api/games', authMiddleware, async (req, res, next) => {
       );
     }
     const sql = `
-      insert into "games" ("userId", "at", "duration", "outcome", "moveHistory", "diceRollHistory", "humanPlaysWhite")
-        values ($1, $2, $3, $4, $5, $6, $7)
+      insert into "games" ("userId", "at", "duration", "opponent", "outcome", "moveHistory", "diceRollHistory", "userPlaysWhite")
+        values ($1, $2, $3, $4, $5, $6, $7, $8)
         returning *
     `;
     const params = [
       req.user?.userId,
       at,
       duration,
+      opponent,
       outcome,
       moveHistory,
       diceRollHistory,
-      humanPlaysWhite,
+      userPlaysWhite,
     ];
     const result = await db.query<SavedGame>(sql, params);
     const [savedGame] = result.rows;

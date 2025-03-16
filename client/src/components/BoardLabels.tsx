@@ -3,23 +3,23 @@ import { allFiles, allFilesReversed, allRanks, allRanksReversed } from '../lib';
 import { WHITE, Color } from 'chess.js';
 
 type Props = {
-  currHumanPlaysColor: Color;
+  currUserPlaysColor: Color;
 };
 
-export function BoardLabels({ currHumanPlaysColor }: Props) {
-  const [humanPlaysColor, setHumanPlaysColor] =
-    useState<Color>(currHumanPlaysColor);
+export function BoardLabels({ currUserPlaysColor }: Props) {
+  const [userPlaysColor, setUserPlaysColor] =
+    useState<Color>(currUserPlaysColor);
 
   useEffect(() => {
-    setHumanPlaysColor(currHumanPlaysColor);
-  }, [currHumanPlaysColor]);
+    setUserPlaysColor(currUserPlaysColor);
+  }, [currUserPlaysColor]);
   const idxs = [0, 1];
   const classNames = [
     'chessboard-row chessboard-file-labels',
     'chessboard-col chessboard-rank-labels',
   ];
-  const ranks = humanPlaysColor === WHITE ? allRanks : allRanksReversed;
-  const files = humanPlaysColor === WHITE ? allFiles : allFilesReversed;
+  const ranks = userPlaysColor === WHITE ? allRanks : allRanksReversed;
+  const files = userPlaysColor === WHITE ? allFiles : allFilesReversed;
   const allLabels = [files, ranks];
   return (
     <>
