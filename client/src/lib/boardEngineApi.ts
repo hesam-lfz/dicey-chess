@@ -95,6 +95,7 @@ export type Board = {
   firstMoveInTurn: boolean;
   gameOver: boolean;
   isLoadedGame: boolean;
+  outcomeId?: number;
   outcome?: string;
   gameStartTime: number;
 };
@@ -175,9 +176,6 @@ export const outcomes: string[] = [
   'Black ($OPPONENT) won vs. You', // 4
 ];
 
-export const outcomeIds: { [o: string]: number } = {};
-outcomes.forEach((o, id) => (outcomeIds[o] = id));
-
 export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
 
@@ -251,7 +249,7 @@ export const resetSettings = (
   currentGameSettings.opponent = settings.onePlayerMode
     ? settings.opponentIsAI
       ? 'AI'
-      : 'user-?'
+      : 'Player_?'
     : 'You';
   // set which players gets which color:
   currentGameSettings.userPlaysColor = settings.userPlaysColorRandomly
@@ -300,6 +298,7 @@ export function initBoardForGameReplay(
   currentGameSettings.opponent = game.opponent;
   board.gameOver = true;
   board.isLoadedGame = true;
+  board.outcomeId = game.outcome;
   board.outcome = outcomes[game.outcome].replace('$OPPONENT', game.opponent);
   const diceRollHistory = game.diceRollHistory.split(',').map((i) => +i);
   board.diceRollHistory = diceRollHistory;
@@ -491,6 +490,7 @@ export const checkForGameOver: (
       : isWhiteWinner
       ? 1
       : 2;
+    board.outcomeId = outcomeId;
     board.outcome = outcomes[outcomeId].replace(
       '$OPPONENT',
       currentGameSettings.opponent
@@ -500,6 +500,7 @@ export const checkForGameOver: (
       calculateAndStorePlayerNewRank(user, !isOpponentWinner);
   } else if (boardEngine.isDraw() || isDiceyChessDraw()) {
     board.gameOver = true;
+    board.outcomeId = 0;
     board.outcome = outcomes[0];
   }
 };

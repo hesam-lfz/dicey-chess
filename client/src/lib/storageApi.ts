@@ -2,7 +2,6 @@ import { WHITE } from 'chess.js';
 import {
   Board,
   SavedGame,
-  outcomeIds,
   Settings,
   CurrentGameSettings,
   DebugOn,
@@ -103,7 +102,7 @@ async function database_loadGames(): Promise<SavedGame[]> {
           Authorization: `Bearer ${readToken()}`,
         },
       };
-      const res = await fetch('/api/games', req); // + userSession!.userId);
+      const res = await fetch('/api/games', req);
       //console.log('result from db', res);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
       const retrievedData = (await res.json()) as SavedGame[];
@@ -143,7 +142,7 @@ export async function storageApi_saveGame(
     at: now,
     duration: now - board.gameStartTime,
     opponent: currentGameSettings.opponent,
-    outcome: outcomeIds[board.outcome!],
+    outcome: board.outcomeId!,
     moveHistory: board.flatSanMoveHistory.join(','),
     diceRollHistory: board.diceRollHistory.join(','),
     userPlaysWhite: currentGameSettings.userPlaysColor === WHITE,

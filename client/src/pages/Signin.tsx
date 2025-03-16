@@ -7,6 +7,8 @@ import { AppSubdomain } from '../App';
 
 const infoMessageModalMessageDefault: string =
   'Sign in incorrect. Please try again!';
+const infoMessageModalMessageOffline: string =
+  'Problem connecting to the database!';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Signin() {
@@ -32,6 +34,10 @@ export function Signin() {
       const res = await fetch('/api/auth/signin', req);
       if (!res.ok) {
         console.log(res);
+        infoMessageModalMessage =
+          res.status === 401
+            ? infoMessageModalMessageDefault
+            : infoMessageModalMessageOffline;
         handleInfoMessageOpen();
         throw new Error(`fetch Error ${res.status}`);
       }
