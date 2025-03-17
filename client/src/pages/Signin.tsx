@@ -43,9 +43,6 @@ export function Signin() {
       }
       const { user, token } = (await res.json()) as Auth;
       handleSignIn(user, token);
-      console.log('Signed In', user);
-      console.log('Received token:', token);
-
       navigate(AppSubdomain);
     } catch (err) {
       console.error(`Error signing in: ${err}`);
@@ -76,37 +73,27 @@ export function Signin() {
       <form onSubmit={handleSubmit}>
         <div className="dotted-border">
           <div className="input-element-container">
-            <label className="mb-1 block">
+            <label>
               Username
-              <input
-                required
-                name="username"
-                type="text"
-                className="block border border-gray-600 rounded p-2 h-8 w-full mb-2"
-              />
+              <input required name="username" type="text" />
             </label>
           </div>
         </div>
         <div className="dotted-border">
           <div className="input-element-container">
-            <label className="mb-1 block">
+            <label>
               Password
               <input
                 required
                 name="password"
                 type="password"
-                className="block border border-gray-600 rounded p-2 h-8 w-full mb-2"
                 ref={passwordInputRef}
               />
             </label>
           </div>
         </div>
         <span className="rainbow-colored-border">
-          <button
-            disabled={isLoading}
-            className="align-middle text-center border rounded py-1 px-3 bg-blue-600 text-white">
-            Sign in
-          </button>
+          <button disabled={isLoading}>Sign in</button>
         </span>
         <p>
           Need an account? <Link to={AppSubdomain + 'register'}>Sign up</Link>

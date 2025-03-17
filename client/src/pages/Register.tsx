@@ -49,9 +49,6 @@ export function Register() {
       }
       const user = (await res.json()) as User;
       console.log('Registered', user);
-      console.log(
-        `You can check the database with: psql -d userManagement -c 'select * from users'`
-      );
       infoMessageModalMessage = `Successfully registered ${user.username}.`;
       console.log(infoMessageModalMessage);
       handleSuccessMessageOpen();
@@ -96,13 +93,12 @@ export function Register() {
       <form onSubmit={handleSubmit}>
         <div className="dotted-border">
           <div className="input-element-container">
-            <label className="mb-1 block">
+            <label>
               Username
               <input
                 required
                 name="username"
                 type="text"
-                className="block border border-gray-600 rounded p-2 h-8 w-full mb-2"
                 ref={usernameInputRef}
               />
             </label>
@@ -110,13 +106,12 @@ export function Register() {
         </div>
         <div className="dotted-border">
           <div className="input-element-container">
-            <label className="mb-1 block">
+            <label>
               Password
               <input
                 required
                 name="password"
                 type="password"
-                className="block border border-gray-600 rounded p-2 h-8 w-full mb-2"
                 ref={passwordInputRef}
               />
             </label>
