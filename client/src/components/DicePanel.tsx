@@ -25,6 +25,7 @@ export function DicePanel({
   const diceLeftRef = useRef<null | HTMLImageElement>(null);
   const diceRightRef = useRef<null | HTMLImageElement>(null);
   const rollDiceButtonBorderRef = useRef<null | HTMLSpanElement>(null);
+  const rollDiceButtonIconRef = useRef<null | HTMLImageElement>(null);
   const { currentGameSettings } = useCurrentGameSettings();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
@@ -111,8 +112,10 @@ export function DicePanel({
       rollDiceButtonBorderRef!.current?.classList.remove(
         'shadow-grow-and-back'
       );
+      rollDiceButtonIconRef!.current?.classList.remove('grow-and-back');
       setTimeout(() => {
         rollDiceButtonBorderRef!.current?.classList.add('shadow-grow-and-back');
+        rollDiceButtonIconRef!.current?.classList.add('grow-and-back');
       }, 100);
     }
   }, [
@@ -156,7 +159,12 @@ export function DicePanel({
             <button
               className="roll-dice-button"
               onClick={handleRollButtonClick}>
-              <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
+              <img
+                src={Icon_dice}
+                className="dice-icon grow-and-back"
+                alt={'dice-icon'}
+                ref={rollDiceButtonIconRef}
+              />
             </button>
           </span>
         ) : board.diceRoll === -1 ? null : (
