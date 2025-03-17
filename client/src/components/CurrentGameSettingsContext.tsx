@@ -66,7 +66,6 @@ export function CurrentGameSettingsProvider({ children }: Props) {
   useEffect(() => {
     setUser(readUser());
     setToken(readToken());
-    console.log('rendered CurrGameSettings');
   }, []);
 
   function handleSignIn(user: User, token: string) {
