@@ -6,6 +6,7 @@ import { FooterPanel } from '../components/FooterPanel';
 import { Modal } from '../components/Modal';
 import {
   board,
+  DebugOn,
   displayGameDuration,
   initBoardForGameReplay,
   outcomes,
@@ -87,7 +88,7 @@ export function Game() {
   }
 
   function resetGame(): void {
-    console.log('Resetting game!');
+    if (DebugOn) console.log('Resetting game!');
     resetBoard();
     setGameId((id) => id + 1);
     setReplayModeOn(false);
@@ -131,7 +132,7 @@ export function Game() {
   }
 
   async function handleDeleteGame(): Promise<void> {
-    console.log('deleting game...');
+    if (DebugOn) console.log('deleting game...');
     await storageApi_deleteGame(user, gameIdToDelete);
     infoMessageModalMessage = 'Game deleted.';
     setTimeout(async () => {
@@ -147,7 +148,7 @@ export function Game() {
     const target = e.target as HTMLElement;
     // Make sure we clicked on a saved game component to load:
     if (target.tagName === 'P') {
-      console.log('Loading game...');
+      if (DebugOn) console.log('Loading game...');
       // Loading a game....
       const $e = target as HTMLParagraphElement;
       const gameId = +$e.dataset.at!;

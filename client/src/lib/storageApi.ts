@@ -61,7 +61,7 @@ export async function storageApi_loadGames(
           return await localStorage_loadGames();
         } else {
           try {
-            console.log('trying to load games from db...');
+            if (DebugOn) console.log('trying to load games from db...');
             return await database_loadGames();
           } catch (e) {
             console.error(
@@ -159,7 +159,7 @@ export async function storageApi_saveGame(
         return await localStorage_saveGame(allSavedGames);
       } else {
         try {
-          console.log('Trying to save game on db...');
+          if (DebugOn) console.log('Trying to save game on db...');
           return await database_saveGame(savedGameData);
         } catch (e) {
           console.error(
