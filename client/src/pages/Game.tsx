@@ -89,7 +89,7 @@ export function Game() {
 
   function resetGame(): void {
     if (DebugOn) console.log('Resetting game!');
-    resetBoard();
+    resetBoard(currentGameSettings);
     setGameId((id) => id + 1);
     setReplayModeOn(false);
   }

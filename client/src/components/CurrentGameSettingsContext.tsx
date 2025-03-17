@@ -26,7 +26,11 @@ export type CurrentGameSettingsContextValues = {
 
 export const CurrentGameSettingsContext =
   createContext<CurrentGameSettingsContextValues>({
-    currentGameSettings: { userPlaysColor: WHITE, opponent: 'AI' },
+    currentGameSettings: {
+      userPlaysColor: WHITE,
+      opponentIsAI: true,
+      opponent: 'AI',
+    },
     setNewCurrentGameSettings: () => undefined,
     user: undefined,
     token: undefined,
@@ -44,6 +48,7 @@ export function CurrentGameSettingsProvider({ children }: Props) {
   const [currentGameSettings, setCurrentGameSettings] =
     useState<CurrentGameSettings>({
       userPlaysColor: WHITE,
+      opponentIsAI: true,
       opponent: 'AI',
     });
   const [user, setUser] = useState<User>();
@@ -94,7 +99,7 @@ export function CurrentGameSettingsProvider({ children }: Props) {
     // FIXME: This needs to be somewhere else??
     // Reset the board:
     if (DebugOn) console.log('reset board...');
-    resetBoard();
+    resetBoard(currentGameSettings);
   }
   return (
     <CurrentGameSettingsContext.Provider

@@ -64,6 +64,7 @@ export type Settings = {
 // Settings specific for a given game:
 export type CurrentGameSettings = {
   userPlaysColor: Color;
+  opponentIsAI: boolean;
   opponent: string;
 };
 
@@ -245,9 +246,11 @@ export const resetSettings = (
 ) => {
   if (resetToDefaultSettings) initSettings = defaultInitSettings;
   settings = { ...initSettings };
+  // set one player mode:
+  currentGameSettings.opponentIsAI = settings.opponentIsAI;
   // set opponent
   currentGameSettings.opponent = settings.onePlayerMode
-    ? settings.opponentIsAI
+    ? currentGameSettings.opponentIsAI
       ? 'AI'
       : 'Player_?'
     : 'You';
@@ -259,7 +262,7 @@ export const resetSettings = (
 };
 
 // Reset the board to start a new game:
-export const resetBoard = () => {
+export const resetBoard = (currentGameSettings: CurrentGameSettings) => {
   board = { ...initBoard };
   board.history = [[]];
   board.flatSanMoveHistory = [];
@@ -273,7 +276,7 @@ export const resetBoard = () => {
   // close the chess AI engine socket if we have one running currently:
   if (chessAIEngine) closeChessAIEngine();
   // If we need the chess aI engine (1-player game) set it up:
-  if (isGameAgainstAI() && settings.AIPlayerIsSmart) {
+  if (isGameAgainstAI(currentGameSettings) && settings.AIPlayerIsSmart) {
     initChessAIEngine();
   }
 };
@@ -285,7 +288,7 @@ export function initBoardForGameReplay(
   currentGameSettings: CurrentGameSettings,
   game: SavedGame
 ): boolean {
-  resetBoard();
+  resetBoard(currentGameSettings);
   /*
   console.log(
     'before prepping board',
@@ -296,6 +299,7 @@ export function initBoardForGameReplay(
   );
   */
   currentGameSettings.userPlaysColor = game.userPlaysWhite ? WHITE : BLACK;
+  currentGameSettings.opponentIsAI = true;
   currentGameSettings.opponent = game.opponent;
   board.gameOver = true;
   board.isLoadedGame = true;
@@ -351,7 +355,7 @@ export function initBoardForGameReplay(
       'Loading the saved game failed. The game was not saved properly and will be removed: ',
       error
     );
-    resetBoard();
+    resetBoard(currentGameSettings);
     return false;
   }
 }
@@ -468,7 +472,9 @@ export function undoMove(): Move | null {
 // Returns true if we're in 1-player mode and it's not human player's turn:
 export const isAITurn: (currentGameSettings: CurrentGameSettings) => boolean = (
   currentGameSettings: CurrentGameSettings
-) => isGameAgainstAI() && board.turn !== currentGameSettings.userPlaysColor;
+) =>
+  isGameAgainstAI(currentGameSettings) &&
+  board.turn !== currentGameSettings.userPlaysColor;
 
 // Is the game over based on the current board. If so, set the outcome:
 export const checkForGameOver: (
@@ -497,7 +503,7 @@ export const checkForGameOver: (
       currentGameSettings.opponent
     );
     // if user in session update player rank:
-    if (user && gameAffectsPlayerRank())
+    if (user && gameAffectsPlayerRank(currentGameSettings))
       calculateAndStorePlayerNewRank(user, !isOpponentWinner);
   } else if (boardEngine.isDraw() || isDiceyChessDraw()) {
     board.gameOver = true;
@@ -530,9 +536,11 @@ export async function calculateAndStorePlayerNewRank(
 
 // Returns whether based on the recent game settings the player rank
 // should be updated (currently: if played against another player or smart AI):
-const gameAffectsPlayerRank: () => boolean = () =>
+const gameAffectsPlayerRank: (
+  currentGameSettings: CurrentGameSettings
+) => boolean = (currentGameSettings: CurrentGameSettings) =>
   settings.onePlayerMode &&
-  (!settings.opponentIsAI || settings.AIPlayerIsSmart);
+  (!currentGameSettings.opponentIsAI || settings.AIPlayerIsSmart);
 
 // Is this a draw situation for Dicey chess, since player still hasn't played all
 // moves in the current turn (based on the dice roll), but has no valid move to make:
@@ -587,8 +595,8 @@ export function setBoard(fen: string): void {
 export const inCheck = (fen: string): boolean => new Chess(fen).inCheck();
 
 // Is game against AI:
-export const isGameAgainstAI = () =>
-  settings.opponentIsAI && settings.onePlayerMode;
+export const isGameAgainstAI = (currentGameSettings: CurrentGameSettings) =>
+  currentGameSettings.opponentIsAI && settings.onePlayerMode;
 
 export function displayGameDuration(secs: number): string {
   const min = Math.floor(secs / 60);

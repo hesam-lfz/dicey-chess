@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { Modal } from '../components/Modal';
@@ -30,6 +30,7 @@ export function Settings() {
   const [AIPlayerIsSmart, setAIPlayerIsSmart] = useState<boolean>(
     settings.AIPlayerIsSmart
   );
+  const playVsFriendOnlineToggleSwitchRef = useRef<null | any>(null);
   const navigate = useNavigate();
 
   const onResetSettings = useCallback(() => {
@@ -96,6 +97,7 @@ export function Settings() {
   );
 
   function handleSigninToPlayFriendOnlineModalClose(): void {
+    playVsFriendOnlineToggleSwitchRef?.current?.toggle();
     setIsSigninToPlayFriendOnlineModalOpen(false);
   }
 
@@ -104,6 +106,7 @@ export function Settings() {
   }
 
   function handleInviteFriendOnlineModalClose(): void {
+    playVsFriendOnlineToggleSwitchRef?.current?.toggle();
     setIsInviteFriendOnlineModalOpen(false);
   }
 
@@ -126,10 +129,11 @@ export function Settings() {
           <ToggleSwitch
             label="Play vs. Online Friend"
             initChecked={onePlayer && !opponentIsAI}
-            disabled={true}
+            //disabled={true}
             containerOnChange={(checked: boolean) =>
               onPlayerModeChange(checked, !checked)
             }
+            ref={playVsFriendOnlineToggleSwitchRef}
           />
           <ToggleSwitch
             label="Play vs. Yourself"
