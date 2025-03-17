@@ -67,6 +67,12 @@ export function DicePanel({
         currGameId,
         'currTurn',
         currTurn,
+        'roll',
+        roll,
+        'theRoll',
+        board.diceRoll,
+        'theRoll === -1 && !itIsAITurn',
+        board.diceRoll === -1 && !isAITurn(currentGameSettings),
         'currNumMovesInTurn',
         currNumMovesInTurn,
         'AIMoveTriggered',
@@ -76,7 +82,11 @@ export function DicePanel({
         'shouldTriggerAIRoll',
         shouldTriggerAIRoll,
         'isAITurn()',
-        isAITurn(currentGameSettings)
+        isAITurn(currentGameSettings),
+        'turn',
+        board.turn,
+        'userPlaysColor',
+        currentGameSettings.userPlaysColor
         //JSON.stringify(board)
       );
     // If it's AI's turn, trigger dice roll automatically:
@@ -124,8 +134,6 @@ export function DicePanel({
 
   const diceClassName =
     'dice-box-icon dice-drop-animation' + (roll === 0 ? ' dice-0' : '');
-  const itIsAITurn = isAITurn(currentGameSettings);
-  const theRoll = board.diceRoll;
   return (
     <>
       <div className="player-turn-title-box flex flex-align-center">
@@ -141,7 +149,7 @@ export function DicePanel({
         <span>'s Move</span>
       </div>
       <div className="dice-area">
-        {theRoll === -1 && !itIsAITurn ? (
+        {board.diceRoll === -1 && !isAITurn(currentGameSettings) ? (
           <span
             className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
             ref={rollDiceButtonBorderRef}>
@@ -151,7 +159,7 @@ export function DicePanel({
               <img src={Icon_dice} className="dice-icon" alt={'dice-icon'} />
             </button>
           </span>
-        ) : theRoll === -1 ? null : (
+        ) : board.diceRoll === -1 ? null : (
           <div className="dice-icons-box" key={board.turn}>
             <img
               className={diceClassName}

@@ -255,6 +255,7 @@ export const resetSettings = (
   currentGameSettings.userPlaysColor = settings.userPlaysColorRandomly
     ? allColors[Math.floor(Math.random() * 2)]
     : settings.userPlaysColor!;
+  console.log('random color', currentGameSettings);
 };
 
 // Reset the board to start a new game:

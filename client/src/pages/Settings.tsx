@@ -71,6 +71,7 @@ export function Settings() {
     resetSettings(currentGameSettings, true);
     saveSettings(setNewCurrentGameSettings);
     setOnePlayer(settings.onePlayerMode);
+    setOpponentIsAI(settings.opponentIsAI);
     setUserPlaysColor(settings.userPlaysColor);
     setUserPlaysColorRandomly(settings.userPlaysColorRandomly);
     setAIPlayerIsSmart(settings.AIPlayerIsSmart);
@@ -84,7 +85,7 @@ export function Settings() {
           label="Play vs. AI"
           initChecked={onePlayer && opponentIsAI}
           containerOnChange={(checked: boolean) =>
-            onPlayerModeChange(checked, true)
+            onPlayerModeChange(checked, checked)
           }
         />
         <ToggleSwitch
@@ -92,14 +93,14 @@ export function Settings() {
           initChecked={onePlayer && !opponentIsAI}
           disabled={true}
           containerOnChange={(checked: boolean) =>
-            onPlayerModeChange(checked, false)
+            onPlayerModeChange(checked, !checked)
           }
         />
         <ToggleSwitch
           label="Play vs. Yourself"
           initChecked={!onePlayer}
           containerOnChange={(checked: boolean) =>
-            onPlayerModeChange(!checked, false)
+            onPlayerModeChange(!checked, !checked)
           }
         />
       </div>

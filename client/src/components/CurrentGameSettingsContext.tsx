@@ -11,6 +11,7 @@ import {
   saveAuth,
   User,
   storageApi_handleSignInOut,
+  DebugOn,
 } from '../lib';
 import { WHITE } from 'chess.js';
 
@@ -36,6 +37,8 @@ export const CurrentGameSettingsContext =
 type Props = {
   children: React.ReactNode;
 };
+
+let gameInitDone = false;
 
 export function CurrentGameSettingsProvider({ children }: Props) {
   const [currentGameSettings, setCurrentGameSettings] =
@@ -63,6 +66,7 @@ export function CurrentGameSettingsProvider({ children }: Props) {
   useEffect(() => {
     setUser(readUser());
     setToken(readToken());
+    console.log('rendered CurrGameSettings');
   }, []);
 
   function handleSignIn(user: User, token: string) {
@@ -79,17 +83,20 @@ export function CurrentGameSettingsProvider({ children }: Props) {
     storageApi_handleSignInOut();
   }
 
-  // At page refresh or each time a setting is changed, we want to reset/reload the current
-  // game settings and reset the board:
-  // Load initial settings:
-  console.log('load settings...');
-  loadSettings(currentGameSettings);
+  if (!gameInitDone) {
+    gameInitDone = true;
+    // At page refresh or each time a setting is changed, we want to reset/reload the current
+    // game settings and reset the board:
+    // Load initial settings:
+    if (DebugOn) console.log('load settings...');
+    loadSettings(currentGameSettings);
+    if (DebugOn) console.log(currentGameSettings);
 
-  // FIXME: This needs to be somewhere else??
-  // Reset the board:
-  console.log('reset board...');
-  resetBoard();
-
+    // FIXME: This needs to be somewhere else??
+    // Reset the board:
+    if (DebugOn) console.log('reset board...');
+    resetBoard();
+  }
   return (
     <CurrentGameSettingsContext.Provider
       value={currentGameSettingsContextValues}>
