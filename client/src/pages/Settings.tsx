@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { Modal } from '../components/Modal';
-import { resetSettings, saveSettings, settings } from '../lib';
+import { resetBoard, resetSettings, saveSettings, settings } from '../lib';
 import { Color, WHITE, BLACK } from 'chess.js';
 import { useNavigate } from 'react-router-dom';
 import { AppSubdomain } from '../App';
@@ -97,6 +97,8 @@ export function Settings() {
   );
 
   function handleSigninToPlayFriendOnlineModalClose(): void {
+    // toggle the setting to play online friend back off right away
+    // (since this is just a one time thing...):
     playVsFriendOnlineToggleSwitchRef?.current?.toggle();
     setIsSigninToPlayFriendOnlineModalOpen(false);
   }
@@ -106,12 +108,17 @@ export function Settings() {
   }
 
   function handleInviteFriendOnlineModalClose(): void {
+    // toggle the setting to play online friend back off right away
+    // (since this is just a one time thing...):
     playVsFriendOnlineToggleSwitchRef?.current?.toggle();
     setIsInviteFriendOnlineModalOpen(false);
   }
 
   function handleInviteFriendOnline(): void {
     alert('invite...');
+    console.log('invite sent - before reset board', currentGameSettings);
+    resetBoard(currentGameSettings);
+    console.log('invite sent - after reset board', currentGameSettings);
   }
 
   return (
