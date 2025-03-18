@@ -24,13 +24,15 @@ export type CurrentGameSettingsContextValues = {
   handleSignOut: () => void;
 };
 
+const defaultCurrentGameSettings: CurrentGameSettings = {
+  userPlaysColor: WHITE,
+  opponentIsAI: true,
+  opponent: 'AI',
+};
+
 export const CurrentGameSettingsContext =
   createContext<CurrentGameSettingsContextValues>({
-    currentGameSettings: {
-      userPlaysColor: WHITE,
-      opponentIsAI: true,
-      opponent: 'AI',
-    },
+    currentGameSettings: defaultCurrentGameSettings,
     setNewCurrentGameSettings: () => undefined,
     user: undefined,
     token: undefined,
@@ -46,11 +48,7 @@ let gameInitDone = false;
 
 export function CurrentGameSettingsProvider({ children }: Props) {
   const [currentGameSettings, setCurrentGameSettings] =
-    useState<CurrentGameSettings>({
-      userPlaysColor: WHITE,
-      opponentIsAI: true,
-      opponent: 'AI',
-    });
+    useState<CurrentGameSettings>(defaultCurrentGameSettings);
   const [user, setUser] = useState<User>();
   const [token, setToken] = useState<string>();
 

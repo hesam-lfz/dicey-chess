@@ -35,6 +35,7 @@ export function Settings() {
 
   const onResetSettings = useCallback(() => {
     resetSettings(currentGameSettings, true);
+    resetBoard(currentGameSettings);
     saveSettings(setNewCurrentGameSettings);
     setOnePlayer(settings.onePlayerMode);
     setOpponentIsAI(settings.opponentIsAI);
@@ -45,11 +46,14 @@ export function Settings() {
 
   const onPlayerModeChange = useCallback(
     (onePlayer: boolean, isOpponentAI: boolean) => {
+      // If we're choosing play against online friend option:
       if (onePlayer && !isOpponentAI) {
+        // Revert back to AI mode in the settings since this is just a one time thing...:
+        isOpponentAI = true;
         if (user) {
           setIsInviteFriendOnlineModalOpen(true);
         } else {
-          isOpponentAI = true;
+          // They're not signed-in. Prompt them to do so:
           setIsSigninToPlayFriendOnlineModalOpen(true);
         }
       }
@@ -57,9 +61,10 @@ export function Settings() {
       setOpponentIsAI(isOpponentAI);
       settings.onePlayerMode = onePlayer;
       settings.opponentIsAI = isOpponentAI;
+      resetBoard(currentGameSettings);
       saveSettings(setNewCurrentGameSettings);
     },
-    [setNewCurrentGameSettings, user]
+    [currentGameSettings, setNewCurrentGameSettings, user]
   );
 
   const onUserPlaysColorChange = useCallback(
@@ -82,18 +87,20 @@ export function Settings() {
       setUserPlaysColorRandomly(randomOn);
       settings.userPlaysColor = colorToSet;
       settings.userPlaysColorRandomly = randomOn;
+      resetBoard(currentGameSettings);
       saveSettings(setNewCurrentGameSettings);
     },
-    [setNewCurrentGameSettings]
+    [currentGameSettings, setNewCurrentGameSettings]
   );
 
   const onAISmartChange = useCallback(
     (checked: boolean) => {
       setAIPlayerIsSmart(checked);
       settings.AIPlayerIsSmart = checked;
+      resetBoard(currentGameSettings);
       saveSettings(setNewCurrentGameSettings);
     },
-    [setNewCurrentGameSettings]
+    [currentGameSettings, setNewCurrentGameSettings]
   );
 
   function handleSigninToPlayFriendOnlineModalClose(): void {
@@ -115,10 +122,9 @@ export function Settings() {
   }
 
   function handleInviteFriendOnline(): void {
-    alert('invite...');
-    console.log('invite sent - before reset board', currentGameSettings);
-    resetBoard(currentGameSettings);
-    console.log('invite sent - after reset board', currentGameSettings);
+    //alert('invite...');
+    console.log('invite sent', currentGameSettings);
+    handleInviteFriendOnlineModalClose();
   }
 
   return (
@@ -211,18 +217,22 @@ export function Settings() {
       <Modal isOpen={isInviteFriendOnlineModalOpen} onClose={() => {}}>
         <div className="modal-box">
           <p>Invite a friend online to a game.</p>
-          <div className="modal-actions">
+          <p>Enter your and your friend's username. </p>
+          <p>Ask your friend to do the same at this time.</p>
+          <div className="modal-actions flex-end-inputs">
             <div className="input-element-container">
-              <label className="mb-1 block">
-                Friend's Username
-                <input
-                  required
-                  name="username"
-                  type="text"
-                  className="block border border-gray-600 rounded p-2 h-8 w-full mb-2"
-                />
+              <label>
+                Your Username
+                <input required name="username" type="text" />
               </label>
             </div>
+            <div className="input-element-container">
+              <label>
+                Friend's Username
+                <input required name="friend-username" type="text" />
+              </label>
+            </div>
+
             <span className="rainbow-colored-border">
               <button onClick={handleInviteFriendOnlineModalClose}>
                 Cancel

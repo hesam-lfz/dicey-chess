@@ -246,7 +246,7 @@ export const resetSettings = (
 ) => {
   if (resetToDefaultSettings) initSettings = defaultInitSettings;
   settings = { ...initSettings };
-  // set one player mode:
+  // set one player mode against AI:
   currentGameSettings.opponentIsAI = settings.opponentIsAI;
   // set opponent
   currentGameSettings.opponent = settings.onePlayerMode
