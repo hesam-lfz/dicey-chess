@@ -154,6 +154,8 @@ export function Board({
         board.flatBoardFenHistory = [];
         console.log(
           'rendered Board',
+          'currentGameSettings',
+          currentGameSettings,
           'currGameId',
           currGameId,
           'gameId',

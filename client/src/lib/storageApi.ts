@@ -1,12 +1,16 @@
 import { WHITE } from 'chess.js';
 import {
-  Board,
-  SavedGame,
-  Settings,
-  CurrentGameSettings,
+  type Board,
+  type SavedGame,
+  type Settings,
+  type CurrentGameSettings,
   DebugOn,
 } from './boardEngineApi';
 import { type User, readToken } from './auth';
+
+type PublicUserInfo = {
+  username: string;
+};
 
 const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
 const appVersion = import.meta.env.VITE_APP_VERSION;
@@ -314,6 +318,28 @@ export async function storageApi_updatePlayerRank(
       //console.log('result from db', res);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
       return true;
+    };
+    resolve(run());
+  });
+}
+
+// Checks if user with username exists in database (and returns any public
+// data on the user -- currently just username):
+export async function database_getUserPublicInfoByUsername(
+  username: string
+): Promise<PublicUserInfo | null> {
+  return new Promise((resolve) => {
+    const run = async (): Promise<PublicUserInfo | null> => {
+      const req = {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${readToken()}`,
+        },
+      };
+      const res = await fetch(`/api/users/${username}`, req);
+      if (!res.ok) return null;
+      const retrievedData = (await res.json()) as PublicUserInfo;
+      return retrievedData;
     };
     resolve(run());
   });

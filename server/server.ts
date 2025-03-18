@@ -249,6 +249,30 @@ app.put('/api/users/:userId', authMiddleware, async (req, res, next) => {
   }
 });
 
+// Check if username exists in the database
+app.get('/api/users/:username', authMiddleware, async (req, res, next) => {
+  try {
+    const username = req.params.username;
+    if (!username || typeof username !== 'string') {
+      throw new ClientError(400, 'Proper username is required');
+    }
+    const sql = `
+      select "username"
+      from "users"
+      where "username" = $1
+    `;
+    const params = [username];
+    const result = await db.query(sql, params);
+    const [user] = result.rows;
+    if (!user) {
+      throw new ClientError(404, `Cannot find user with username ${username}`);
+    }
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
 /*
  * Handles paths that aren't handled by any other route handler.
  * It responds with `index.html` to support page refreshes with React Router.

@@ -2,10 +2,22 @@ import { useState, useCallback, useRef } from 'react';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { Modal } from '../components/Modal';
-import { resetBoard, resetSettings, saveSettings, settings } from '../lib';
+import {
+  database_getUserPublicInfoByUsername,
+  DebugOn,
+  resetBoard,
+  resetSettings,
+  saveSettings,
+  settings,
+} from '../lib';
 import { Color, WHITE, BLACK } from 'chess.js';
 import { useNavigate } from 'react-router-dom';
 import { AppSubdomain } from '../App';
+
+const infoMessageModalMessageDefault =
+  'Waiting for a connection between players...';
+const infoMessageModalMessageUsernameError = 'Username(s) incorrect!';
+let infoMessageModalMessage = infoMessageModalMessageDefault;
 
 export function Settings() {
   const { currentGameSettings, setNewCurrentGameSettings, user } =
@@ -15,6 +27,8 @@ export function Settings() {
     setIsSigninToPlayFriendOnlineModalOpen,
   ] = useState<boolean>(false);
   const [isInviteFriendOnlineModalOpen, setIsInviteFriendOnlineModalOpen] =
+    useState<boolean>(false);
+  const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
     useState<boolean>(false);
 
   const [onePlayer, setOnePlayer] = useState<boolean>(settings.onePlayerMode);
@@ -30,7 +44,10 @@ export function Settings() {
   const [AIPlayerIsSmart, setAIPlayerIsSmart] = useState<boolean>(
     settings.AIPlayerIsSmart
   );
+
   const playVsFriendOnlineToggleSwitchRef = useRef<null | any>(null);
+  const inviteFormUsernameRef = useRef<null | HTMLInputElement>(null);
+  const inviteFormFriendUsernameRef = useRef<null | HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const onResetSettings = useCallback(() => {
@@ -121,10 +138,29 @@ export function Settings() {
     setIsInviteFriendOnlineModalOpen(false);
   }
 
-  function handleInviteFriendOnline(): void {
-    //alert('invite...');
-    console.log('invite sent', currentGameSettings);
+  async function handleInviteFriendOnline(): Promise<void> {
     handleInviteFriendOnlineModalClose();
+    const formUsername = inviteFormUsernameRef?.current?.value;
+    const formFriendUsername = inviteFormFriendUsernameRef?.current?.value;
+    // Check if usernames entered are valid and existing in db:
+    if (
+      formUsername !== user?.username ||
+      !formFriendUsername ||
+      formUsername === formFriendUsername ||
+      !(await database_getUserPublicInfoByUsername(formFriendUsername))
+    ) {
+      infoMessageModalMessage = infoMessageModalMessageUsernameError;
+    } else {
+      currentGameSettings.opponentIsAI = false;
+      setNewCurrentGameSettings();
+      console.log('invite sent', currentGameSettings);
+    }
+    setIsInfoMessageModalOpen(true);
+  }
+
+  function handleInfoMessageDone() {
+    infoMessageModalMessage = infoMessageModalMessageDefault;
+    setIsInfoMessageModalOpen(false);
   }
 
   return (
@@ -142,7 +178,7 @@ export function Settings() {
           <ToggleSwitch
             label="Play vs. Online Friend"
             initChecked={onePlayer && !opponentIsAI}
-            disabled={true}
+            disabled={!DebugOn}
             containerOnChange={(checked: boolean) =>
               onPlayerModeChange(checked, !checked)
             }
@@ -219,20 +255,30 @@ export function Settings() {
           <p>Invite a friend online to a game.</p>
           <p>Enter your and your friend's username. </p>
           <p>Ask your friend to do the same at this time.</p>
+
           <div className="modal-actions flex-end-inputs">
             <div className="input-element-container">
               <label>
                 Your Username
-                <input required name="username" type="text" />
+                <input
+                  required
+                  name="username"
+                  type="text"
+                  ref={inviteFormUsernameRef}
+                />
               </label>
             </div>
             <div className="input-element-container">
               <label>
                 Friend's Username
-                <input required name="friend-username" type="text" />
+                <input
+                  required
+                  name="friend-username"
+                  type="text"
+                  ref={inviteFormFriendUsernameRef}
+                />
               </label>
             </div>
-
             <span className="rainbow-colored-border">
               <button onClick={handleInviteFriendOnlineModalClose}>
                 Cancel
@@ -242,6 +288,16 @@ export function Settings() {
               <button onClick={handleInviteFriendOnline} autoFocus>
                 Send Invite
               </button>
+            </span>
+          </div>
+        </div>
+      </Modal>
+      <Modal isOpen={isInfoMessageModalOpen} onClose={() => {}}>
+        <div className="modal-box">
+          <p>{infoMessageModalMessage}</p>
+          <div className="modal-actions">
+            <span className="rainbow-colored-border">
+              <button onClick={handleInfoMessageDone}>Cancel</button>
             </span>
           </div>
         </div>
