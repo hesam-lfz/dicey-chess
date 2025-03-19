@@ -69,6 +69,27 @@
   color: pink;
 }
 
+.player-name {
+  font-size: 1.2rem;
+  color: cyan;
+}
+
+.player-names-box {
+  min-width: 50%;
+  max-width: 75%;
+}
+
+.player-names-box .flex-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-names-box .play-icon {
+  width: 3vw;
+  height: 3vw;
+}
+
 /*
 	Small Device Landscape Screen
 */
@@ -105,5 +126,14 @@
 
   .dice-icon {
     width: calc(3 * 5vw);
+  }
+
+  .right-panel {
+    flex-direction: column-reverse;
+  }
+
+  .player-names-box .play-icon {
+    width: calc(3vw * 3);
+    height: calc(3vw * 3);
   }
 }

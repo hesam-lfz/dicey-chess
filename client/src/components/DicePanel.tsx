@@ -139,52 +139,54 @@ export function DicePanel({
     'dice-box-icon dice-drop-animation' + (roll === 0 ? ' dice-0' : '');
   return (
     <>
-      <div className="player-turn-title-box flex flex-align-center">
-        {
-          <div className={'square player-icon-container'}>
-            <img
-              src={playerIconSVGs[turn]}
-              className="piece play-icon"
-              alt={'player-icon-' + turn}
-            />
-          </div>
-        }
-        <span>'s Move</span>
-      </div>
-      <div className="dice-area">
-        {board.diceRoll === -1 && !isAITurn(currentGameSettings) ? (
-          <span
-            className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
-            ref={rollDiceButtonBorderRef}>
-            <button
-              className="roll-dice-button"
-              onClick={handleRollButtonClick}>
+      <div className="flex flex-col flex-align-center">
+        <div className="player-turn-title-box flex flex-align-center">
+          {
+            <div className={'square player-icon-container'}>
               <img
-                src={Icon_dice}
-                className="dice-icon grow-and-back"
-                alt={'dice-icon'}
-                ref={rollDiceButtonIconRef}
+                src={playerIconSVGs[turn]}
+                className="piece play-icon"
+                alt={'player-icon-' + turn}
               />
-            </button>
-          </span>
-        ) : board.diceRoll === -1 ? null : (
-          <div className="dice-icons-box" key={board.turn}>
-            <img
-              className={diceClassName}
-              src={diceSVGs['Icon_Dice' + roll1]}
-              alt="dice-left-logo"
-              style={{ transform: 'rotate(' + dice1IconRotation + 'deg)' }}
-              ref={diceLeftRef}
-            />
-            <img
-              className={diceClassName}
-              src={diceSVGs['Icon_Dice' + roll2]}
-              alt="dice-right-logo"
-              style={{ transform: 'rotate(' + dice2IconRotation + 'deg)' }}
-              ref={diceRightRef}
-            />
-          </div>
-        )}
+            </div>
+          }
+          <span>'s Move</span>
+        </div>
+        <div className="dice-area">
+          {board.diceRoll === -1 && !isAITurn(currentGameSettings) ? (
+            <span
+              className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
+              ref={rollDiceButtonBorderRef}>
+              <button
+                className="roll-dice-button"
+                onClick={handleRollButtonClick}>
+                <img
+                  src={Icon_dice}
+                  className="dice-icon grow-and-back"
+                  alt={'dice-icon'}
+                  ref={rollDiceButtonIconRef}
+                />
+              </button>
+            </span>
+          ) : board.diceRoll === -1 ? null : (
+            <div className="dice-icons-box" key={board.turn}>
+              <img
+                className={diceClassName}
+                src={diceSVGs['Icon_Dice' + roll1]}
+                alt="dice-left-logo"
+                style={{ transform: 'rotate(' + dice1IconRotation + 'deg)' }}
+                ref={diceLeftRef}
+              />
+              <img
+                className={diceClassName}
+                src={diceSVGs['Icon_Dice' + roll2]}
+                alt="dice-right-logo"
+                style={{ transform: 'rotate(' + dice2IconRotation + 'deg)' }}
+                ref={diceRightRef}
+              />
+            </div>
+          )}
+        </div>
       </div>
       <p
         className={

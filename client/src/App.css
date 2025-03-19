@@ -184,6 +184,7 @@ nav li {
 
 .mobile-line-separator {
   display: none;
+  width: 75%;
 }
 
 .red {
@@ -301,6 +302,5 @@ dialog button {
 
   .mobile-line-separator {
     display: inline-block;
-    width: 75%;
   }
 }

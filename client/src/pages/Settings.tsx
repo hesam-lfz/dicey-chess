@@ -51,9 +51,9 @@ export function Settings() {
   const navigate = useNavigate();
 
   const onResetSettings = useCallback(() => {
-    resetSettings(currentGameSettings, true);
+    resetSettings(currentGameSettings, setNewCurrentGameSettings, true);
     resetBoard(currentGameSettings);
-    saveSettings(setNewCurrentGameSettings);
+    saveSettings(currentGameSettings, setNewCurrentGameSettings);
     setOnePlayer(settings.onePlayerMode);
     setOpponentIsAI(settings.opponentIsAI);
     setUserPlaysColor(settings.userPlaysColor);
@@ -79,7 +79,7 @@ export function Settings() {
       settings.onePlayerMode = onePlayer;
       settings.opponentIsAI = isOpponentAI;
       resetBoard(currentGameSettings);
-      saveSettings(setNewCurrentGameSettings);
+      saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
     [currentGameSettings, setNewCurrentGameSettings, user]
   );
@@ -105,7 +105,7 @@ export function Settings() {
       settings.userPlaysColor = colorToSet;
       settings.userPlaysColorRandomly = randomOn;
       resetBoard(currentGameSettings);
-      saveSettings(setNewCurrentGameSettings);
+      saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
     [currentGameSettings, setNewCurrentGameSettings]
   );
@@ -115,7 +115,7 @@ export function Settings() {
       setAIPlayerIsSmart(checked);
       settings.AIPlayerIsSmart = checked;
       resetBoard(currentGameSettings);
-      saveSettings(setNewCurrentGameSettings);
+      saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
     [currentGameSettings, setNewCurrentGameSettings]
   );

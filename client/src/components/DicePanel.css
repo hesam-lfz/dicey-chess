@@ -72,10 +72,11 @@
 	Small Device Landscape Screen
 */
 @media screen and (orientation: landscape) and (height <= 400px) {
+  /*
   .dice-area {
     height: 120px;
   }
-
+*/
   .dice-box-icon {
     width: calc(4vw * 1.2);
     margin: calc(1vw * 1.2);
@@ -86,10 +87,11 @@
 	Portrait Screen
 */
 @media screen and (orientation: portrait) {
+  /*
   .dice-area {
     height: 120px;
   }
-
+*/
   .dice-box-icon {
     width: calc(4vw * 2.5);
     margin: calc(1vw * 2.5);

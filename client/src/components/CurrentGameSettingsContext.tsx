@@ -25,6 +25,7 @@ export type CurrentGameSettingsContextValues = {
 };
 
 const defaultCurrentGameSettings: CurrentGameSettings = {
+  gameId: 0,
   userPlaysColor: WHITE,
   opponentIsAI: true,
   opponent: 'AI',
@@ -91,7 +92,7 @@ export function CurrentGameSettingsProvider({ children }: Props) {
     // game settings and reset the board:
     // Load initial settings:
     if (DebugOn) console.log('load settings...');
-    loadSettings(currentGameSettings);
+    loadSettings(currentGameSettings, setNewCurrentGameSettings);
     if (DebugOn) console.log(currentGameSettings);
 
     // FIXME: This needs to be somewhere else??

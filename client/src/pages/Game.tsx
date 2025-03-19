@@ -25,7 +25,8 @@ const infoMessageModalMessageDefault: string = 'Game saved.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Game() {
-  const { currentGameSettings, user } = useCurrentGameSettings();
+  const { currentGameSettings, setNewCurrentGameSettings, user } =
+    useCurrentGameSettings();
   const [savedGames, setSavedGames] = useState<SavedGame[]>();
   const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
     useState<boolean>(false);
@@ -39,7 +40,7 @@ export function Game() {
     useState<boolean>(false);
   const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
     useState<boolean>(false);
-  const [gameId, setGameId] = useState<number>(0);
+  const [gameId, setGameId] = useState<number>(currentGameSettings.gameId);
   const [gameIdToDelete, setGameIdToDelete] = useState<number>(0);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(board.gameOver);
 
@@ -90,9 +91,9 @@ export function Game() {
 
   function resetGame(): void {
     if (DebugOn) console.log('Resetting game!');
-    resetSettings(currentGameSettings, false);
+    resetSettings(currentGameSettings, setNewCurrentGameSettings, false);
     resetBoard(currentGameSettings);
-    setGameId((id) => id + 1);
+    setGameId(currentGameSettings.gameId);
     setReplayModeOn(false);
   }
 
@@ -166,7 +167,7 @@ export function Game() {
         }
       }
       if (loadedGame && loadSuccess) {
-        setGameId((id) => id + 1);
+        setGameId(currentGameSettings.gameId);
         setReplayModeOn(true);
       } else {
         resetGame();

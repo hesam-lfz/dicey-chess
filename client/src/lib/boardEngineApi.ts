@@ -63,6 +63,7 @@ export type Settings = {
 
 // Settings specific for a given game:
 export type CurrentGameSettings = {
+  gameId: number;
   userPlaysColor: Color;
   opponentIsAI: boolean;
   opponent: string;
@@ -226,26 +227,47 @@ export let board: Board;
 export let boardEngine: Chess; // <-- board rules engine
 
 // Initialize settings and load any saved settings:
-export function loadSettings(currentGameSettings: CurrentGameSettings): void {
+export function loadSettings(
+  currentGameSettings: CurrentGameSettings,
+  setNewCurrentGameSettings: () => void
+): void {
   const retrievedSettings = storageApi_loadSettings();
   initSettings = retrievedSettings || defaultInitSettings;
-  resetSettings(currentGameSettings, false);
+  resetSettings(currentGameSettings, setNewCurrentGameSettings, false);
 }
 
 // Save the current settings:
-export function saveSettings(setNewCurrentGameSettings: () => void): void {
+export function saveSettings(
+  currentGameSettings: CurrentGameSettings,
+  setNewCurrentGameSettings: () => void
+): void {
   storageApi_saveSettings(settings);
   // trigger resetting the current game settings and board reset:
-  setNewCurrentGameSettings();
+  setCurrentGameSettingsBasedOnSettings(
+    currentGameSettings,
+    setNewCurrentGameSettings
+  );
 }
 
 // Reset the current settings:
 export const resetSettings = (
   currentGameSettings: CurrentGameSettings,
+  setNewCurrentGameSettings: () => void,
   resetToDefaultSettings: boolean = false
 ) => {
   if (resetToDefaultSettings) initSettings = defaultInitSettings;
   settings = { ...initSettings };
+  setCurrentGameSettingsBasedOnSettings(
+    currentGameSettings,
+    setNewCurrentGameSettings
+  );
+};
+
+// Sets the current game settings based on current settings:
+export const setCurrentGameSettingsBasedOnSettings = (
+  currentGameSettings: CurrentGameSettings,
+  setNewCurrentGameSettings: () => void
+) => {
   // set one player mode against AI:
   currentGameSettings.opponentIsAI = settings.opponentIsAI;
   // set opponent
@@ -258,11 +280,14 @@ export const resetSettings = (
   currentGameSettings.userPlaysColor = settings.userPlaysColorRandomly
     ? allColors[Math.floor(Math.random() * 2)]
     : settings.userPlaysColor!;
-  if (DebugOn) console.log('random color', currentGameSettings);
+  setNewCurrentGameSettings();
+  if (DebugOn) console.log('currentGameSettings', currentGameSettings);
 };
 
 // Reset the board to start a new game:
 export const resetBoard = (currentGameSettings: CurrentGameSettings) => {
+  // increment gameId to trigger all components to reset:
+  currentGameSettings.gameId += 1;
   board = { ...initBoard };
   board.history = [[]];
   board.flatSanMoveHistory = [];
