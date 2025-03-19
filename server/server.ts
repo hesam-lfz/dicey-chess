@@ -301,13 +301,12 @@ app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
       'current requests to',
       JSON.stringify(pendingGameFriendInviteRequestsTo)
     );
-    if (status === 0) {
-      // timeout request after 5 min:
-      setTimeout(
-        () => cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
-        300000
-      );
-    }
+    // timeout request after 5 min:
+    setTimeout(
+      () => cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
+      300000
+    );
+    // return status of request:
     res.json({ status });
   } catch (err) {
     next(err);
