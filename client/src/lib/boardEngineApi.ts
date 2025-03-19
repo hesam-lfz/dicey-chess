@@ -274,7 +274,7 @@ export const setCurrentGameSettingsBasedOnSettings = (
   currentGameSettings.opponent = settings.onePlayerMode
     ? currentGameSettings.opponentIsAI
       ? 'AI'
-      : 'Player_?'
+      : 'Friend'
     : 'You #2';
   // set which players gets which color:
   currentGameSettings.userPlaysColor = settings.userPlaysColorRandomly

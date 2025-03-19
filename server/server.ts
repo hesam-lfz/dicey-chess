@@ -4,6 +4,7 @@ import express from 'express';
 import pg from 'pg';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
+import { isProfane } from 'no-profanity';
 
 import { ClientError, errorMiddleware, authMiddleware } from './lib/index.js';
 
@@ -30,6 +31,10 @@ type SavedGame = {
   userPlaysWhite: boolean;
 };
 
+const disallowedUsernames = ['AI', 'ai'];
+const pendingGameFriendInviteRequestsFrom: Record<string, string> = {};
+const pendingGameFriendInviteRequestsTo: Record<string, string> = {};
+
 const db = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -43,6 +48,14 @@ if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
 // Create paths for static directories
 const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
+
+// Removes friend invite request (called after invite timeouts):
+const cancelFriendInviteRequest = (userId1: string, userId2: string): void => {
+  delete pendingGameFriendInviteRequestsFrom[userId1];
+  delete pendingGameFriendInviteRequestsFrom[userId2];
+  delete pendingGameFriendInviteRequestsTo[userId1];
+  delete pendingGameFriendInviteRequestsTo[userId2];
+};
 
 const app = express();
 
@@ -58,9 +71,10 @@ app.get('/api/hello', (req, res) => {
 app.post('/api/auth/register', async (req, res, next) => {
   try {
     const { username, password, rank } = req.body;
-    if (!username || !password) {
+    if (!username || !password)
       throw new ClientError(400, 'username and password are required fields');
-    }
+    if (disallowedUsernames.includes(username) || isProfane(username))
+      throw new ClientError(400, 'username is not allowed');
     const hashedPassword = await argon2.hash(password);
     const sql = `
       insert into "users" ("username", "hashedPassword", "rank")
@@ -79,9 +93,7 @@ app.post('/api/auth/register', async (req, res, next) => {
 app.post('/api/auth/signin', async (req, res, next) => {
   try {
     const { username, password } = req.body as Partial<Auth>;
-    if (!username || !password) {
-      throw new ClientError(401, 'invalid login');
-    }
+    if (!username || !password) throw new ClientError(401, 'invalid login');
     const sql = `
     select "userId",
            "hashedPassword",
@@ -92,13 +104,10 @@ app.post('/api/auth/signin', async (req, res, next) => {
     const params = [username];
     const result = await db.query<User>(sql, params);
     const [user] = result.rows;
-    if (!user) {
-      throw new ClientError(401, 'invalid login -- User not found!');
-    }
+    if (!user) throw new ClientError(401, 'invalid login -- User not found!');
     const { userId, hashedPassword, rank } = user;
-    if (!(await argon2.verify(hashedPassword, password))) {
+    if (!(await argon2.verify(hashedPassword, password)))
       throw new ClientError(401, 'invalid login -- Wrong password!');
-    }
     const payload = { userId, username, rank };
     const token = jwt.sign(payload, hashKey);
     res.json({ token, user: payload });
@@ -110,7 +119,6 @@ app.post('/api/auth/signin', async (req, res, next) => {
 // Load all games saved by the user (stored in database):
 app.get('/api/games', authMiddleware, async (req, res, next) => {
   try {
-    // const userId = Number(req.params.userId);
     const sql = `
       select *
       from "games"
@@ -149,18 +157,16 @@ app.post('/api/games', authMiddleware, async (req, res, next) => {
       !moveHistory ||
       !diceRollHistory ||
       typeof userPlaysWhite !== 'boolean'
-    ) {
+    )
       throw new ClientError(
         400,
         'Proper params for userId, at, duration, opponent, outcome, moveHistory, diceRollHistory, and userPlaysWhite are required.'
       );
-    }
-    if (req.user?.userId !== userId) {
+    if (req.user?.userId !== userId)
       throw new ClientError(
         400,
         'Params userId does not match userId in authentication.'
       );
-    }
     const sql = `
       insert into "games" ("userId", "at", "duration", "opponent", "outcome", "moveHistory", "diceRollHistory", "userPlaysWhite")
         values ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -188,18 +194,16 @@ app.post('/api/games', authMiddleware, async (req, res, next) => {
 app.delete('/api/games', authMiddleware, async (req, res, next) => {
   try {
     const { userId, at } = req.body;
-    if (typeof userId !== 'number' || typeof at !== 'number') {
+    if (typeof userId !== 'number' || typeof at !== 'number')
       throw new ClientError(
         400,
         'Proper params for userId and at are required.'
       );
-    }
-    if (req.user?.userId !== userId) {
+    if (req.user?.userId !== userId)
       throw new ClientError(
         400,
         'Params userId does not match userId in authentication.'
       );
-    }
     const sql = `
       delete from "games"
         where "userId" = $1 and "at" = $2
@@ -218,19 +222,16 @@ app.delete('/api/games', authMiddleware, async (req, res, next) => {
 app.put('/api/users/:userId', authMiddleware, async (req, res, next) => {
   try {
     const userId = Number(req.params.userId);
-    if (!Number.isInteger(userId) || userId < 0) {
+    if (!Number.isInteger(userId) || userId < 0)
       throw new ClientError(400, 'userId must be a natural number');
-    }
     const { rank } = req.body;
-    if (typeof rank !== 'number') {
+    if (typeof rank !== 'number')
       throw new ClientError(400, 'rank (number) is required');
-    }
-    if (req.user?.userId !== userId) {
+    if (req.user?.userId !== userId)
       throw new ClientError(
         400,
         'Params userId does not match userId in authentication.'
       );
-    }
     const sql = `
       update "users"
         set "rank" = $1
@@ -240,34 +241,74 @@ app.put('/api/users/:userId', authMiddleware, async (req, res, next) => {
     const params = [rank, req.user?.userId];
     const result = await db.query(sql, params);
     const [user] = result.rows;
-    if (!user) {
+    if (!user)
       throw new ClientError(404, `Cannot find user with userId ${userId}`);
-    }
     res.json({ userId: user.userId, rank: user.rank });
   } catch (err) {
     next(err);
   }
 });
 
-// Check if username exists in the database
-app.get('/api/users/:username', authMiddleware, async (req, res, next) => {
+// Receives a request to play an online friend.
+// Records the request parties and if both parties have sent the request
+// initiates the connection, sends status (1 = waiting, 0 = ready)
+// First checks if friend username exists in the database, and fails if not.
+app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
   try {
     const username = req.params.username;
     if (!username || typeof username !== 'string') {
       throw new ClientError(400, 'Proper username is required');
     }
     const sql = `
-      select "username"
+      select "userId",
+             "username"
       from "users"
       where "username" = $1
     `;
     const params = [username];
     const result = await db.query(sql, params);
     const [user] = result.rows;
-    if (!user) {
+    if (!user)
       throw new ClientError(404, `Cannot find user with username ${username}`);
+    if (user.userId === req.user?.userId)
+      throw new ClientError(400, 'Cannot send invitation to self');
+    const requestingPlayerId = String(req.user!.userId);
+    const requestedPlayerId = String(user.userId);
+    // Check if invite request possible:
+    if (pendingGameFriendInviteRequestsFrom[requestingPlayerId])
+      throw new ClientError(
+        400,
+        'There is already a pending friend invite request from the requester'
+      );
+    if (pendingGameFriendInviteRequestsTo[requestedPlayerId])
+      throw new ClientError(
+        400,
+        'There is already a pending friend invite request for the requested'
+      );
+    // Record the request:
+    pendingGameFriendInviteRequestsFrom[requestingPlayerId] = requestedPlayerId;
+    pendingGameFriendInviteRequestsTo[requestedPlayerId] = requestingPlayerId;
+    const status =
+      pendingGameFriendInviteRequestsFrom[requestedPlayerId] &&
+      pendingGameFriendInviteRequestsTo[requestingPlayerId]
+        ? 0
+        : 1;
+    // If handshake is complete (both players have invited each other),
+    // establish a connection:
+    console.log(
+      'current requests from',
+      JSON.stringify(pendingGameFriendInviteRequestsFrom),
+      'current requests to',
+      JSON.stringify(pendingGameFriendInviteRequestsTo)
+    );
+    if (status === 0) {
+      // timeout request after 5 min:
+      setTimeout(
+        () => cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
+        300000
+      );
     }
-    res.json(user);
+    res.json({ status });
   } catch (err) {
     next(err);
   }

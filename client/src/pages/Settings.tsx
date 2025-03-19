@@ -3,7 +3,7 @@ import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { Modal } from '../components/Modal';
 import {
-  database_getUserPublicInfoByUsername,
+  database_sendInviteFriendRequestByUsername,
   DebugOn,
   resetBoard,
   resetSettings,
@@ -16,7 +16,9 @@ import { AppSubdomain } from '../App';
 
 const infoMessageModalMessageDefault =
   'Waiting for a connection between players...';
-const infoMessageModalMessageUsernameError = 'Username(s) incorrect!';
+const infoMessageModalMessageUsernameError = 'Username(s) incorrect';
+const infoMessageModalMessageInviteDeniedError =
+  'Friend username incorrect or invite request disallowed!';
 let infoMessageModalMessage = infoMessageModalMessageDefault;
 
 export function Settings() {
@@ -146,16 +148,28 @@ export function Settings() {
     if (
       formUsername !== user?.username ||
       !formFriendUsername ||
-      formUsername === formFriendUsername ||
-      !(await database_getUserPublicInfoByUsername(formFriendUsername))
+      formUsername === formFriendUsername
     ) {
       infoMessageModalMessage = infoMessageModalMessageUsernameError;
     } else {
-      currentGameSettings.opponentIsAI = false;
-      currentGameSettings.opponent = 'Player_' + formFriendUsername;
-      setNewCurrentGameSettings();
-      console.log('invite sent', currentGameSettings);
-      navigate(AppSubdomain);
+      const requestResponse = await database_sendInviteFriendRequestByUsername(
+        formFriendUsername
+      );
+      if (!requestResponse) {
+        infoMessageModalMessage = infoMessageModalMessageInviteDeniedError;
+      } else {
+        const { status } = requestResponse;
+        currentGameSettings.opponentIsAI = false;
+        currentGameSettings.opponent = formFriendUsername;
+        setNewCurrentGameSettings();
+        console.log(
+          'invite sent -> status =',
+          status,
+          'currentGameSettings',
+          currentGameSettings
+        );
+        navigate(AppSubdomain);
+      }
     }
     setIsInfoMessageModalOpen(true);
   }

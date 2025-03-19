@@ -8,8 +8,8 @@ import {
 } from './boardEngineApi';
 import { type User, readToken } from './auth';
 
-type PublicUserInfo = {
-  username: string;
+type InviteRequestResponse = {
+  status: number;
 };
 
 const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
@@ -323,22 +323,23 @@ export async function storageApi_updatePlayerRank(
   });
 }
 
+// Sends an invite request to play a friend online with username.
 // Checks if user with username exists in database (and returns any public
 // data on the user -- currently just username):
-export async function database_getUserPublicInfoByUsername(
+export async function database_sendInviteFriendRequestByUsername(
   username: string
-): Promise<PublicUserInfo | null> {
+): Promise<InviteRequestResponse | null> {
   return new Promise((resolve) => {
-    const run = async (): Promise<PublicUserInfo | null> => {
+    const run = async (): Promise<InviteRequestResponse | null> => {
       const req = {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${readToken()}`,
         },
       };
-      const res = await fetch(`/api/users/${username}`, req);
+      const res = await fetch(`/api/invite/${username}`, req);
       if (!res.ok) return null;
-      const retrievedData = (await res.json()) as PublicUserInfo;
+      const retrievedData = (await res.json()) as InviteRequestResponse;
       return retrievedData;
     };
     resolve(run());
