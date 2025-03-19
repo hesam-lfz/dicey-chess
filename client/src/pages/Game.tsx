@@ -11,6 +11,7 @@ import {
   initBoardForGameReplay,
   outcomes,
   resetBoard,
+  resetSettings,
   type SavedGame,
 } from '../lib';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
@@ -89,6 +90,7 @@ export function Game() {
 
   function resetGame(): void {
     if (DebugOn) console.log('Resetting game!');
+    resetSettings(currentGameSettings, false);
     resetBoard(currentGameSettings);
     setGameId((id) => id + 1);
     setReplayModeOn(false);

@@ -154,6 +154,7 @@ export function Settings() {
       currentGameSettings.opponentIsAI = false;
       setNewCurrentGameSettings();
       console.log('invite sent', currentGameSettings);
+      navigate(AppSubdomain);
     }
     setIsInfoMessageModalOpen(true);
   }
