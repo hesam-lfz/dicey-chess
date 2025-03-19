@@ -149,6 +149,7 @@ export function GamePanel({
           <BoardLabels
             currUserPlaysColor={currentGameSettings.userPlaysColor}
           />
+          {/*<span className="player-username">Opponent</span>*/}
           <Board
             currGameId={gameId}
             currReplayModeOn={replayModeOn}
@@ -165,6 +166,7 @@ export function GamePanel({
             containerOnMove={onMove}
             containerOnAlertDiceRoll={onAlertDiceRoll}
           />
+          {/*<span className="player-username">You</span>*/}
         </div>
         <RightPanel
           currGameId={gameId}

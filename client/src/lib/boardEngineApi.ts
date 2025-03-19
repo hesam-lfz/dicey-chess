@@ -253,7 +253,7 @@ export const resetSettings = (
     ? currentGameSettings.opponentIsAI
       ? 'AI'
       : 'Player_?'
-    : 'You';
+    : 'You #2';
   // set which players gets which color:
   currentGameSettings.userPlaysColor = settings.userPlaysColorRandomly
     ? allColors[Math.floor(Math.random() * 2)]

@@ -152,6 +152,7 @@ export function Settings() {
       infoMessageModalMessage = infoMessageModalMessageUsernameError;
     } else {
       currentGameSettings.opponentIsAI = false;
+      currentGameSettings.opponent = 'Player_' + formFriendUsername;
       setNewCurrentGameSettings();
       console.log('invite sent', currentGameSettings);
       navigate(AppSubdomain);

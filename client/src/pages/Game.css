@@ -151,6 +151,17 @@
   align-self: center;
 }
 
+.player-username {
+  /* position: absolute; */
+  text-decoration: underline;
+  font-size: 1.2rem;
+  color: cyan;
+  margin: 1vw;
+
+  /* top: calc(4vw * -1);
+  left: calc(4vw * 3.5); */
+}
+
 /*
 	Small Device Landscape Screen
 */
