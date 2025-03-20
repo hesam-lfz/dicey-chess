@@ -5,6 +5,7 @@ import pg from 'pg';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { isProfane } from 'no-profanity';
+import { WebSocket, WebSocketServer } from 'ws';
 
 import { ClientError, errorMiddleware, authMiddleware } from './lib/index.js';
 
@@ -31,9 +32,22 @@ type SavedGame = {
   userPlaysWhite: boolean;
 };
 
+type InviteResponse = {
+  status: number;
+  pin?: string;
+};
+
 const disallowedUsernames = ['AI', 'ai'];
+// Game connection requests timeout after 5 min.
+const pendingGameConnectionTimeout = 300000;
+// Games timeout after 20 min.
+const gameTimeout = 1200000;
+
 const pendingGameFriendInviteRequestsFrom: Record<string, string> = {};
 const pendingGameFriendInviteRequestsTo: Record<string, string> = {};
+const gameConnectionPins: Record<string, string> = {};
+const pendingGameConnections: Record<string, WebSocket> = {};
+const inProgressGameConnections: Record<string, WebSocket> = {};
 
 const db = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
@@ -48,20 +62,6 @@ if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
 // Create paths for static directories
 const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
-
-// Removes friend invite request (called after invite timeouts):
-const cancelFriendInviteRequest = (
-  requestingUserId: string,
-  requestedUserId: string
-): void => {
-  const priorRequestedFriendId =
-    pendingGameFriendInviteRequestsFrom[requestingUserId];
-  if (priorRequestedFriendId) {
-    delete pendingGameFriendInviteRequestsFrom[requestingUserId];
-    if (pendingGameFriendInviteRequestsTo[requestedUserId] === requestingUserId)
-      delete pendingGameFriendInviteRequestsTo[requestedUserId];
-  }
-};
 
 const app = express();
 
@@ -315,10 +315,20 @@ app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
     // timeout pending request after 5 min:
     setTimeout(
       () => cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
-      300000
+      pendingGameConnectionTimeout
     );
     // return status of request:
-    res.json({ status });
+    const responseData: InviteResponse = { status };
+    // if we're ready to start establishing connection, add a pin for socket communication:
+    if (status === 0) {
+      responseData.pin = generateConnectionPin();
+      gameConnectionPins[requestingPlayerId] = responseData.pin!;
+      // Timeout game after a while:
+      setTimeout(() => {
+        delete gameConnectionPins[requestingPlayerId];
+      }, gameTimeout);
+    }
+    res.json(responseData);
   } catch (err) {
     next(err);
   }
@@ -333,6 +343,149 @@ app.get('*', (req, res) => res.sendFile(`${reactStaticDir}/index.html`));
 
 app.use(errorMiddleware);
 
-app.listen(process.env.PORT, () => {
+// HTTP server to handle incoming HTTP requests:
+const server = app.listen(process.env.PORT, () => {
   console.log('Express server listening on port', process.env.PORT);
 });
+
+// WebSocket server to handle online game connections (between 2 players):
+const wsServer = new WebSocketServer({ server });
+
+wsServer.on('connection', (ws) => {
+  console.log('Client connected');
+
+  ws.on('message', (message) => {
+    console.log(`Received: ${message}`);
+    const { userId, pin, type, data } = JSON.parse(message.toString());
+    if (!userId) throw new ClientError(400, 'Websocket message missing userId');
+    const friendId = pendingGameFriendInviteRequestsFrom[userId];
+    if (!friendId)
+      throw new ClientError(400, 'There is no pending invite from userId');
+    if (!(pin && gameConnectionPins[userId] === pin))
+      throw new ClientError(400, 'Websocket message with invalid pin');
+    if (type === 'connection') {
+      if (data === 'open') {
+        ws.send('hand');
+      } else if (data === 'shake') {
+        pendingGameConnections[userId] = ws;
+        // remove after 5 min.
+        setTimeout(() => {
+          delete pendingGameConnections[userId];
+        }, pendingGameConnectionTimeout);
+        const friendWs = pendingGameConnections[friendId];
+        if (friendWs) {
+          // Both parties established connection and game is ready:
+          ws.send('ready');
+          friendWs.send('ready');
+          // Move game from pending to in-progress:
+          delete pendingGameConnections[userId];
+          delete pendingGameConnections[friendId];
+          inProgressGameConnections[userId] = ws;
+          inProgressGameConnections[friendId] = friendWs;
+          // Timeout game after a while:
+          setTimeout(() => {
+            delete inProgressGameConnections[userId];
+            delete inProgressGameConnections[friendId];
+          }, gameTimeout);
+        } else {
+          // One party hasn't established connection yet. Tell the user
+          // to wait and retry later:
+          ws.send('wait');
+        }
+      }
+    }
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
+  });
+});
+
+// Removes friend invite request (called after invite timeouts):
+const cancelFriendInviteRequest = (
+  requestingUserId: string,
+  requestedUserId: string
+): void => {
+  const priorRequestedFriendId =
+    pendingGameFriendInviteRequestsFrom[requestingUserId];
+  if (priorRequestedFriendId) {
+    delete pendingGameFriendInviteRequestsFrom[requestingUserId];
+    if (pendingGameFriendInviteRequestsTo[requestedUserId] === requestingUserId)
+      delete pendingGameFriendInviteRequestsTo[requestedUserId];
+  }
+};
+
+// Generates a random pin for user connections
+const generateConnectionPin = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * 26);
+    result += chars[randomIndex];
+  }
+  return result;
+};
+
+/*
+
+// server.js
+import { WebSocketServer } from 'ws';
+
+
+//const wss = new WebSocketServer({ port: 8080 }); // <-- NO
+//const wsServer = new webSocketServer({ httpServer: server });
+const wsServer = new WebSocket.Server({ httpServer: server }); //?
+
+wsServer.on('connection', ws => {
+  console.log('Client connected');
+
+  ws.on('message', message => {
+    console.log(`Received: ${message}`);
+    ws.send(`Server: ${message}`); // Echo the message back to the client
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+
+  ws.on('error', error => {
+    console.error('WebSocket error:', error);
+  });
+});
+
+console.log('WebSocket server is running on ws://localhost:8080');
+
+// client.js
+import WebSocket from 'ws';
+
+const ws = new WebSocket('ws://localhost:8080');
+
+ws.on('open', () => {
+  console.log('Connected to server');
+  ws.send('Hello from client!');
+});
+
+ws.on('message', message => {
+  console.log(`Received: ${message}`);
+});
+
+ws.on('close', () => {
+  console.log('Disconnected from server');
+});
+
+ws.on('error', error => {
+  console.error('WebSocket error:', error);
+});
+
+// Send a message every 3 seconds
+setInterval(() => {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send('Another message from client');
+  }
+}, 3000);
+
+*/
