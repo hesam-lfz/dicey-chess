@@ -50,11 +50,17 @@ const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
 
 // Removes friend invite request (called after invite timeouts):
-const cancelFriendInviteRequest = (userId1: string, userId2: string): void => {
-  delete pendingGameFriendInviteRequestsFrom[userId1];
-  delete pendingGameFriendInviteRequestsFrom[userId2];
-  delete pendingGameFriendInviteRequestsTo[userId1];
-  delete pendingGameFriendInviteRequestsTo[userId2];
+const cancelFriendInviteRequest = (
+  requestingUserId: string,
+  requestedUserId: string
+): void => {
+  const priorRequestedFriendId =
+    pendingGameFriendInviteRequestsFrom[requestingUserId];
+  if (priorRequestedFriendId) {
+    delete pendingGameFriendInviteRequestsFrom[requestingUserId];
+    if (pendingGameFriendInviteRequestsTo[requestedUserId] === requestingUserId)
+      delete pendingGameFriendInviteRequestsTo[requestedUserId];
+  }
 };
 
 const app = express();
@@ -251,10 +257,21 @@ app.put('/api/users/:userId', authMiddleware, async (req, res, next) => {
 
 // Receives a request to play an online friend.
 // Records the request parties and if both parties have sent the request
-// initiates the connection, sends status (1 = waiting, 0 = ready)
+// Sends status (1 = waiting for other player's invite, 0 = ready)
 // First checks if friend username exists in the database, and fails if not.
 app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
   try {
+    const requestingPlayerId = String(req.user!.userId);
+    const priorRequestedFriendId =
+      pendingGameFriendInviteRequestsFrom[requestingPlayerId];
+    // If any pending prior request from user, cancel and refuse invite:
+    if (priorRequestedFriendId) {
+      cancelFriendInviteRequest(requestingPlayerId, priorRequestedFriendId);
+      throw new ClientError(
+        400,
+        'There is already a pending friend invite request from the requester'
+      );
+    }
     const username = req.params.username;
     if (!username || typeof username !== 'string') {
       throw new ClientError(400, 'Proper username is required');
@@ -272,14 +289,8 @@ app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
       throw new ClientError(404, `Cannot find user with username ${username}`);
     if (user.userId === req.user?.userId)
       throw new ClientError(400, 'Cannot send invitation to self');
-    const requestingPlayerId = String(req.user!.userId);
     const requestedPlayerId = String(user.userId);
     // Check if invite request possible:
-    if (pendingGameFriendInviteRequestsFrom[requestingPlayerId])
-      throw new ClientError(
-        400,
-        'There is already a pending friend invite request from the requester'
-      );
     if (pendingGameFriendInviteRequestsTo[requestedPlayerId])
       throw new ClientError(
         400,
@@ -301,7 +312,7 @@ app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
       'current requests to',
       JSON.stringify(pendingGameFriendInviteRequestsTo)
     );
-    // timeout request after 5 min:
+    // timeout pending request after 5 min:
     setTimeout(
       () => cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
       300000
