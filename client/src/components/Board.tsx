@@ -12,7 +12,7 @@ import {
   promptUserIfPromotionMove,
   board,
   isAITurn,
-  getAIMove,
+  chessAiEngineApi_getAIMove,
   boardReplayStepMove,
   BasicMove,
   DebugOn,
@@ -116,7 +116,9 @@ export function Board({
 
   const triggerAIMove = useCallback(() => {
     const run = async () => {
-      const move: BasicMove = await getAIMove(board.numMovesInTurn === 1);
+      const move: BasicMove = await chessAiEngineApi_getAIMove(
+        board.numMovesInTurn === 1
+      );
       //console.log('getAIMove got', move);
       setMovingFromSq(move.from);
       setMovingToSq(move.to);

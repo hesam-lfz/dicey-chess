@@ -15,19 +15,23 @@ interface AIEngineParams {
   searchmoves?: string;
 }
 
-export let chessAIEngine: WebSocket; // <-- chess AI player engine (socket ver.)
-let chessAIEngineUrl: string;
-let chessAIEngineBusy: boolean = false;
-let chessAIEngineResponseMove: BasicMove | null = null;
+let chessAiEngine_socket: WebSocket; // <-- chess AI player engine (socket ver.)
+let chessAiEngineUrl: string;
+let chessAiEngineBusy_socket: boolean = false;
+let chessAiEngineResponseMove: BasicMove | null = null;
 
-export async function getAIMove(isLastMoveInTurn: boolean): Promise<BasicMove> {
+export async function chessAiEngineApi_getAIMove(
+  isLastMoveInTurn: boolean
+): Promise<BasicMove> {
   return settings.AIPlayerIsSmart
     ? getAISmartMove(isLastMoveInTurn)
-    : getAIRandomMove(isLastMoveInTurn);
+    : chessAiEngineApi_getAIRandomMove(isLastMoveInTurn);
 }
 
 // Stupid AI mode: Makes a random move with a bit of delay:
-async function getAIRandomMove(isLastMoveInTurn: boolean): Promise<BasicMove> {
+async function chessAiEngineApi_getAIRandomMove(
+  isLastMoveInTurn: boolean
+): Promise<BasicMove> {
   const seconds = (internalSettings.AIMoveDelay * 5 * Math.random()) / 1000;
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -63,7 +67,7 @@ async function getAISmartMove_fetch(
     if (possibleMoves) params.searchmoves = possibleMoves;
     if (DebugOn) console.log('added searchmoves:', possibleMoves);
   }
-  const response = await fetch(chessAIEngineUrl, {
+  const response = await fetch(chessAiEngineUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -87,14 +91,14 @@ async function getAISmartMove_fetch(
       console.log(
         `oops. AI engine returned an invalid move. ${chessApiMessage.san} Falling back to a random move...`
       );
-    return await getAIRandomMove(isLastMoveInTurn);
+    return await chessAiEngineApi_getAIRandomMove(isLastMoveInTurn);
   }
-  chessAIEngineResponseMove = {
+  chessAiEngineResponseMove = {
     from: chessApiMessage.from,
     to: chessApiMessage.to,
     promotion: chessApiMessage.promotion || undefined,
   };
-  return chessAIEngineResponseMove;
+  return chessAiEngineResponseMove;
 }
 
 // Calls a chess engine API using web socket method
@@ -103,48 +107,48 @@ async function getAISmartMove_socket(
   isLastMoveInTurn: boolean
 ): Promise<BasicMove> {
   return new Promise((resolve) => {
-    if (chessAIEngineBusy) throw Error('Chess AI engine is busy');
-    chessAIEngineBusy = true;
-    chessAIEngine.send(
+    if (chessAiEngineBusy_socket) throw Error('Chess AI engine is busy');
+    chessAiEngineBusy_socket = true;
+    chessAiEngine_socket.send(
       JSON.stringify({
         fen: boardEngine.fen(),
         maxThinkingTime: 100,
         depth: 18,
       })
     );
-    return resolve(awaitChessAIEngineMove_socket(isLastMoveInTurn));
+    return resolve(awaitChessAiEngineMove_socket(isLastMoveInTurn));
   });
 }
 
 // Frequently checks to see if response from chess engine AI has arrived yet.
 // Once it is here, it returns the move:
-async function awaitChessAIEngineMove_socket(
+async function awaitChessAiEngineMove_socket(
   isLastMoveInTurn: boolean
 ): Promise<BasicMove> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      if (chessAIEngineResponseMove) {
-        const move = chessAIEngineResponseMove;
-        chessAIEngineResponseMove = null;
-        chessAIEngineBusy = false;
+      if (chessAiEngineResponseMove) {
+        const move = chessAiEngineResponseMove;
+        chessAiEngineResponseMove = null;
+        chessAiEngineBusy_socket = false;
         resolve(move);
-      } else return resolve(awaitChessAIEngineMove_socket(isLastMoveInTurn));
+      } else return resolve(awaitChessAiEngineMove_socket(isLastMoveInTurn));
     }, 1000);
   });
 }
 
 // Sets up proper URLs and preparations for AI engine API communication:
-export async function initChessAIEngine(): Promise<void> {
+export async function chessAiEngineApi_initChessAiEngine(): Promise<void> {
   if (internalSettings.AIEngineUsesSocket) {
     // AI Engine API uses: socket
-    chessAIEngineUrl = 'wss:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
+    chessAiEngineUrl = 'wss:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
     // Set up socket communication:
-    chessAIEngine = new WebSocket(chessAIEngineUrl);
-    chessAIEngine.onmessage = (event) => {
+    chessAiEngine_socket = new WebSocket(chessAiEngineUrl);
+    chessAiEngine_socket.onmessage = (event) => {
       const chessApiMessage = JSON.parse(event.data);
       if (chessApiMessage.type === 'move') {
         //console.log('chess ai response arrived', chessApiMessage);
-        chessAIEngineResponseMove = {
+        chessAiEngineResponseMove = {
           from: chessApiMessage.from,
           to: chessApiMessage.to,
           promotion: chessApiMessage.promotion || undefined,
@@ -153,7 +157,7 @@ export async function initChessAIEngine(): Promise<void> {
     };
   } else {
     // AI Engine API uses: fetch
-    chessAIEngineUrl = 'https:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
+    chessAiEngineUrl = 'https:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
     // Run a one-time test to see we can talk to the API through fetch call
     // If we get an error (due to CORS proxy limitations), update the API
     // URL to use a CORS proxy server...
@@ -164,7 +168,7 @@ export async function initChessAIEngine(): Promise<void> {
     } catch (error) {
       console.error('Test of AI engine API fetch encountered error):', error);
 
-      if (await reattemptInitChessAIEngine()) {
+      if (await reattemptInitChessAiEngine()) {
         if (DebugOn)
           console.log(
             'Test of AI engine API fetch succeeded after 2nd attempt'
@@ -172,8 +176,8 @@ export async function initChessAIEngine(): Promise<void> {
         return;
       }
       console.log('Enabling use of proxy CORS server for fetching...');
-      chessAIEngineUrl =
-        import.meta.env.VITE_APP_FETCH_CORS_PROXY_SERVER + chessAIEngineUrl;
+      chessAiEngineUrl =
+        import.meta.env.VITE_APP_FETCH_CORS_PROXY_SERVER + chessAiEngineUrl;
       try {
         const move = await getAISmartMove_fetch(true);
         console.log(
@@ -193,7 +197,7 @@ export async function initChessAIEngine(): Promise<void> {
 }
 
 // Reattempts a connection test to AI engine API
-async function reattemptInitChessAIEngine(): Promise<boolean> {
+async function reattemptInitChessAiEngine(): Promise<boolean> {
   return new Promise((resolve) => {
     setTimeout(async () => {
       try {
@@ -206,6 +210,7 @@ async function reattemptInitChessAIEngine(): Promise<boolean> {
   });
 }
 
-export function closeChessAIEngine(): void {
-  if (internalSettings.AIEngineUsesSocket) (chessAIEngine as WebSocket).close();
+export function chessAiEngineApi_closeChessAiEngine_socket(): void {
+  if (internalSettings.AIEngineUsesSocket)
+    (chessAiEngine_socket as WebSocket).close();
 }

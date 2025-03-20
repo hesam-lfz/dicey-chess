@@ -32,7 +32,7 @@ type SavedGame = {
   userPlaysWhite: boolean;
 };
 
-type InviteResponse = {
+type InviteRequestResponse = {
   status: number;
   pin?: string;
 };
@@ -42,6 +42,8 @@ const disallowedUsernames = ['AI', 'ai'];
 const pendingGameConnectionTimeout = 300000;
 // Games timeout after 20 min.
 const gameTimeout = 1200000;
+// Timeout for waiting for a graceful closing of connection before a hard close:
+const pendingGameConnectionCloseTimeout = 20000;
 
 const pendingGameFriendInviteRequestsFrom: Record<string, string> = {};
 const pendingGameFriendInviteRequestsTo: Record<string, string> = {};
@@ -318,7 +320,7 @@ app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
       pendingGameConnectionTimeout
     );
     // return status of request:
-    const responseData: InviteResponse = { status };
+    const responseData: InviteRequestResponse = { status };
     // if we're ready to start establishing connection, add a pin for socket communication:
     if (status === 0) {
       responseData.pin = generateConnectionPin();
@@ -354,6 +356,12 @@ const wsServer = new WebSocketServer({ server });
 wsServer.on('connection', (ws) => {
   console.log('Client connected');
 
+  // Remove connection after a while, if game hasn't gotten started:
+  let pendingGameCloseTimerId2: NodeJS.Timeout | null;
+  const pendingGameCloseTimerId1 = setTimeout(() => {
+    pendingGameCloseTimerId2 = closeStaleGameConnection(ws, true);
+  }, pendingGameConnectionTimeout);
+
   ws.on('message', (message) => {
     console.log(`Received: ${message}`);
     const { userId, pin, type, data } = JSON.parse(message.toString());
@@ -365,27 +373,33 @@ wsServer.on('connection', (ws) => {
       throw new ClientError(400, 'Websocket message with invalid pin');
     if (type === 'connection') {
       if (data === 'open') {
-        ws.send('hand');
+        ws.send(JSON.stringify({ type: 'connection', data: 'hand' }));
       } else if (data === 'shake') {
         pendingGameConnections[userId] = ws;
-        // remove after 5 min.
-        setTimeout(() => {
-          delete pendingGameConnections[userId];
-        }, pendingGameConnectionTimeout);
+        // remove after a while (if game hasn't gotten started):
+        const pendingGameDataCleanupTimerId = setTimeout(
+          () => removeStaleGameData(userId),
+          pendingGameConnectionTimeout
+        );
         const friendWs = pendingGameConnections[friendId];
         if (friendWs) {
           // Both parties established connection and game is ready:
-          ws.send('ready');
-          friendWs.send('ready');
+          const msg = JSON.stringify({ type: 'connection', data: 'ready' });
+          ws.send(msg);
+          friendWs.send(msg);
           // Move game from pending to in-progress:
+          // Clear timeouts set out to clear unsuccessful connection attempts:
+          clearTimeout(pendingGameDataCleanupTimerId);
+          clearTimeout(pendingGameCloseTimerId1);
+          if (pendingGameCloseTimerId2) clearTimeout(pendingGameCloseTimerId2);
           delete pendingGameConnections[userId];
           delete pendingGameConnections[friendId];
           inProgressGameConnections[userId] = ws;
           inProgressGameConnections[friendId] = friendWs;
           // Timeout game after a while:
           setTimeout(() => {
-            delete inProgressGameConnections[userId];
-            delete inProgressGameConnections[friendId];
+            closeStaleGameConnection(userId, false);
+            removeStaleGameData(userId);
           }, gameTimeout);
         } else {
           // One party hasn't established connection yet. Tell the user
@@ -428,6 +442,52 @@ const generateConnectionPin = (): string => {
     result += chars[randomIndex];
   }
   return result;
+};
+
+// Starts the process of forcing a game connection to close, forcing a
+// a termination if client is unresponsive after a while:
+const closeStaleGameConnection = (
+  connection: WebSocket,
+  isForPendingGame: boolean
+): NodeJS.Timeout | null => {
+  // If connection is already closed, then nothing to do:
+  if (!connection || connection.readyState === connection.CLOSED) return null;
+  // If connection is not already closing, start the closing process:
+  if (connection.readyState !== connection.CLOSING) connection.close();
+  // check back later and if it is still pending close, force close it then:
+  return setTimeout(
+    () => closeStaleGameConnectionCheck(connection, isForPendingGame, 1),
+    isForPendingGame ? pendingGameConnectionCloseTimeout : gameTimeout
+  );
+};
+
+// Helper for function above to force a connection termination if needed:
+const closeStaleGameConnectionCheck = (
+  connection: WebSocket,
+  isForPendingGame: boolean,
+  attemptNumber: number = 1
+): void => {
+  // If connection is already closed, then nothing to do:
+  if (connection.readyState === connection.CLOSED) return;
+  if (attemptNumber <= 1)
+    // check back later and if it is still pending close, force close it then:
+    setTimeout(
+      () =>
+        closeStaleGameConnectionCheck(
+          connection,
+          isForPendingGame,
+          attemptNumber + 1
+        ),
+      isForPendingGame ? pendingGameConnectionCloseTimeout : gameTimeout
+    );
+  // force a terminate
+  else connection.terminate();
+};
+
+// Removes any cached data on a game that's ended:
+const removeStaleGameData = (userId: string): void => {
+  delete pendingGameConnections[userId];
+  delete inProgressGameConnections[userId];
 };
 
 /*

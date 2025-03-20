@@ -3,8 +3,10 @@ import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { Modal } from '../components/Modal';
 import {
+  type InviteRequestResponse,
   database_sendInviteFriendRequestByUsername,
   DebugOn,
+  onlineGameApi_initialize,
   resetBoard,
   resetSettings,
   saveSettings,
@@ -152,23 +154,28 @@ export function Settings() {
     ) {
       infoMessageModalMessage = infoMessageModalMessageUsernameError;
     } else {
-      const requestResponse = await database_sendInviteFriendRequestByUsername(
-        formFriendUsername
-      );
+      const requestResponse: InviteRequestResponse | null =
+        await database_sendInviteFriendRequestByUsername(formFriendUsername);
       if (!requestResponse) {
         infoMessageModalMessage = infoMessageModalMessageInviteDeniedError;
       } else {
-        const { status } = requestResponse;
-        currentGameSettings.opponentIsAI = false;
-        currentGameSettings.opponent = formFriendUsername;
-        setNewCurrentGameSettings();
-        console.log(
-          'invite sent -> status =',
-          status,
-          'currentGameSettings',
-          currentGameSettings
-        );
-        navigate(AppSubdomain);
+        const { status, pin } = requestResponse;
+        console.log('invite sent -> response =', requestResponse);
+        if (status === 0) {
+          onlineGameApi_initialize(user!.userId, pin!);
+          /*
+          currentGameSettings.opponentIsAI = false;
+          currentGameSettings.opponent = formFriendUsername;
+          setNewCurrentGameSettings();
+          console.log(
+            'invite sent -> status =',
+            status,
+            'currentGameSettings',
+            currentGameSettings
+          );
+          navigate(AppSubdomain);
+          */
+        }
       }
     }
     setIsInfoMessageModalOpen(true);

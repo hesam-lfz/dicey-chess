@@ -8,8 +8,9 @@ import {
 } from './boardEngineApi';
 import { type User, readToken } from './auth';
 
-type InviteRequestResponse = {
+export type InviteRequestResponse = {
   status: number;
+  pin?: string;
 };
 
 const localStorageKeyPrefix = import.meta.env.VITE_APP_NAME;
