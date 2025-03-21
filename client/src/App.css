@@ -265,6 +265,10 @@ dialog button {
 	Small Device Landscape Screen
 */
 @media screen and (orientation: landscape) and (height <= 400px) {
+  .header {
+    justify-content: space-between;
+  }
+
   .header-logo {
     width: calc(2 * 7vw);
   }
@@ -276,6 +280,10 @@ dialog button {
 @media screen and (orientation: portrait) {
   #root {
     padding: 0;
+  }
+
+  .header {
+    justify-content: space-between;
   }
 
   .header-logo {

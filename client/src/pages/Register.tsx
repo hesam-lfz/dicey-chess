@@ -28,13 +28,17 @@ export function Register() {
       const userData = Object.fromEntries(formData) as Record<any, any>;
       // add the initial player rank to user data:
       userData.rank = internalSettings.initPlayerRank;
-      if ((userData.username as string).length < 5) {
+      const usernameLength = (userData.username as string).length;
+      const passwordLength = (userData.password as string).length;
+      if (usernameLength < 5 || usernameLength > 15) {
         formCheckError = 1;
-        infoMessageModalMessage = 'Username is too short. Please try again!';
+        infoMessageModalMessage =
+          'Username should be 5-15 characters. Please try again!';
         throw new Error(infoMessageModalMessage);
-      } else if ((userData.password as string).length < 5) {
+      } else if (passwordLength < 5 || passwordLength > 20) {
         formCheckError = 2;
-        infoMessageModalMessage = 'Password is too short. Please try again!';
+        infoMessageModalMessage =
+          'Password should be 5-20 characters. Please try again!';
         throw new Error(infoMessageModalMessage);
       }
       const req = {

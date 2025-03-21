@@ -3,7 +3,7 @@ import { DicePanel } from '../components/DicePanel';
 import { ReplayPanel } from '../components/ReplayPanel';
 import { WHITE, type Color } from 'chess.js';
 import { useCurrentGameSettings } from './useCurrentGameSettings';
-import { playerIconSVGs } from '../lib';
+import { playerIconSVGs, shorten } from '../lib';
 
 type Props = {
   currGameId: number;
@@ -63,7 +63,9 @@ export function RightPanel({
               className="piece play-icon"
               alt="player-names-box-icon-opponent"
             />
-            <span className="player-name">{currentGameSettings.opponent}</span>
+            <span className="player-name">
+              {shorten(currentGameSettings.opponent, 10)}
+            </span>
           </div>
 
           <hr className="line-separator" />
@@ -73,7 +75,9 @@ export function RightPanel({
               className="piece play-icon"
               alt="player-names-box-icon-user"
             />
-            <span className="player-name">{user ? user.username : 'You'}</span>
+            <span className="player-name">
+              {user ? shorten(user.username, 10) : 'You'}
+            </span>
           </div>
         </div>
       </div>

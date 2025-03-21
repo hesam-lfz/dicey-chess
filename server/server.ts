@@ -80,9 +80,21 @@ app.post('/api/auth/register', async (req, res, next) => {
   try {
     const { username, password, rank } = req.body;
     if (!username || !password)
-      throw new ClientError(400, 'username and password are required fields');
+      throw new ClientError(400, 'Username and password are required fields');
+    const usernameLength = username.length;
+    const passwordLength = password.length;
+    if (usernameLength < 5 || usernameLength > 15)
+      throw new ClientError(
+        400,
+        'Username should be 5-15 characters. Please try again!'
+      );
+    if (passwordLength < 5 || passwordLength > 20)
+      throw new ClientError(
+        400,
+        'Password should be 5-20 characters. Please try again!'
+      );
     if (disallowedUsernames.includes(username) || isProfane(username))
-      throw new ClientError(400, 'username is not allowed');
+      throw new ClientError(400, 'Username is not allowed');
     const hashedPassword = await argon2.hash(password);
     const sql = `
       insert into "users" ("username", "hashedPassword", "rank")
@@ -261,13 +273,18 @@ app.put('/api/users/:userId', authMiddleware, async (req, res, next) => {
 // Records the request parties and if both parties have sent the request
 // Sends status (1 = waiting for other player's invite, 0 = ready)
 // First checks if friend username exists in the database, and fails if not.
+// If this is 2nd+ attempt from client (as its waiting for other party to
+// also send invite): isRecheck = true
 app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
   try {
+    const { isRecheck } = req.body;
+    if (typeof isRecheck !== 'string')
+      throw new ClientError(400, 'Param isRecheck is required');
     const requestingPlayerId = String(req.user!.userId);
     const priorRequestedFriendId =
       pendingGameFriendInviteRequestsFrom[requestingPlayerId];
     // If any pending prior request from user, cancel and refuse invite:
-    if (priorRequestedFriendId) {
+    if (!isRecheck && priorRequestedFriendId) {
       cancelFriendInviteRequest(requestingPlayerId, priorRequestedFriendId);
       throw new ClientError(
         400,
@@ -293,7 +310,7 @@ app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
       throw new ClientError(400, 'Cannot send invitation to self');
     const requestedPlayerId = String(user.userId);
     // Check if invite request possible:
-    if (pendingGameFriendInviteRequestsTo[requestedPlayerId])
+    if (!isRecheck && pendingGameFriendInviteRequestsTo[requestedPlayerId])
       throw new ClientError(
         400,
         'There is already a pending friend invite request for the requested'
@@ -301,6 +318,8 @@ app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
     // Record the request:
     pendingGameFriendInviteRequestsFrom[requestingPlayerId] = requestedPlayerId;
     pendingGameFriendInviteRequestsTo[requestedPlayerId] = requestingPlayerId;
+    // status = 0 means both players did mutual invite,
+    // status = 1 means only 1 way so far:
     const status =
       pendingGameFriendInviteRequestsFrom[requestedPlayerId] &&
       pendingGameFriendInviteRequestsTo[requestingPlayerId]

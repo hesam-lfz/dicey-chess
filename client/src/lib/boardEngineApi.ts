@@ -50,6 +50,11 @@ export type InternalSettings = {
   makeMoveDelay: number;
   AIMoveDelay: number;
   AIEngineUsesSocket: boolean;
+  // When requesting to play online friend with an invite, frequently recheck
+  // until the friend has send mutual invite back to us. This is the timeout
+  // between each recheck:
+  friendInviteRequestRecheckTimeout: number;
+  friendInviteRequestRecheckMaxAttempts: number;
 };
 
 // General user controlled settings:
@@ -207,6 +212,8 @@ export const internalSettings: InternalSettings = {
   AIMoveDelay: 500,
   AIEngineUsesSocket: false,
   makeMoveDelay: 50,
+  friendInviteRequestRecheckTimeout: 20000,
+  friendInviteRequestRecheckMaxAttempts: 3,
 };
 
 const defaultInitSettings: Settings = {

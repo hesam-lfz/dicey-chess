@@ -328,7 +328,8 @@ export async function storageApi_updatePlayerRank(
 // Checks if user with username exists in database (and returns any public
 // data on the user -- currently just username):
 export async function database_sendInviteFriendRequestByUsername(
-  username: string
+  username: string,
+  isRecheck: boolean
 ): Promise<InviteRequestResponse | null> {
   return new Promise((resolve) => {
     const run = async (): Promise<InviteRequestResponse | null> => {
@@ -337,6 +338,7 @@ export async function database_sendInviteFriendRequestByUsername(
         headers: {
           Authorization: `Bearer ${readToken()}`,
         },
+        body: JSON.stringify({ isRecheck: isRecheck }),
       };
       const res = await fetch(`/api/invite/${username}`, req);
       if (!res.ok) return null;

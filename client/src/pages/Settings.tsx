@@ -6,6 +6,7 @@ import {
   type InviteRequestResponse,
   database_sendInviteFriendRequestByUsername,
   DebugOn,
+  internalSettings,
   onlineGameApi_initialize,
   resetBoard,
   resetSettings,
@@ -154,16 +155,34 @@ export function Settings() {
     ) {
       infoMessageModalMessage = infoMessageModalMessageUsernameError;
     } else {
-      const requestResponse: InviteRequestResponse | null =
-        await database_sendInviteFriendRequestByUsername(formFriendUsername);
-      if (!requestResponse) {
-        infoMessageModalMessage = infoMessageModalMessageInviteDeniedError;
-      } else {
-        const { status, pin } = requestResponse;
-        console.log('invite sent -> response =', requestResponse);
-        if (status === 0) {
-          onlineGameApi_initialize(user!.userId, pin!);
-          /*
+      sendInviteFriendRequestAndHandleResponse(formFriendUsername, false);
+    }
+    setIsInfoMessageModalOpen(true);
+  }
+
+  // Sends an invite to play online friend and waits for friend to do the same
+  // If mutual invites have been sent, we're ready to start a websocket connection
+  // to play online game:
+  async function sendInviteFriendRequestAndHandleResponse(
+    formFriendUsername: string,
+    isRecheck: boolean,
+    recheckAttemptNumber: number = 0
+  ): Promise<void> {
+    const requestResponse: InviteRequestResponse | null =
+      await database_sendInviteFriendRequestByUsername(
+        formFriendUsername,
+        isRecheck
+      );
+    if (!requestResponse) {
+      infoMessageModalMessage = infoMessageModalMessageInviteDeniedError;
+    } else {
+      const { status, pin } = requestResponse;
+      console.log('invite sent -> response =', requestResponse);
+      if (status === 0) {
+        // if status = 0 (both parties have sent mutual invites and we are
+        // ready to start web socket connection to start game):
+        onlineGameApi_initialize(user!.userId, pin!);
+        /*
           currentGameSettings.opponentIsAI = false;
           currentGameSettings.opponent = formFriendUsername;
           setNewCurrentGameSettings();
@@ -175,10 +194,24 @@ export function Settings() {
           );
           navigate(AppSubdomain);
           */
-        }
+      } else if (
+        recheckAttemptNumber <
+        internalSettings.friendInviteRequestRecheckMaxAttempts
+      ) {
+        // if status = 1 (we are still waiting for friend to send
+        // the invite our way to complete the mutual invite):
+        // check back after a bit of time...:
+        setTimeout(
+          () =>
+            sendInviteFriendRequestAndHandleResponse(
+              formFriendUsername,
+              true,
+              recheckAttemptNumber + 1
+            ),
+          internalSettings.friendInviteRequestRecheckTimeout
+        );
       }
     }
-    setIsInfoMessageModalOpen(true);
   }
 
   function handleInfoMessageDone() {
