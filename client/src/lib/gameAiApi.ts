@@ -15,7 +15,7 @@ interface AIEngineParams {
   searchmoves?: string;
 }
 
-let chessAiEngine_socket: WebSocket; // <-- chess AI player engine (socket ver.)
+export let chessAiEngine_socket: WebSocket; // <-- chess AI player engine (socket ver.)
 let chessAiEngineUrl: string;
 let chessAiEngineBusy_socket: boolean = false;
 let chessAiEngineResponseMove: BasicMove | null = null;

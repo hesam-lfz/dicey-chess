@@ -37,9 +37,9 @@ import {
   storageApi_updatePlayerRank,
 } from './storageApi';
 import {
-  chessAIEngine,
-  closeChessAIEngine,
-  initChessAIEngine,
+  chessAiEngine_socket,
+  chessAiEngineApi_closeChessAiEngine_socket,
+  chessAiEngineApi_initChessAiEngine,
 } from './gameAiApi';
 import { readToken, saveAuth, User } from './auth';
 
@@ -299,10 +299,10 @@ export const resetBoard = (currentGameSettings: CurrentGameSettings) => {
   board.turn = boardEngine.turn();
   board.flatBoardFenHistory.push(boardEngine.fen());
   // close the chess AI engine socket if we have one running currently:
-  if (chessAIEngine) closeChessAIEngine();
+  if (chessAiEngine_socket) chessAiEngineApi_closeChessAiEngine_socket();
   // If we need the chess aI engine (1-player game) set it up:
   if (isGameAgainstAI(currentGameSettings) && settings.AIPlayerIsSmart) {
-    initChessAIEngine();
+    chessAiEngineApi_initChessAiEngine();
   }
 };
 
