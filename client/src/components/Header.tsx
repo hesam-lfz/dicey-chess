@@ -43,7 +43,10 @@ export function Header() {
                       handleSignOut();
                       navigate(AppSubdomain);
                     }}>
-                    {'Sign out (' + shorten(user.username, 7) + ')'}
+                    {'Sign out '}
+                    <span className="small">
+                      {'(' + shorten(user.username, 10) + ')'}
+                    </span>
                   </span>
                 ) : (
                   <Link to={AppSubdomain + 'signin'}>Sign in</Link>

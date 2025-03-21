@@ -22,6 +22,7 @@ const infoMessageModalMessageDefault =
 const infoMessageModalMessageUsernameError = 'Username(s) incorrect';
 const infoMessageModalMessageInviteDeniedError =
   'Friend username incorrect or invite request disallowed!';
+const infoMessageModalMessageGeneralError = 'Sending friend invite failed!';
 let infoMessageModalMessage = infoMessageModalMessageDefault;
 let inviteRequestSentWaitingResponse = false;
 
@@ -34,6 +35,10 @@ export function Settings() {
   ] = useState<boolean>(false);
   const [isInviteFriendOnlineModalOpen, setIsInviteFriendOnlineModalOpen] =
     useState<boolean>(false);
+  const [
+    isWaitingForFriendInviteModalOpen,
+    setIsWaitingForFriendInviteModalOpen,
+  ] = useState<boolean>(false);
   const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
     useState<boolean>(false);
 
@@ -155,10 +160,16 @@ export function Settings() {
       formUsername === formFriendUsername
     ) {
       infoMessageModalMessage = infoMessageModalMessageUsernameError;
+      setIsInfoMessageModalOpen(true);
     } else {
-      sendInviteFriendRequestAndHandleResponse(formFriendUsername, false);
+      try {
+        sendInviteFriendRequestAndHandleResponse(formFriendUsername, false);
+      } catch (error) {
+        console.error('Error sending invitation', error);
+        infoMessageModalMessage = infoMessageModalMessageGeneralError;
+        setIsInfoMessageModalOpen(true);
+      }
     }
-    setIsInfoMessageModalOpen(true);
   }
 
   // Sends an invite to play online friend and waits for friend to do the same
@@ -179,6 +190,9 @@ export function Settings() {
     inviteRequestSentWaitingResponse = false;
     if (!requestResponse) {
       infoMessageModalMessage = infoMessageModalMessageInviteDeniedError;
+      setIsInviteFriendOnlineModalOpen(false);
+      setIsInfoMessageModalOpen(true);
+      return;
     } else {
       const { status, pin } = requestResponse;
       console.log('invite sent -> response =', requestResponse);
@@ -202,6 +216,8 @@ export function Settings() {
         recheckAttemptNumber <
         internalSettings.friendInviteRequestRecheckMaxAttempts
       ) {
+        if (!isWaitingForFriendInviteModalOpen)
+          setIsWaitingForFriendInviteModalOpen(true);
         // if status = 1 (we are still waiting for friend to send
         // the invite our way to complete the mutual invite):
         // check back after a bit of time...:
@@ -216,6 +232,10 @@ export function Settings() {
         );
       }
     }
+  }
+
+  function handleWaitingForFriendInviteMessageDone() {
+    setIsWaitingForFriendInviteModalOpen(false);
   }
 
   function handleInfoMessageDone() {
@@ -311,11 +331,15 @@ export function Settings() {
         </div>
       </Modal>
       <Modal isOpen={isInviteFriendOnlineModalOpen} onClose={() => {}}>
-        <div className="modal-box">
+        <div className="modal-box compact-p">
           <p>Invite a friend online to a game.</p>
           <p>Enter your and your friend's username. </p>
           <p>Ask your friend to do the same at this time.</p>
-
+          <p>
+            <em className="smaller pink">
+              Invites will expire in 2 minutes...
+            </em>
+          </p>
           <div className="modal-actions flex-end-inputs">
             <div className="input-element-container">
               <label>
@@ -347,6 +371,29 @@ export function Settings() {
             <span className="rainbow-colored-border">
               <button onClick={handleInviteFriendOnline} autoFocus>
                 Send Invite
+              </button>
+            </span>
+          </div>
+        </div>
+      </Modal>
+      <Modal isOpen={isWaitingForFriendInviteModalOpen} onClose={() => {}}>
+        <div className="modal-box">
+          <p>Waiting to receive your friend's invite back...</p>
+          <p>
+            <em className="smaller pink">
+              Once mutual invites are sent, a connection will be established to
+              start the game.
+            </em>
+          </p>
+          <p>
+            <em className="smaller pink">
+              Invites will expire in 2 minutes...
+            </em>
+          </p>
+          <div className="modal-actions">
+            <span className="rainbow-colored-border">
+              <button onClick={handleWaitingForFriendInviteMessageDone}>
+                Cancel
               </button>
             </span>
           </div>

@@ -333,17 +333,27 @@ export async function database_sendInviteFriendRequestByUsername(
 ): Promise<InviteRequestResponse | null> {
   return new Promise((resolve) => {
     const run = async (): Promise<InviteRequestResponse | null> => {
-      const req = {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${readToken()}`,
-        },
-        body: JSON.stringify({ isRecheck: isRecheck }),
-      };
-      const res = await fetch(`/api/invite/${username}`, req);
-      if (!res.ok) return null;
-      const retrievedData = (await res.json()) as InviteRequestResponse;
-      return retrievedData;
+      try {
+        const req = {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${readToken()}`,
+          },
+        };
+        const res = await fetch(
+          `/api/invite/username/${username}/isRecheck/${isRecheck}`,
+          req
+        );
+        console.log('res', res);
+        if (!res.ok) {
+          return null;
+        }
+        const retrievedData = (await res.json()) as InviteRequestResponse;
+        return retrievedData;
+      } catch (e) {
+        console.error('Problem sending invite', e);
+        return null;
+      }
     };
     resolve(run());
   });

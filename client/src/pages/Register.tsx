@@ -1,5 +1,5 @@
 import { type FormEvent, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { internalSettings, type User } from '../lib';
 import { Modal } from '../components/Modal';
 import { AppSubdomain } from '../App';
@@ -128,6 +128,10 @@ export function Register() {
             Register
           </button>
         </span>
+        <p>
+          Already have an account?{' '}
+          <Link to={AppSubdomain + 'signin'}>Sign in</Link>
+        </p>
       </form>
       <Modal isOpen={isInfoMessageModalOpen} onClose={() => {}}>
         <div className="modal-box">

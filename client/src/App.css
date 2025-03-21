@@ -191,6 +191,18 @@ nav li {
   color: red;
 }
 
+.pink {
+  color: pink;
+}
+
+.smaller {
+  font-size: smaller;
+}
+
+.small {
+  font-size: small;
+}
+
 dialog {
   background-color: black;
   color: white;
@@ -215,6 +227,10 @@ dialog .modal-box {
 
 dialog button {
   font-size: 1em;
+}
+
+.compact-p p {
+  margin: 0;
 }
 
 /* animate slide in zoom a bit */
@@ -287,7 +303,7 @@ dialog button {
   }
 
   .header-logo {
-    width: calc(3.5 * 7vw);
+    width: calc(4 * 7vw);
   }
 
   .header-left-side ul,

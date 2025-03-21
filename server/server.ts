@@ -275,85 +275,95 @@ app.put('/api/users/:userId', authMiddleware, async (req, res, next) => {
 // First checks if friend username exists in the database, and fails if not.
 // If this is 2nd+ attempt from client (as its waiting for other party to
 // also send invite): isRecheck = true
-app.get('/api/invite/:username', authMiddleware, async (req, res, next) => {
-  try {
-    const { isRecheck } = req.body;
-    if (typeof isRecheck !== 'string')
-      throw new ClientError(400, 'Param isRecheck is required');
-    const requestingPlayerId = String(req.user!.userId);
-    const priorRequestedFriendId =
-      pendingGameFriendInviteRequestsFrom[requestingPlayerId];
-    // If any pending prior request from user, cancel and refuse invite:
-    if (!isRecheck && priorRequestedFriendId) {
-      cancelFriendInviteRequest(requestingPlayerId, priorRequestedFriendId);
-      throw new ClientError(
-        400,
-        'There is already a pending friend invite request from the requester'
-      );
-    }
-    const username = req.params.username;
-    if (!username || typeof username !== 'string') {
-      throw new ClientError(400, 'Proper username is required');
-    }
-    const sql = `
+app.get(
+  '/api/invite/username/:username/isRecheck/:isRecheck',
+  // '/api/invite/:username',
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const isRecheckStr = req.params.isRecheck;
+      if (typeof isRecheckStr !== 'string')
+        throw new ClientError(400, 'Param isRecheck is required');
+      const isRecheck = isRecheckStr === 'true';
+      const requestingPlayerId = String(req.user!.userId);
+      const priorRequestedFriendId =
+        pendingGameFriendInviteRequestsFrom[requestingPlayerId];
+      // If any pending prior request from user, cancel and refuse invite:
+      if (!isRecheck && priorRequestedFriendId) {
+        cancelFriendInviteRequest(requestingPlayerId, priorRequestedFriendId);
+        throw new ClientError(
+          400,
+          'There is already a pending friend invite request from the requester'
+        );
+      }
+      const username = req.params.username;
+      if (!username || typeof username !== 'string') {
+        throw new ClientError(400, 'Proper username is required');
+      }
+      const sql = `
       select "userId",
              "username"
       from "users"
       where "username" = $1
     `;
-    const params = [username];
-    const result = await db.query(sql, params);
-    const [user] = result.rows;
-    if (!user)
-      throw new ClientError(404, `Cannot find user with username ${username}`);
-    if (user.userId === req.user?.userId)
-      throw new ClientError(400, 'Cannot send invitation to self');
-    const requestedPlayerId = String(user.userId);
-    // Check if invite request possible:
-    if (!isRecheck && pendingGameFriendInviteRequestsTo[requestedPlayerId])
-      throw new ClientError(
-        400,
-        'There is already a pending friend invite request for the requested'
+      const params = [username];
+      const result = await db.query(sql, params);
+      const [user] = result.rows;
+      if (!user)
+        throw new ClientError(
+          404,
+          `Cannot find user with username ${username}`
+        );
+      if (user.userId === req.user?.userId)
+        throw new ClientError(400, 'Cannot send invitation to self');
+      const requestedPlayerId = String(user.userId);
+      // Check if invite request possible:
+      if (!isRecheck && pendingGameFriendInviteRequestsTo[requestedPlayerId])
+        throw new ClientError(
+          400,
+          'There is already a pending friend invite request for the requested'
+        );
+      // Record the request:
+      pendingGameFriendInviteRequestsFrom[requestingPlayerId] =
+        requestedPlayerId;
+      pendingGameFriendInviteRequestsTo[requestedPlayerId] = requestingPlayerId;
+      // status = 0 means both players did mutual invite,
+      // status = 1 means only 1 way so far:
+      const status =
+        pendingGameFriendInviteRequestsFrom[requestedPlayerId] &&
+        pendingGameFriendInviteRequestsTo[requestingPlayerId]
+          ? 0
+          : 1;
+      // If handshake is complete (both players have invited each other),
+      // establish a connection:
+      console.log(
+        'current requests from',
+        JSON.stringify(pendingGameFriendInviteRequestsFrom),
+        'current requests to',
+        JSON.stringify(pendingGameFriendInviteRequestsTo)
       );
-    // Record the request:
-    pendingGameFriendInviteRequestsFrom[requestingPlayerId] = requestedPlayerId;
-    pendingGameFriendInviteRequestsTo[requestedPlayerId] = requestingPlayerId;
-    // status = 0 means both players did mutual invite,
-    // status = 1 means only 1 way so far:
-    const status =
-      pendingGameFriendInviteRequestsFrom[requestedPlayerId] &&
-      pendingGameFriendInviteRequestsTo[requestingPlayerId]
-        ? 0
-        : 1;
-    // If handshake is complete (both players have invited each other),
-    // establish a connection:
-    console.log(
-      'current requests from',
-      JSON.stringify(pendingGameFriendInviteRequestsFrom),
-      'current requests to',
-      JSON.stringify(pendingGameFriendInviteRequestsTo)
-    );
-    // timeout pending request after 5 min:
-    setTimeout(
-      () => cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
-      pendingGameConnectionTimeout
-    );
-    // return status of request:
-    const responseData: InviteRequestResponse = { status };
-    // if we're ready to start establishing connection, add a pin for socket communication:
-    if (status === 0) {
-      responseData.pin = generateConnectionPin();
-      gameConnectionPins[requestingPlayerId] = responseData.pin!;
-      // Timeout game after a while:
-      setTimeout(() => {
-        delete gameConnectionPins[requestingPlayerId];
-      }, gameTimeout);
+      // timeout pending request after 5 min:
+      setTimeout(
+        () => cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
+        pendingGameConnectionTimeout
+      );
+      // return status of request:
+      const responseData: InviteRequestResponse = { status };
+      // if we're ready to start establishing connection, add a pin for socket communication:
+      if (status === 0) {
+        responseData.pin = generateConnectionPin();
+        gameConnectionPins[requestingPlayerId] = responseData.pin!;
+        // Timeout game after a while:
+        setTimeout(() => {
+          delete gameConnectionPins[requestingPlayerId];
+        }, gameTimeout);
+      }
+      res.json(responseData);
+    } catch (err) {
+      next(err);
     }
-    res.json(responseData);
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 /*
  * Handles paths that aren't handled by any other route handler.
