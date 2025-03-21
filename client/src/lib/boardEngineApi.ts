@@ -212,8 +212,8 @@ export const internalSettings: InternalSettings = {
   AIMoveDelay: 500,
   AIEngineUsesSocket: false,
   makeMoveDelay: 50,
-  friendInviteRequestRecheckTimeout: 20000,
-  friendInviteRequestRecheckMaxAttempts: 3,
+  friendInviteRequestRecheckTimeout: 10000,
+  friendInviteRequestRecheckMaxAttempts: 12,
 };
 
 const defaultInitSettings: Settings = {

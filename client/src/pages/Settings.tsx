@@ -23,6 +23,7 @@ const infoMessageModalMessageUsernameError = 'Username(s) incorrect';
 const infoMessageModalMessageInviteDeniedError =
   'Friend username incorrect or invite request disallowed!';
 let infoMessageModalMessage = infoMessageModalMessageDefault;
+let inviteRequestSentWaitingResponse = false;
 
 export function Settings() {
   const { currentGameSettings, setNewCurrentGameSettings, user } =
@@ -168,11 +169,14 @@ export function Settings() {
     isRecheck: boolean,
     recheckAttemptNumber: number = 0
   ): Promise<void> {
+    if (inviteRequestSentWaitingResponse) return;
+    inviteRequestSentWaitingResponse = true;
     const requestResponse: InviteRequestResponse | null =
       await database_sendInviteFriendRequestByUsername(
         formFriendUsername,
         isRecheck
       );
+    inviteRequestSentWaitingResponse = false;
     if (!requestResponse) {
       infoMessageModalMessage = infoMessageModalMessageInviteDeniedError;
     } else {
