@@ -78,12 +78,9 @@ export function Settings() {
       if (onePlayer && !isOpponentAI) {
         // Revert back to AI mode in the settings since this is just a one time thing...:
         isOpponentAI = true;
-        if (user) {
-          setIsInviteFriendOnlineModalOpen(true);
-        } else {
-          // They're not signed-in. Prompt them to do so:
-          setIsSigninToPlayFriendOnlineModalOpen(true);
-        }
+        if (user) setIsInviteFriendOnlineModalOpen(true);
+        // They're not signed-in. Prompt them to do so:
+        else setIsSigninToPlayFriendOnlineModalOpen(true);
       }
       setOnePlayer(onePlayer);
       setOpponentIsAI(isOpponentAI);
@@ -172,6 +169,24 @@ export function Settings() {
     }
   }
 
+  // This is called once a socket connection is establish to play an online friend
+  // It'll navigate to game to start:
+  function onOnlineGameReadyCallback(
+    friendUsername: string,
+    userPlaysColor: Color
+  ): void {
+    currentGameSettings.opponentIsAI = false;
+    currentGameSettings.opponent = friendUsername;
+    currentGameSettings.userPlaysColor = userPlaysColor;
+    setNewCurrentGameSettings();
+    console.log(
+      'online game ready',
+      'currentGameSettings',
+      currentGameSettings
+    );
+    navigate(AppSubdomain);
+  }
+
   // Sends an invite to play online friend and waits for friend to do the same
   // If mutual invites have been sent, we're ready to start a websocket connection
   // to play online game:
@@ -200,19 +215,9 @@ export function Settings() {
         // if status = 0 (both parties have sent mutual invites and we are
         // ready to start web socket connection to start game):
         setIsWaitingForFriendInviteModalOpen(false);
-        onlineGameApi_initialize(user!.userId, pin!);
-        /*
-          currentGameSettings.opponentIsAI = false;
-          currentGameSettings.opponent = formFriendUsername;
-          setNewCurrentGameSettings();
-          console.log(
-            'invite sent -> status =',
-            status,
-            'currentGameSettings',
-            currentGameSettings
-          );
-          navigate(AppSubdomain);
-          */
+        onlineGameApi_initialize(user!.userId, pin!, (userPlaysColor: Color) =>
+          onOnlineGameReadyCallback(formFriendUsername, userPlaysColor)
+        );
       } else if (
         recheckAttemptNumber <
         internalSettings.friendInviteRequestRecheckMaxAttempts

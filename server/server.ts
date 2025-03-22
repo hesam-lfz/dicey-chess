@@ -393,7 +393,7 @@ wsServer.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     console.log(`Received: ${message}`);
-    const { userId, pin, type, data } = JSON.parse(message.toString());
+    const { userId, pin, type, msg } = JSON.parse(message.toString());
     if (!userId) throw new ClientError(400, 'Websocket message missing userId');
     const friendId = pendingGameFriendInviteRequestsFrom[userId];
     if (!friendId)
@@ -401,9 +401,9 @@ wsServer.on('connection', (ws) => {
     if (!(pin && gameConnectionPins[userId] === pin))
       throw new ClientError(400, 'Websocket message with invalid pin');
     if (type === 'connection') {
-      if (data === 'open') {
-        ws.send(JSON.stringify({ type: 'connection', data: 'hand' }));
-      } else if (data === 'shake') {
+      if (msg === 'open') {
+        ws.send(JSON.stringify({ type: 'connection', msg: 'hand' }));
+      } else if (msg === 'shake') {
         pendingGameConnections[userId] = ws;
         // remove after a while (if game hasn't gotten started):
         const pendingGameDataCleanupTimerId = setTimeout(
@@ -413,9 +413,17 @@ wsServer.on('connection', (ws) => {
         const friendWs = pendingGameConnections[friendId];
         if (friendWs) {
           // Both parties established connection and game is ready:
-          const msg = JSON.stringify({ type: 'connection', data: 'ready' });
-          ws.send(msg);
-          friendWs.send(msg);
+          const msg = {
+            type: 'connection',
+            msg: 'ready',
+            data: { color: 'w' },
+          };
+          // Randomize player colors and send both players game ready message:
+          const connections = [ws, friendWs];
+          const randomIndex = Math.floor(Math.random() * 2);
+          connections[randomIndex].send(JSON.stringify(msg));
+          msg.data.color = 'b';
+          connections[randomIndex === 0 ? 1 : 0].send(JSON.stringify(msg));
           // Move game from pending to in-progress:
           // Clear timeouts set out to clear unsuccessful connection attempts:
           clearTimeout(pendingGameDataCleanupTimerId);
@@ -430,11 +438,11 @@ wsServer.on('connection', (ws) => {
             closeStaleGameConnection(userId, false);
             removeStaleGameData(userId);
           }, gameTimeout);
-        } else {
-          // One party hasn't established connection yet. Tell the user
-          // to wait and retry later:
-          ws.send('wait');
-        }
+        } // else {
+        // One party hasn't established connection yet. Tell the user
+        // to wait (not necessary!):
+        // ws.send(JSON.stringify({ type: 'connection', msg: 'wait' }));
+        // }
       }
     }
   });
