@@ -7,7 +7,11 @@ let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
 // 2 players:
 export function onlineGameApi_initialize(userId: number, pin: string): void {
   // Set up socket communication:
-  onlineGameApi_socket = new WebSocket('/ws');
+
+  onlineGameApi_socket = new WebSocket(
+    '/ws'
+    //'ws://${window.location.host}/ws'
+  );
 
   onlineGameApi_socket.on('open', () => {
     console.log('Connected to server');

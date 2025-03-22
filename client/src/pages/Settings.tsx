@@ -1,4 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
+import {
+  useState,
+  useCallback,
+  useRef /*, useEffect*/,
+  useEffect,
+} from 'react';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { Modal } from '../components/Modal';
@@ -55,11 +60,24 @@ export function Settings() {
   const [AIPlayerIsSmart, setAIPlayerIsSmart] = useState<boolean>(
     settings.AIPlayerIsSmart
   );
+  const [
+    needToInitOnlineGameApiConnection,
+    setNeedToInitOnlineGameApiConnection,
+  ] = useState<boolean>(false);
+  const [onlineGameApiConnectionPin, setOnlineGameApiConnectionPin] =
+    useState<string>('');
 
   const playVsFriendOnlineToggleSwitchRef = useRef<null | any>(null);
   const inviteFormUsernameRef = useRef<null | HTMLInputElement>(null);
   const inviteFormFriendUsernameRef = useRef<null | HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (needToInitOnlineGameApiConnection) {
+      setNeedToInitOnlineGameApiConnection(false);
+      onlineGameApi_initialize(user!.userId, onlineGameApiConnectionPin);
+    }
+  }, [needToInitOnlineGameApiConnection, onlineGameApiConnectionPin, user]);
 
   const onResetSettings = useCallback(() => {
     resetSettings(currentGameSettings, setNewCurrentGameSettings, true);
@@ -199,7 +217,8 @@ export function Settings() {
       if (status === 0) {
         // if status = 0 (both parties have sent mutual invites and we are
         // ready to start web socket connection to start game):
-        onlineGameApi_initialize(user!.userId, pin!);
+        setOnlineGameApiConnectionPin(pin!);
+        setNeedToInitOnlineGameApiConnection(true);
         /*
           currentGameSettings.opponentIsAI = false;
           currentGameSettings.opponent = formFriendUsername;
