@@ -559,9 +559,13 @@ export async function calculateAndStorePlayerNewRank(
   if (newRank === user.rank) return true;
   user.rank = newRank;
   if (DebugOn) console.log('updating player rank to', user.rank);
-  if (await storageApi_updatePlayerRank(user)) {
-    saveAuth(user, readToken()!);
-    return true;
+  try {
+    if (await storageApi_updatePlayerRank(user)) {
+      saveAuth(user, readToken()!);
+      return true;
+    }
+  } catch (error) {
+    console.error('Could not store player rank to the database', error);
   }
   return false;
 }

@@ -45,9 +45,11 @@ const gameTimeout = 1200000;
 // Timeout for waiting for a graceful closing of connection before a hard close:
 const pendingGameConnectionCloseTimeout = 20000;
 
+// FIXME: These caches need to go to db!!:
 const pendingGameFriendInviteRequestsFrom: Record<string, string> = {};
 const pendingGameFriendInviteRequestsTo: Record<string, string> = {};
 const gameConnectionPins: Record<string, string> = {};
+
 const pendingGameConnections: Record<string, WebSocket> = {};
 const inProgressGameConnections: Record<string, WebSocket> = {};
 

@@ -54,11 +54,12 @@ export function GamePanel({
       currReplayModeOn
     );
     */
-    if (board.gameOver && !(board.isLoadedGame || replayModeOn)) onGameOver();
+    if (board.gameOver && !(board.isLoadedGame || currReplayModeOn))
+      onGameOver();
     setGameId(currGameId);
     setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
-  });
+  }, [currGameId, currReplayModeOn, onGameOver, replayModeOn]);
 
   const onMove = useCallback(() => {
     if (replayModeOn) {
@@ -71,6 +72,7 @@ export function GamePanel({
         setShouldTriggerAITurn(false);
       setNumSingleMovesMade((n) => n + 1);
     }
+    if (board.gameOver && !replayModeOn) setReplayModeOn(true);
   }, [currentGameSettings, replayModeOn]);
 
   const onDiceRoll = useCallback(
