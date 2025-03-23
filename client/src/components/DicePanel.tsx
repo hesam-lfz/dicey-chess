@@ -141,6 +141,8 @@ export function DicePanel({
     alreadyTriggeredAIRoll,
     currentBoardData.diceRoll,
     currentBoardData.numMovesInTurn,
+    currentBoardData.diceRoll1,
+    currentBoardData.diceRoll2,
   ]);
 
   const diceClassName =
