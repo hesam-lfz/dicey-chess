@@ -39,6 +39,7 @@ const defaultCurrentBoardData: CurrentBoardData = {
   diceRoll: -1,
   diceRoll1: -1,
   diceRoll2: -1,
+  numMovesInTurn: -1,
 };
 
 export const CurrentGameContext = createContext<CurrentGameContextValues>({
@@ -118,7 +119,7 @@ export function CurrentGameContextProvider({ children }: Props) {
     // FIXME: This needs to be somewhere else??
     // Reset the board:
     if (DebugOn) console.log('reset board...');
-    resetBoard(currentGameSettings);
+    resetBoard(currentGameSettings, currentBoardData);
   }
 
   return (

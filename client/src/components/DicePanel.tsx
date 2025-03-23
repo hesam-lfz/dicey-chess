@@ -15,7 +15,6 @@ import './DicePanel.css';
 type Props = {
   currGameId: number;
   currTurn: Color;
-  currNumMovesInTurn: number;
   currShouldTriggerAIRoll: boolean;
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number, n1: number, n2: number) => void;
@@ -24,7 +23,6 @@ type Props = {
 export function DicePanel({
   currGameId,
   currTurn,
-  currNumMovesInTurn,
   currShouldTriggerAIRoll,
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
@@ -33,20 +31,16 @@ export function DicePanel({
   const diceRightRef = useRef<null | HTMLImageElement>(null);
   const rollDiceButtonBorderRef = useRef<null | HTMLSpanElement>(null);
   const rollDiceButtonIconRef = useRef<null | HTMLImageElement>(null);
-  const { currentGameSettings } = useCurrentGameContext();
+  const { currentGameSettings, currentBoardData, setNewCurrentBoardData } =
+    useCurrentGameContext();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
-  const [numMovesInTurn, setNumMovesInTurn] =
-    useState<number>(currNumMovesInTurn);
   const [shouldTriggerAIRoll, setShouldTriggerAIRoll] = useState<boolean>(
     currShouldTriggerAIRoll
   );
   const [alreadyTriggeredAIRoll, setAlreadyTriggeredAIRoll] =
     useState<boolean>(false);
   const [AIMoveTriggered, setAIMoveTriggered] = useState<boolean>(false);
-  const [roll1, setRoll1] = useState<number>(board.diceRoll1);
-  const [roll2, setRoll2] = useState<number>(board.diceRoll2);
-  const [roll, setRoll] = useState<number>(board.diceRoll);
   const [dice1IconRotation, setDice1IconRotation] = useState<number>(0);
   const [dice2IconRotation, setDice2IconRotation] = useState<number>(0);
 
@@ -57,33 +51,40 @@ export function DicePanel({
     // If we re-rolled due to an AI 0 roll on check, and again we got a 0,
     // then force another re-roll:
     if (roll === 0 && alreadyTriggeredAIRoll) setAlreadyTriggeredAIRoll(false);
-    setNumMovesInTurn(roll);
-    setRoll1(roll1);
-    setRoll2(roll2);
-    setRoll(roll);
+    currentBoardData.numMovesInTurn = roll;
+    currentBoardData.diceRoll = roll;
+    currentBoardData.diceRoll1 = roll1;
+    currentBoardData.diceRoll2 = roll2;
+    setNewCurrentBoardData();
     setDice1IconRotation(Math.floor(Math.random() * 50) - 25);
     setDice2IconRotation(Math.floor(Math.random() * 50) - 25);
     containerOnDiceRoll(roll, roll1, roll2);
-  }, [alreadyTriggeredAIRoll, containerOnDiceRoll]);
+  }, [
+    alreadyTriggeredAIRoll,
+    containerOnDiceRoll,
+    currentBoardData,
+    setNewCurrentBoardData,
+  ]);
 
   useEffect(() => {
     setTurn(board.turn);
     setGameId(currGameId);
-    setNumMovesInTurn(currNumMovesInTurn);
     if (DebugOn)
       console.log(
         'rendered DicePanel',
         currGameId,
         'currTurn',
         currTurn,
-        'roll',
-        roll,
         'theRoll',
-        board.diceRoll,
+        currentBoardData.diceRoll,
+        'roll1',
+        currentBoardData.diceRoll1,
+        'roll2',
+        currentBoardData.diceRoll2,
         'theRoll === -1 && !itIsAITurn',
-        board.diceRoll === -1 && !isAITurn(currentGameSettings),
+        currentBoardData.diceRoll === -1 && !isAITurn(currentGameSettings),
         'currNumMovesInTurn',
-        currNumMovesInTurn,
+        currentBoardData.numMovesInTurn,
         'AIMoveTriggered',
         AIMoveTriggered,
         'currShouldTriggerAIRoll',
@@ -127,7 +128,6 @@ export function DicePanel({
       }, 100);
     }
   }, [
-    currNumMovesInTurn,
     currGameId,
     gameId,
     currTurn,
@@ -136,15 +136,16 @@ export function DicePanel({
     currShouldAlertDiceRoll,
     handleRollButtonClick,
     currentGameSettings,
-    roll,
-    numMovesInTurn,
     currShouldTriggerAIRoll,
     shouldTriggerAIRoll,
     alreadyTriggeredAIRoll,
+    currentBoardData.diceRoll,
+    currentBoardData.numMovesInTurn,
   ]);
 
   const diceClassName =
-    'dice-box-icon dice-drop-animation' + (roll === 0 ? ' dice-0' : '');
+    'dice-box-icon dice-drop-animation' +
+    (currentBoardData.diceRoll === 0 ? ' dice-0' : '');
   return (
     <>
       <div className="flex flex-col flex-align-center">
@@ -161,7 +162,8 @@ export function DicePanel({
           <span>'s Move</span>
         </div>
         <div className="dice-area">
-          {board.diceRoll === -1 && !isOpponentsTurn(currentGameSettings) ? (
+          {currentBoardData.diceRoll === -1 &&
+          !isOpponentsTurn(currentGameSettings) ? (
             <span
               className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
               ref={rollDiceButtonBorderRef}>
@@ -176,18 +178,18 @@ export function DicePanel({
                 />
               </button>
             </span>
-          ) : board.diceRoll === -1 ? null : (
+          ) : currentBoardData.diceRoll === -1 ? null : (
             <div className="dice-icons-box" key={board.turn}>
               <img
                 className={diceClassName}
-                src={diceSVGs['Icon_Dice' + roll1]}
+                src={diceSVGs['Icon_Dice' + currentBoardData.diceRoll1]}
                 alt="dice-left-logo"
                 style={{ transform: 'rotate(' + dice1IconRotation + 'deg)' }}
                 ref={diceLeftRef}
               />
               <img
                 className={diceClassName}
-                src={diceSVGs['Icon_Dice' + roll2]}
+                src={diceSVGs['Icon_Dice' + currentBoardData.diceRoll2]}
                 alt="dice-right-logo"
                 style={{ transform: 'rotate(' + dice2IconRotation + 'deg)' }}
                 ref={diceRightRef}
@@ -199,10 +201,15 @@ export function DicePanel({
       <p
         className={
           'num-moves-left-text' +
-          (board.diceRoll <= 0 || numMovesInTurn === -1 ? ' invisible' : '')
+          (currentBoardData.diceRoll <= 0 ||
+          currentBoardData.numMovesInTurn === -1
+            ? ' invisible'
+            : '')
         }>
-        <span className="num-moves-left-num">{numMovesInTurn}</span>
-        {' move' + (numMovesInTurn > 1 ? 's' : '') + ' left.'}
+        <span className="num-moves-left-num">
+          {currentBoardData.numMovesInTurn}
+        </span>
+        {' move' + (currentBoardData.numMovesInTurn > 1 ? 's' : '') + ' left.'}
       </p>
     </>
   );

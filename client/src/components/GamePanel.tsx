@@ -31,20 +31,17 @@ export function GamePanel({
   onNewGame,
   onLoadGame,
 }: Props) {
-  const { currentGameSettings } = useCurrentGameContext();
+  const { currentGameSettings, currentBoardData } = useCurrentGameContext();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [replayStepMove, setReplayStepMove] = useState<number>(0);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
-    board.diceRoll !== -1 && isAITurn(currentGameSettings)
+    currentBoardData.diceRoll !== -1 && isAITurn(currentGameSettings)
   );
   const [shouldTriggerAIRoll, setShouldTriggerAIRoll] =
     useState<boolean>(false);
   const [numSingleMovesMade, setNumSingleMovesMade] = useState<number>(0);
-  const [numMovesInTurn, setNumMovesInTurn] = useState<number>(
-    board.numMovesInTurn
-  );
   const [shouldAlertDiceRoll, setShouldAlertDiceRoll] =
     useState<boolean>(false);
   const [isMovingDisabled, setIsMovingDisabled] = useState<boolean>(false);
@@ -73,15 +70,18 @@ export function GamePanel({
     if (replayModeOn) {
       setReplayStepMove(0);
     } else {
-      if (DebugOn) console.log('onmove', board.turn, board.numMovesInTurn);
+      if (DebugOn)
+        console.log('onmove', board.turn, currentBoardData.numMovesInTurn);
       setTurn(board.turn);
-      setNumMovesInTurn(board.numMovesInTurn);
-      if (board.numMovesInTurn === -1 && isAITurn(currentGameSettings))
+      if (
+        currentBoardData.numMovesInTurn === -1 &&
+        isAITurn(currentGameSettings)
+      )
         setShouldTriggerAITurn(false);
       setNumSingleMovesMade((n) => n + 1);
     }
     if (board.gameOver && !replayModeOn) setReplayModeOn(true);
-  }, [currentGameSettings, replayModeOn]);
+  }, [currentBoardData.numMovesInTurn, currentGameSettings, replayModeOn]);
 
   const onDiceRoll = useCallback(
     (roll: number, roll1: number, roll2: number) => {
@@ -100,17 +100,16 @@ export function GamePanel({
           setTurn(board.turn);
         }
         roll = -1;
-        board.diceRoll = roll;
-        setNumMovesInTurn(roll);
+        currentBoardData.diceRoll = roll;
+        currentBoardData.numMovesInTurn = roll;
         setIsMovingDisabled(false);
       }
       board.diceRollHistory.push(roll);
-      board.diceRoll = roll;
-      board.diceRoll1 = roll1;
-      board.diceRoll2 = roll2;
-      board.numMovesInTurn = roll;
+      currentBoardData.diceRoll = roll;
+      currentBoardData.diceRoll1 = roll1;
+      currentBoardData.diceRoll2 = roll2;
+      currentBoardData.numMovesInTurn = roll;
       setTurn(board.turn);
-      setNumMovesInTurn(roll);
       if (DebugOn)
         console.log(
           'onroll',
@@ -135,7 +134,7 @@ export function GamePanel({
       if (isGameAgainstOnlineFriend(currentGameSettings))
         onlineGameApi_sendDiceRoll(roll, roll1, roll2);
     },
-    [currentGameSettings, shouldTriggerAITurn]
+    [currentBoardData, currentGameSettings, shouldTriggerAITurn]
   );
 
   const onAlertDiceRoll = useCallback(() => {
@@ -162,7 +161,6 @@ export function GamePanel({
           <BoardLabels
             currUserPlaysColor={currentGameSettings.userPlaysColor}
           />
-          {/*<span className="player-username">Opponent</span>*/}
           <Board
             currGameId={gameId}
             currReplayModeOn={replayModeOn}
@@ -179,13 +177,11 @@ export function GamePanel({
             containerOnMove={onMove}
             containerOnAlertDiceRoll={onAlertDiceRoll}
           />
-          {/*<span className="player-username">You</span>*/}
         </div>
         <RightPanel
           currGameId={gameId}
           currReplayModeOn={replayModeOn}
           currTurn={turn}
-          currNumMovesInTurn={numMovesInTurn}
           currShouldTriggerAIRoll={shouldTriggerAIRoll}
           currShouldAlertDiceRoll={shouldAlertDiceRoll}
           containerOnDiceRoll={onDiceRoll}

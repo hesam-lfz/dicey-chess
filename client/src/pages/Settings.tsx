@@ -27,8 +27,13 @@ let infoMessageModalMessage = infoMessageModalMessageDefault;
 let inviteRequestSentWaitingResponse = false;
 
 export function Settings() {
-  const { currentGameSettings, setNewCurrentGameSettings, user } =
-    useCurrentGameContext();
+  const {
+    currentGameSettings,
+    setNewCurrentGameSettings,
+    currentBoardData,
+    setNewCurrentBoardData,
+    user,
+  } = useCurrentGameContext();
   const [
     isSigninToPlayFriendOnlineModalOpen,
     setIsSigninToPlayFriendOnlineModalOpen,
@@ -63,14 +68,14 @@ export function Settings() {
 
   const onResetSettings = useCallback(() => {
     resetSettings(currentGameSettings, setNewCurrentGameSettings, true);
-    resetBoard(currentGameSettings);
+    resetBoard(currentGameSettings, currentBoardData);
     saveSettings(currentGameSettings, setNewCurrentGameSettings);
     setOnePlayer(settings.onePlayerMode);
     setOpponentIsAI(settings.opponentIsAI);
     setUserPlaysColor(settings.userPlaysColor);
     setUserPlaysColorRandomly(settings.userPlaysColorRandomly);
     setAIPlayerIsSmart(settings.AIPlayerIsSmart);
-  }, [currentGameSettings, setNewCurrentGameSettings]);
+  }, [currentBoardData, currentGameSettings, setNewCurrentGameSettings]);
 
   const onPlayerModeChange = useCallback(
     (onePlayer: boolean, isOpponentAI: boolean) => {
@@ -86,10 +91,10 @@ export function Settings() {
       setOpponentIsAI(isOpponentAI);
       settings.onePlayerMode = onePlayer;
       settings.opponentIsAI = isOpponentAI;
-      resetBoard(currentGameSettings);
+      resetBoard(currentGameSettings, currentBoardData);
       saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
-    [currentGameSettings, setNewCurrentGameSettings, user]
+    [currentBoardData, currentGameSettings, setNewCurrentGameSettings, user]
   );
 
   const onUserPlaysColorChange = useCallback(
@@ -112,20 +117,20 @@ export function Settings() {
       setUserPlaysColorRandomly(randomOn);
       settings.userPlaysColor = colorToSet;
       settings.userPlaysColorRandomly = randomOn;
-      resetBoard(currentGameSettings);
+      resetBoard(currentGameSettings, currentBoardData);
       saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
-    [currentGameSettings, setNewCurrentGameSettings]
+    [currentBoardData, currentGameSettings, setNewCurrentGameSettings]
   );
 
   const onAISmartChange = useCallback(
     (checked: boolean) => {
       setAIPlayerIsSmart(checked);
       settings.AIPlayerIsSmart = checked;
-      resetBoard(currentGameSettings);
+      resetBoard(currentGameSettings, currentBoardData);
       saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
-    [currentGameSettings, setNewCurrentGameSettings]
+    [currentBoardData, currentGameSettings, setNewCurrentGameSettings]
   );
 
   function handleSigninToPlayFriendOnlineModalClose(): void {
@@ -217,8 +222,13 @@ export function Settings() {
       if (status === 0) {
         // if status = 0 (both parties have sent mutual invites and we are
         // ready to start web socket connection to start game):
-        onlineGameApi_initialize(user!.userId, pin!, (userPlaysColor: Color) =>
-          onOnlineGameReadyCallback(formFriendUsername, userPlaysColor)
+        onlineGameApi_initialize(
+          currentBoardData,
+          setNewCurrentBoardData,
+          user!.userId,
+          pin!,
+          (userPlaysColor: Color) =>
+            onOnlineGameReadyCallback(formFriendUsername, userPlaysColor)
         );
       } else if (
         recheckAttemptNumber <

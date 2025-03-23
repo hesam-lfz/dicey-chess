@@ -25,8 +25,12 @@ const infoMessageModalMessageDefault: string = 'Game saved.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Game() {
-  const { currentGameSettings, setNewCurrentGameSettings, user } =
-    useCurrentGameContext();
+  const {
+    currentGameSettings,
+    setNewCurrentGameSettings,
+    currentBoardData,
+    user,
+  } = useCurrentGameContext();
   const [savedGames, setSavedGames] = useState<SavedGame[]>();
   const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
     useState<boolean>(false);
@@ -92,7 +96,7 @@ export function Game() {
   function resetGame(): void {
     if (DebugOn) console.log('Resetting game!');
     resetSettings(currentGameSettings, setNewCurrentGameSettings, false);
-    resetBoard(currentGameSettings);
+    resetBoard(currentGameSettings, currentBoardData);
     setGameId(currentGameSettings.gameId);
     setReplayModeOn(false);
   }
@@ -161,7 +165,11 @@ export function Game() {
       for (const g of savedGames!) {
         if (gameId === g.at) {
           // Prepare the board for replay of this saved game:
-          loadSuccess = initBoardForGameReplay(currentGameSettings, g);
+          loadSuccess = initBoardForGameReplay(
+            currentGameSettings,
+            currentBoardData,
+            g
+          );
           loadedGame = true;
           break;
         }

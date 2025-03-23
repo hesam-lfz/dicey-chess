@@ -1,5 +1,5 @@
 import { Color } from 'chess.js';
-import { board } from './boardEngineApi';
+import { CurrentBoardData, DebugOn } from './boardEngineApi';
 
 type SocketResponseMessage = {
   type: string;
@@ -20,6 +20,8 @@ let thePin: string;
 // Starts a new web socket connection to server to establish connection between
 // 2 players:
 export function onlineGameApi_initialize(
+  currentBoardData: CurrentBoardData,
+  setNewCurrentBoardData: () => void,
   userId: number,
   pin: string,
   onOnlineGameReadyCallback: (userPlaysColor: Color) => void
@@ -33,7 +35,7 @@ export function onlineGameApi_initialize(
   );
 
   onlineGameApi_socket.onopen = () => {
-    console.log('Connected to server');
+    if (DebugOn) console.log('Connected to server');
     onlineGameApi_socket.send(
       JSON.stringify({
         userId: userId,
@@ -48,7 +50,7 @@ export function onlineGameApi_initialize(
     //console.log(message);
     const response = JSON.parse(message.data) as SocketResponseMessage;
     const { type, msg, data } = response;
-    console.log('Received: ', response);
+    if (DebugOn) console.log('Received: ', response);
     if (type === 'connection') {
       if (msg === 'hand') {
         // Send "shake" to complete handshake with socket server:
@@ -66,11 +68,13 @@ export function onlineGameApi_initialize(
     } else if (type === 'game') {
       // Receiving a game event (roll or move) from the opponent friend:
       if (msg === 'roll') {
-        console.log('got friend roll', data);
+        if (DebugOn) console.log('got friend roll', data);
         const diceData = data as DiceRollData;
-        board.diceRoll = diceData.roll;
-        board.diceRoll1 = diceData.roll1;
-        board.diceRoll1 = diceData.roll2;
+        currentBoardData.diceRoll = diceData.roll;
+        currentBoardData.diceRoll1 = diceData.roll1;
+        currentBoardData.diceRoll2 = diceData.roll2;
+        currentBoardData.numMovesInTurn = diceData.roll;
+        setNewCurrentBoardData();
       }
     }
   };

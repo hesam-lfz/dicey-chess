@@ -9,7 +9,6 @@ type Props = {
   currGameId: number;
   currReplayModeOn: boolean;
   currTurn: Color;
-  currNumMovesInTurn: number;
   currShouldTriggerAIRoll: boolean;
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number, n1: number, n2: number) => void;
@@ -20,7 +19,6 @@ export function RightPanel({
   currGameId,
   currReplayModeOn,
   currTurn,
-  currNumMovesInTurn,
   currShouldTriggerAIRoll,
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
@@ -44,7 +42,6 @@ export function RightPanel({
         <DicePanel
           currGameId={currGameId}
           currTurn={currTurn}
-          currNumMovesInTurn={currNumMovesInTurn}
           currShouldTriggerAIRoll={currShouldTriggerAIRoll}
           currShouldAlertDiceRoll={currShouldAlertDiceRoll}
           containerOnDiceRoll={containerOnDiceRoll}

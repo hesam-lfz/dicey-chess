@@ -62,7 +62,8 @@ export function Board({
   containerOnMove,
   containerOnAlertDiceRoll,
 }: Props) {
-  const { currentGameSettings, user } = useCurrentGameContext();
+  const { currentGameSettings, currentBoardData, user } =
+    useCurrentGameContext();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [replayStepMove, setReplayStepMove] =
@@ -98,6 +99,7 @@ export function Board({
     } else {
       makeMove(
         currentGameSettings,
+        currentBoardData,
         user,
         movingFromSq!,
         movingToSq!,
@@ -111,15 +113,16 @@ export function Board({
     movingToSq,
     replayModeOn,
     containerOnMove,
-    user,
     currentGameSettings,
+    currentBoardData,
+    user,
     pawnPromotion,
   ]);
 
   const triggerAIMove = useCallback(() => {
     const run = async () => {
       const move: BasicMove = await chessAiEngineApi_getAIMove(
-        board.numMovesInTurn === 1
+        currentBoardData.numMovesInTurn === 1
       );
       //console.log('getAIMove got', move);
       setMovingFromSq(move.from);
@@ -127,7 +130,7 @@ export function Board({
       setPawnPromotion(move.promotion);
     };
     run();
-  }, []);
+  }, [currentBoardData.numMovesInTurn]);
 
   // Move to next/prev move during game replay:
   const triggerReplayStepMove = useCallback((step: number) => {
@@ -268,7 +271,7 @@ export function Board({
       // if the game is over or we're in replay mode, clicking is not allowed:
       if (board.gameOver) return;
       // if dice isn't rolled yet clicking is not allowed:
-      if (board.diceRoll === -1) {
+      if (currentBoardData.diceRoll === -1) {
         // alert user they need to roll dice first:
         containerOnAlertDiceRoll();
         return;
@@ -285,7 +288,11 @@ export function Board({
         setMovingFromSq(square);
       else if (
         movingFromSq &&
-        validateMove(movingFromSq, square, board.numMovesInTurn === 1)
+        validateMove(
+          movingFromSq,
+          square,
+          currentBoardData.numMovesInTurn === 1
+        )
       ) {
         setMovingToSq(square);
         setPawnPromotion(
@@ -295,6 +302,8 @@ export function Board({
     },
     [
       isMovingDisabled,
+      currentBoardData.diceRoll,
+      currentBoardData.numMovesInTurn,
       currentGameSettings,
       movingFromSq,
       containerOnAlertDiceRoll,

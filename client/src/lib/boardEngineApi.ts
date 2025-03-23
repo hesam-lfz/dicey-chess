@@ -80,6 +80,7 @@ export type CurrentBoardData = {
   diceRoll: number;
   diceRoll1: number;
   diceRoll2: number;
+  numMovesInTurn: number;
 };
 
 export type SavedGame = {
@@ -103,10 +104,6 @@ export type Board = {
   historyNumMoves: number;
   replayCurrentFlatIndex: number;
   turn: Color;
-  diceRoll: number;
-  diceRoll1: number;
-  diceRoll2: number;
-  numMovesInTurn: number;
   firstMoveInTurn: boolean;
   gameOver: boolean;
   isLoadedGame: boolean;
@@ -204,10 +201,6 @@ const initBoard: Board = {
   historyNumMoves: 0,
   replayCurrentFlatIndex: -1,
   turn: WHITE,
-  diceRoll: -1,
-  diceRoll1: -1,
-  diceRoll2: -1,
-  numMovesInTurn: -1,
   firstMoveInTurn: true,
   gameOver: false,
   isLoadedGame: false,
@@ -303,12 +296,18 @@ export const setCurrentGameSettingsBasedOnSettings = (
 };
 
 // Reset the board to start a new game:
-export const resetBoard = (currentGameSettings: CurrentGameSettings) => {
+export const resetBoard = (
+  currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData
+) => {
   // If we're currently in a game with an online friend, close the web socket
   // connection:
   if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
   // increment gameId to trigger all components to reset:
   currentGameSettings.gameId += 1;
+  currentBoardData.diceRoll = -1;
+  currentBoardData.diceRoll1 = -1;
+  currentBoardData.diceRoll2 = -1;
   board = { ...initBoard };
   board.history = [[]];
   board.flatSanMoveHistory = [];
@@ -332,9 +331,10 @@ export const resetBoard = (currentGameSettings: CurrentGameSettings) => {
 // Returns false if fails
 export function initBoardForGameReplay(
   currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData,
   game: SavedGame
 ): boolean {
-  resetBoard(currentGameSettings);
+  resetBoard(currentGameSettings, currentBoardData);
   /*
   console.log(
     'before prepping board',
@@ -401,7 +401,7 @@ export function initBoardForGameReplay(
       'Loading the saved game failed. The game was not saved properly and will be removed: ',
       error
     );
-    resetBoard(currentGameSettings);
+    resetBoard(currentGameSettings, currentBoardData);
     return false;
   }
 }
@@ -453,6 +453,7 @@ export function getPossibleSanMoves(
 // Execute the given move from to square:
 export function makeMove(
   currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData,
   user: User | undefined,
   fromSquare: Square,
   toSquare: Square,
@@ -467,12 +468,12 @@ export function makeMove(
   board.history[board.history.length - 1].push(move.san);
   board.flatSanMoveHistory.push(move.san);
   board.historyNumMoves += 1;
-  board.numMovesInTurn -= 1;
+  currentBoardData.numMovesInTurn -= 1;
   //board.replayCurrentMoveInTurnIndex += 1;
-  if (board.numMovesInTurn === 0) {
+  if (currentBoardData.numMovesInTurn === 0) {
     // The player has played current turn's all the number of moves according to the dice roll:
-    board.diceRoll = -1;
-    board.numMovesInTurn = -1;
+    currentBoardData.diceRoll = -1;
+    currentBoardData.numMovesInTurn = -1;
     board.firstMoveInTurn = true;
     board.history.push([]);
   } else {
