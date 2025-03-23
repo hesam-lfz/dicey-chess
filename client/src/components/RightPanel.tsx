@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { DicePanel } from '../components/DicePanel';
 import { ReplayPanel } from '../components/ReplayPanel';
-import { WHITE, type Color } from 'chess.js';
+import { WHITE } from 'chess.js';
 import { useCurrentGameContext } from './useCurrentGameContext';
 import { playerIconSVGs, shorten } from '../lib';
 
 type Props = {
   currGameId: number;
   currReplayModeOn: boolean;
-  currTurn: Color;
   currShouldTriggerAIRoll: boolean;
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number, n1: number, n2: number) => void;
@@ -18,7 +17,6 @@ type Props = {
 export function RightPanel({
   currGameId,
   currReplayModeOn,
-  currTurn,
   currShouldTriggerAIRoll,
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
@@ -41,7 +39,6 @@ export function RightPanel({
       ) : (
         <DicePanel
           currGameId={currGameId}
-          currTurn={currTurn}
           currShouldTriggerAIRoll={currShouldTriggerAIRoll}
           currShouldAlertDiceRoll={currShouldAlertDiceRoll}
           containerOnDiceRoll={containerOnDiceRoll}

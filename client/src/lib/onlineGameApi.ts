@@ -1,5 +1,10 @@
 import { Color } from 'chess.js';
-import { CurrentBoardData, DebugOn } from './boardEngineApi';
+import {
+  CurrentBoardData,
+  CurrentGameSettings,
+  DebugOn,
+  handleDiceRoll,
+} from './boardEngineApi';
 
 type SocketResponseMessage = {
   type: string;
@@ -20,6 +25,7 @@ let thePin: string;
 // Starts a new web socket connection to server to establish connection between
 // 2 players:
 export function onlineGameApi_initialize(
+  currentGameSettings: CurrentGameSettings,
   currentBoardData: CurrentBoardData,
   setNewCurrentBoardData: () => void,
   userId: number,
@@ -70,11 +76,14 @@ export function onlineGameApi_initialize(
       if (msg === 'roll') {
         if (DebugOn) console.log('got friend roll', data);
         const diceData = data as DiceRollData;
-        currentBoardData.diceRoll = diceData.roll;
-        currentBoardData.diceRoll1 = diceData.roll1;
-        currentBoardData.diceRoll2 = diceData.roll2;
-        currentBoardData.numMovesInTurn = diceData.roll;
-        setNewCurrentBoardData();
+        handleDiceRoll(
+          currentGameSettings,
+          currentBoardData,
+          setNewCurrentBoardData,
+          diceData.roll,
+          diceData.roll1,
+          diceData.roll2
+        );
       }
     }
   };

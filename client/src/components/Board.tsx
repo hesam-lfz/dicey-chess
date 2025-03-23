@@ -20,7 +20,7 @@ import {
   internalSettings,
   isOpponentsTurn,
 } from '../lib';
-import { Color, WHITE, type Piece, type Square } from 'chess.js';
+import { Color, PieceSymbol, WHITE, type Piece, type Square } from 'chess.js';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -77,7 +77,7 @@ export function Board({
   );
   const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
   const [movingToSq, setMovingToSq] = useState<Square | null>(null);
-  const [pawnPromotion, setPawnPromotion] = useState<string | undefined>(
+  const [pawnPromotion, setPawnPromotion] = useState<PieceSymbol | undefined>(
     undefined
   );
   const [prevMoveFromSq, setPrevMoveFromSq] = useState<Square | null>(
@@ -133,24 +133,27 @@ export function Board({
   }, [currentBoardData.numMovesInTurn]);
 
   // Move to next/prev move during game replay:
-  const triggerReplayStepMove = useCallback((step: number) => {
-    const run = async () => {
-      const move = boardReplayStepMove(step);
-      if (move) {
-        setMovingFromSq(move.from);
-        setMovingToSq(move.to);
-        setPawnPromotion(move.promotion);
-      } else {
-        setPrevMoveFromSq(null);
-        setPrevMoveToSq(null);
-        setMovingFromSq(null);
-        setMovingToSq(null);
-        setPawnPromotion(undefined);
-      }
-      setReplayStepMove(0);
-    };
-    run();
-  }, []);
+  const triggerReplayStepMove = useCallback(
+    (step: number) => {
+      const run = async () => {
+        const move = boardReplayStepMove(currentBoardData, step);
+        if (move) {
+          setMovingFromSq(move.from);
+          setMovingToSq(move.to);
+          setPawnPromotion(move.promotion);
+        } else {
+          setPrevMoveFromSq(null);
+          setPrevMoveToSq(null);
+          setMovingFromSq(null);
+          setMovingToSq(null);
+          setPawnPromotion(undefined);
+        }
+        setReplayStepMove(0);
+      };
+      run();
+    },
+    [currentBoardData]
+  );
 
   useEffect(() => {
     const run = async () => {
@@ -180,7 +183,7 @@ export function Board({
           'shouldTriggerAITurn',
           shouldTriggerAITurn,
           'isOpponentsTurn()',
-          isOpponentsTurn(currentGameSettings),
+          isOpponentsTurn(currentGameSettings, currentBoardData),
           'replayModeOn',
           replayModeOn,
           'replayStepMove',
@@ -220,7 +223,10 @@ export function Board({
           return;
         }
         // mechanism to trigger AI move automatically, if needed (part one)
-        if (isAITurn(currentGameSettings) && !board.gameOver) {
+        if (
+          isAITurn(currentGameSettings, currentBoardData) &&
+          !board.gameOver
+        ) {
           setShouldTriggerAITurn(currShouldTriggerAITurn);
           return;
         }
@@ -262,6 +268,7 @@ export function Board({
     prevMoveFromSq,
     prevMoveToSq,
     currIsMovingDisabled,
+    currentBoardData,
   ]);
 
   const squareClicked = useCallback(
@@ -277,33 +284,34 @@ export function Board({
         return;
       }
       // if in 1-player mode and it's not player's turn, clicking is not allowed:
-      if (isOpponentsTurn(currentGameSettings)) return;
+      if (isOpponentsTurn(currentGameSettings, currentBoardData)) return;
       // find the square element which was clicked on so we can get the square coords:
       let $clickedSq = e.target as HTMLElement;
       if ($clickedSq.tagName === 'IMG')
         $clickedSq = $clickedSq!.closest('.square') ?? $clickedSq;
       const square = $clickedSq.id as Square;
       const clickedPiece = getSquarePiece(square);
-      if (clickedPiece && clickedPiece.color === board.turn)
+      const promotion = movingFromSq
+        ? promptUserIfPromotionMove(movingFromSq, square, currentBoardData.turn)
+        : undefined;
+      if (clickedPiece && clickedPiece.color === currentBoardData.turn)
         setMovingFromSq(square);
       else if (
         movingFromSq &&
         validateMove(
           movingFromSq,
           square,
-          currentBoardData.numMovesInTurn === 1
+          currentBoardData.numMovesInTurn === 1,
+          promotion
         )
       ) {
         setMovingToSq(square);
-        setPawnPromotion(
-          promptUserIfPromotionMove(movingFromSq, square, board.turn)
-        );
+        setPawnPromotion(promotion);
       }
     },
     [
       isMovingDisabled,
-      currentBoardData.diceRoll,
-      currentBoardData.numMovesInTurn,
+      currentBoardData,
       currentGameSettings,
       movingFromSq,
       containerOnAlertDiceRoll,

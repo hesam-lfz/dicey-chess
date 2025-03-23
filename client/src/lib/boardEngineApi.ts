@@ -42,7 +42,10 @@ import {
   chessAiEngineApi_initChessAiEngine,
 } from './gameAiApi';
 import { readToken, saveAuth, User } from './auth';
-import { onlineGameApi_close } from './onlineGameApi';
+import {
+  onlineGameApi_close,
+  onlineGameApi_sendDiceRoll,
+} from './onlineGameApi';
 
 // General internal game settings:
 export type InternalSettings = {
@@ -77,6 +80,7 @@ export type CurrentGameSettings = {
 
 // Settings specific for a given game:
 export type CurrentBoardData = {
+  turn: Color;
   diceRoll: number;
   diceRoll1: number;
   diceRoll2: number;
@@ -103,7 +107,6 @@ export type Board = {
   diceRollHistory: number[];
   historyNumMoves: number;
   replayCurrentFlatIndex: number;
-  turn: Color;
   firstMoveInTurn: boolean;
   gameOver: boolean;
   isLoadedGame: boolean;
@@ -200,7 +203,6 @@ const initBoard: Board = {
   diceRollHistory: [],
   historyNumMoves: 0,
   replayCurrentFlatIndex: -1,
-  turn: WHITE,
   firstMoveInTurn: true,
   gameOver: false,
   isLoadedGame: false,
@@ -316,7 +318,7 @@ export const resetBoard = (
   board.diceRollHistory = [];
   board.gameStartTime = Math.floor(Date.now() / 1000);
   boardEngine = new Chess(board.initPositionFen);
-  board.turn = boardEngine.turn();
+  currentBoardData.turn = boardEngine.turn();
   board.flatBoardFenHistory.push(boardEngine.fen());
   // close the chess AI engine socket if we have one running currently:
   if (chessAiEngine_socket) chessAiEngineApi_closeChessAiEngine_socket();
@@ -372,7 +374,7 @@ export function initBoardForGameReplay(
       if (diceRoll === 0) {
         // roll was 0 and turn need to be given back to the other player:
         flatBoardFenHistory.pop();
-        swapTurn();
+        swapTurn(currentBoardData);
         flatBoardFenHistory.push(boardEngine.fen());
       } else {
         while (currTurnMoveIdx < diceRoll) {
@@ -380,7 +382,7 @@ export function initBoardForGameReplay(
           const move = boardEngine.move(flatSanMoveHistory[currFlatMoveIdx++]);
           // If this is not the last move in the current turn move set,
           // we need to manually change the turn back to the same player:
-          if (currTurnMoveIdx < diceRoll - 1) swapTurn();
+          if (currTurnMoveIdx < diceRoll - 1) swapTurn(currentBoardData);
           currMoveSet.push(move.san);
           flatSquareMoveHistory.push(move);
           flatBoardFenHistory.push(boardEngine.fen());
@@ -391,8 +393,8 @@ export function initBoardForGameReplay(
     }
     // Move the game back to beginning:
     boardEngine = new Chess(board.flatBoardFenHistory[1]);
-    board.turn = boardEngine.turn();
-    if (board.diceRollHistory[0] > 1) swapTurn();
+    currentBoardData.turn = boardEngine.turn();
+    if (board.diceRollHistory[0] > 1) swapTurn(currentBoardData);
     board.replayCurrentFlatIndex = 0;
     //console.log('done prepping board', board, boardEngine.turn());
     return true;
@@ -413,13 +415,17 @@ export const getSquarePiece = (square: Square) => boardEngine.get(square);
 export function validateMove(
   fromSquare: Square,
   toSquare: Square,
-  isLastMoveInTurn: boolean
+  isLastMoveInTurn: boolean,
+  promotion?: PieceSymbol
 ): boolean {
   // boardEngine accepts a move in which a king is taken! Take care of it manually here:
   const toPiece = getSquarePiece(toSquare);
   if (toPiece && toPiece.type === KING) return false;
   const possibleMoves = getPossibleMoves(isLastMoveInTurn, fromSquare);
-  return possibleMoves.filter((m) => m.to === toSquare).length > 0;
+  return (
+    possibleMoves.filter((m) => m.to === toSquare && m.promotion === promotion)
+      .length > 0
+  );
 }
 
 // Returns list of all valid moves (optionally only from the specified fromSquare):
@@ -457,14 +463,16 @@ export function makeMove(
   user: User | undefined,
   fromSquare: Square,
   toSquare: Square,
-  promotion?: string
+  promotion?: PieceSymbol
 ): void {
   const move: Move = boardEngine.move({
     from: fromSquare,
     to: toSquare,
     promotion: promotion,
   });
-  board.turn = boardEngine.turn();
+  // if it's a promotion, update the the type of promoted piece:
+  if (promotion) getSquarePiece(toSquare)!.type = promotion;
+  currentBoardData.turn = boardEngine.turn();
   board.history[board.history.length - 1].push(move.san);
   board.flatSanMoveHistory.push(move.san);
   board.historyNumMoves += 1;
@@ -480,7 +488,7 @@ export function makeMove(
     // The player still has moves left in the current turn, according to the dice roll:
     board.firstMoveInTurn = false;
     // swap turn back to the player who just moved since there's still more to make:
-    swapTurn();
+    swapTurn(currentBoardData);
   }
   board.replayCurrentFlatIndex += 1;
   board.flatBoardFenHistory.push(boardEngine.fen());
@@ -488,7 +496,55 @@ export function makeMove(
 
   // After each move we need to check for game over because if player has moves left
   // in the turn but has no valid moves then it's a draw:
-  checkForGameOver(currentGameSettings, user);
+  checkForGameOver(currentGameSettings, currentBoardData, user);
+}
+
+// Handle a player's latest roll of dice:
+export function handleDiceRoll(
+  currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData,
+  setNewCurrentBoardData: () => void,
+  roll: number,
+  roll1: number,
+  roll2: number
+): void {
+  async function runSwapTurn() {
+    // player got 0 roll, so no moves in this turn...
+    // Swap turn, unless player is in check (in which case
+    // the player rolls again):
+    const playerInCheck = boardEngine.inCheck();
+    if (playerInCheck) {
+      // pop the last roll so player in check can re-roll dice:
+      board.diceRollHistory.pop();
+    } else {
+      swapTurn(currentBoardData);
+      board.history.push([]);
+    }
+    roll = -1;
+    currentBoardData.diceRoll = roll;
+    currentBoardData.numMovesInTurn = roll;
+    setNewCurrentBoardData(); //Need here????
+  }
+
+  board.diceRollHistory.push(roll);
+  currentBoardData.diceRoll = roll;
+  currentBoardData.diceRoll1 = roll1;
+  currentBoardData.diceRoll2 = roll2;
+  currentBoardData.numMovesInTurn = roll;
+
+  // add a bit of delay if the roll was 0 and we're changing turn:
+  if (roll == 0) {
+    //setTimeout(runSwapTurn, 2000);
+    runSwapTurn();
+  } else {
+    setNewCurrentBoardData(); //Need here????
+  }
+  // if this is an online game with a friend, send the roll data:
+  if (
+    isGameAgainstOnlineFriend(currentGameSettings) &&
+    !isOpponentsTurn(currentGameSettings, currentBoardData)
+  )
+    onlineGameApi_sendDiceRoll(roll, roll1, roll2);
 }
 
 /*
@@ -521,31 +577,42 @@ export const isOnePlayerMode: () => boolean = () => settings.onePlayerMode;
 
 // Returns true if we're in 1-player mode and it's not human player's turn:
 export const isOpponentsTurn: (
-  currentGameSettings: CurrentGameSettings
-) => boolean = (currentGameSettings: CurrentGameSettings) =>
-  settings.onePlayerMode && board.turn !== currentGameSettings.userPlaysColor;
+  currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData
+) => boolean = (
+  currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData
+) =>
+  settings.onePlayerMode &&
+  currentBoardData.turn !== currentGameSettings.userPlaysColor;
 
 // Returns true if we're in 1-player mode against AI and it's not human player's turn:
-export const isAITurn: (currentGameSettings: CurrentGameSettings) => boolean = (
-  currentGameSettings: CurrentGameSettings
+export const isAITurn: (
+  currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData
+) => boolean = (
+  currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData
 ) =>
   isGameAgainstAI(currentGameSettings) &&
-  board.turn !== currentGameSettings.userPlaysColor;
+  currentBoardData.turn !== currentGameSettings.userPlaysColor;
 
 // Is the game over based on the current board. If so, set the outcome:
 export const checkForGameOver: (
   currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData,
   user: User | undefined
 ) => void = (
   currentGameSettings: CurrentGameSettings,
+  currentBoardData: CurrentBoardData,
   user: User | undefined
 ) => {
   if (boardEngine.isCheckmate()) {
     board.gameOver = true;
-    const isWhiteWinner = board.turn === BLACK;
+    const isWhiteWinner = currentBoardData.turn === BLACK;
     const isOpponentWinner =
       settings.onePlayerMode &&
-      board.turn === currentGameSettings.userPlaysColor;
+      currentBoardData.turn === currentGameSettings.userPlaysColor;
     const outcomeId = isOpponentWinner
       ? isWhiteWinner
         ? 3
@@ -616,7 +683,7 @@ export function promptUserIfPromotionMove(
   if (piece.type === PAWN) {
     const toSquareRank = getSquareRank(toSquare);
     if (turn === WHITE ? toSquareRank === 8 : toSquareRank === 1) {
-      piece.type = QUEEN;
+      //piece.type = QUEEN;
       return QUEEN;
     }
   }
@@ -624,10 +691,16 @@ export function promptUserIfPromotionMove(
 }
 
 // Move board fwd or bkwd in replay mode:
-export function boardReplayStepMove(step: number): Move | null {
+export function boardReplayStepMove(
+  currentBoardData: CurrentBoardData,
+  step: number
+): Move | null {
   const newReplayCurrentFlatIndex = board.replayCurrentFlatIndex + step;
   board.replayCurrentFlatIndex = newReplayCurrentFlatIndex;
-  setBoard(board.flatBoardFenHistory[newReplayCurrentFlatIndex]);
+  setBoard(
+    currentBoardData,
+    board.flatBoardFenHistory[newReplayCurrentFlatIndex]
+  );
   const move: Move | null =
     board.flatSquareMoveHistory[newReplayCurrentFlatIndex] || null;
   if (move) boardEngine.move(move);
@@ -637,18 +710,21 @@ export function boardReplayStepMove(step: number): Move | null {
 // Manually manipulate the current board to make it the other player's turn.
 // This is needed since we want to make a player make multiple moves in a single
 // turn:
-export function swapTurn(): void {
+export function swapTurn(currentBoardData: CurrentBoardData): void {
   let fen = boardEngine.fen();
   const fenA = fen.split(' ');
   fenA[1] = fenA[1] === 'w' ? 'b' : 'w';
   fen = fenA.join(' ');
-  setBoard(fen);
+  setBoard(currentBoardData, fen);
 }
 
 // Manually modify the state of the board:
-export function setBoard(fen: string): void {
+export function setBoard(
+  currentBoardData: CurrentBoardData,
+  fen: string
+): void {
   boardEngine = new Chess(fen);
-  board.turn = boardEngine.turn();
+  currentBoardData.turn = boardEngine.turn();
 }
 
 // Given board fen position, is the player with turn in check:

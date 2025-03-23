@@ -3,17 +3,16 @@ import {
   board,
   boardEngine,
   DebugOn,
+  handleDiceRoll,
   isAITurn,
-  isGameAgainstOnlineFriend,
-  onlineGameApi_sendDiceRoll,
-  swapTurn,
+  isGameAgainstAI,
 } from '../lib';
 import { useCurrentGameContext } from '../components/useCurrentGameContext';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Board } from './Board';
 import { BoardLabels } from './BoardLabels';
-import { type Square, type Color } from 'chess.js';
+import { type Square } from 'chess.js';
 import './Panels.css';
 
 type Props = {
@@ -31,13 +30,14 @@ export function GamePanel({
   onNewGame,
   onLoadGame,
 }: Props) {
-  const { currentGameSettings, currentBoardData } = useCurrentGameContext();
+  const { currentGameSettings, currentBoardData, setNewCurrentBoardData } =
+    useCurrentGameContext();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [replayStepMove, setReplayStepMove] = useState<number>(0);
-  const [turn, setTurn] = useState<Color>(board.turn);
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
-    currentBoardData.diceRoll !== -1 && isAITurn(currentGameSettings)
+    currentBoardData.diceRoll !== -1 &&
+      isAITurn(currentGameSettings, currentBoardData)
   );
   const [shouldTriggerAIRoll, setShouldTriggerAIRoll] =
     useState<boolean>(false);
@@ -71,45 +71,52 @@ export function GamePanel({
       setReplayStepMove(0);
     } else {
       if (DebugOn)
-        console.log('onmove', board.turn, currentBoardData.numMovesInTurn);
-      setTurn(board.turn);
+        console.log(
+          'onmove',
+          currentBoardData.turn,
+          currentBoardData.numMovesInTurn
+        );
+      //setTurn(board.turn);
       if (
         currentBoardData.numMovesInTurn === -1 &&
-        isAITurn(currentGameSettings)
+        isAITurn(currentGameSettings, currentBoardData)
       )
         setShouldTriggerAITurn(false);
       setNumSingleMovesMade((n) => n + 1);
     }
     if (board.gameOver && !replayModeOn) setReplayModeOn(true);
-  }, [currentBoardData.numMovesInTurn, currentGameSettings, replayModeOn]);
+  }, [currentBoardData, currentGameSettings, replayModeOn]);
 
   const onDiceRoll = useCallback(
     (roll: number, roll1: number, roll2: number) => {
       async function runSwapTurn() {
+        handleDiceRoll(
+          currentGameSettings,
+          currentBoardData,
+          setNewCurrentBoardData,
+          roll,
+          roll1,
+          roll2
+        );
         // player got 0 roll, so no moves in this turn...
         // Swap turn, unless player is in check (in which case
         // the player rolls again):
-        const playerInCheck = boardEngine.inCheck();
-        if (playerInCheck) {
-          // pop the last roll so player in check can re-roll dice:
-          board.diceRollHistory.pop();
-          setShouldTriggerAIRoll(isAITurn(currentGameSettings));
-        } else {
-          swapTurn();
-          board.history.push([]);
-          setTurn(board.turn);
-        }
-        roll = -1;
-        currentBoardData.diceRoll = roll;
-        currentBoardData.numMovesInTurn = roll;
+        const currTurnIsAI = isAITurn(currentGameSettings, currentBoardData);
+        if (DebugOn)
+          console.log(
+            'currentBoardData',
+            currentBoardData,
+            'isGameAgainstAI',
+            isGameAgainstAI(currentGameSettings),
+            'currTurnIsAI',
+            currTurnIsAI,
+            'inCheck',
+            boardEngine.inCheck()
+          );
+        if (isGameAgainstAI(currentGameSettings))
+          setShouldTriggerAIRoll(currTurnIsAI && boardEngine.inCheck());
         setIsMovingDisabled(false);
       }
-      board.diceRollHistory.push(roll);
-      currentBoardData.diceRoll = roll;
-      currentBoardData.diceRoll1 = roll1;
-      currentBoardData.diceRoll2 = roll2;
-      currentBoardData.numMovesInTurn = roll;
-      setTurn(board.turn);
       if (DebugOn)
         console.log(
           'onroll',
@@ -121,7 +128,6 @@ export function GamePanel({
           'shouldTriggerAITurn',
           shouldTriggerAITurn
         );
-      setShouldTriggerAIRoll(false);
       // add a bit of delay if the roll was 0 and we're changing turn:
       if (roll == 0) {
         setIsMovingDisabled(true);
@@ -129,12 +135,24 @@ export function GamePanel({
         setTimeout(runSwapTurn, 2000);
       }
       // if we're in 1-player mode and it's AI's turn, trigger AI move:
-      else setShouldTriggerAITurn(isAITurn(currentGameSettings));
-      // if this is an online game with a friend, send the roll data:
-      if (isGameAgainstOnlineFriend(currentGameSettings))
-        onlineGameApi_sendDiceRoll(roll, roll1, roll2);
+      else {
+        setShouldTriggerAITurn(isAITurn(currentGameSettings, currentBoardData));
+        handleDiceRoll(
+          currentGameSettings,
+          currentBoardData,
+          setNewCurrentBoardData,
+          roll,
+          roll1,
+          roll2
+        );
+      }
     },
-    [currentBoardData, currentGameSettings, shouldTriggerAITurn]
+    [
+      currentBoardData,
+      currentGameSettings,
+      setNewCurrentBoardData,
+      shouldTriggerAITurn,
+    ]
   );
 
   const onAlertDiceRoll = useCallback(() => {
@@ -181,7 +199,6 @@ export function GamePanel({
         <RightPanel
           currGameId={gameId}
           currReplayModeOn={replayModeOn}
-          currTurn={turn}
           currShouldTriggerAIRoll={shouldTriggerAIRoll}
           currShouldAlertDiceRoll={shouldAlertDiceRoll}
           containerOnDiceRoll={onDiceRoll}

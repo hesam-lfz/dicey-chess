@@ -8,13 +8,11 @@ import {
   isOpponentsTurn,
   playerIconSVGs,
 } from '../lib';
-import { type Color } from 'chess.js';
 import Icon_dice from '../assets/dice.svg';
 import './DicePanel.css';
 
 type Props = {
   currGameId: number;
-  currTurn: Color;
   currShouldTriggerAIRoll: boolean;
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number, n1: number, n2: number) => void;
@@ -22,7 +20,6 @@ type Props = {
 
 export function DicePanel({
   currGameId,
-  currTurn,
   currShouldTriggerAIRoll,
   currShouldAlertDiceRoll,
   containerOnDiceRoll,
@@ -34,7 +31,6 @@ export function DicePanel({
   const { currentGameSettings, currentBoardData, setNewCurrentBoardData } =
     useCurrentGameContext();
   const [gameId, setGameId] = useState<number>(currGameId);
-  const [turn, setTurn] = useState<Color>(board.turn);
   const [shouldTriggerAIRoll, setShouldTriggerAIRoll] = useState<boolean>(
     currShouldTriggerAIRoll
   );
@@ -67,14 +63,12 @@ export function DicePanel({
   ]);
 
   useEffect(() => {
-    setTurn(board.turn);
+    //setTurn(board.turn);
     setGameId(currGameId);
     if (DebugOn)
       console.log(
         'rendered DicePanel',
         currGameId,
-        'currTurn',
-        currTurn,
         'theRoll',
         currentBoardData.diceRoll,
         'roll1',
@@ -82,9 +76,12 @@ export function DicePanel({
         'roll2',
         currentBoardData.diceRoll2,
         'theRoll === -1 && !itIsAITurn',
-        currentBoardData.diceRoll === -1 && !isAITurn(currentGameSettings),
+        currentBoardData.diceRoll === -1 &&
+          !isAITurn(currentGameSettings, currentBoardData),
         'currNumMovesInTurn',
         currentBoardData.numMovesInTurn,
+        'isAITurn',
+        isAITurn(currentGameSettings, currentBoardData),
         'AIMoveTriggered',
         AIMoveTriggered,
         'currShouldTriggerAIRoll',
@@ -92,16 +89,16 @@ export function DicePanel({
         'shouldTriggerAIRoll',
         shouldTriggerAIRoll,
         'isOpponentsTurn()',
-        isOpponentsTurn(currentGameSettings),
+        isOpponentsTurn(currentGameSettings, currentBoardData),
         'turn',
-        board.turn,
+        currentBoardData.turn,
         'userPlaysColor',
         currentGameSettings.userPlaysColor
         //JSON.stringify(board)
       );
     // If it's AI's turn, trigger dice roll automatically:
     setShouldTriggerAIRoll(false);
-    if (isAITurn(currentGameSettings) && !board.gameOver) {
+    if (isAITurn(currentGameSettings, currentBoardData) && !board.gameOver) {
       if (AIMoveTriggered) {
         if (shouldTriggerAIRoll) {
           setAIMoveTriggered(false);
@@ -130,8 +127,6 @@ export function DicePanel({
   }, [
     currGameId,
     gameId,
-    currTurn,
-    turn,
     AIMoveTriggered,
     currShouldAlertDiceRoll,
     handleRollButtonClick,
@@ -143,6 +138,8 @@ export function DicePanel({
     currentBoardData.numMovesInTurn,
     currentBoardData.diceRoll1,
     currentBoardData.diceRoll2,
+    currentBoardData.turn,
+    currentBoardData,
   ]);
 
   const diceClassName =
@@ -155,9 +152,9 @@ export function DicePanel({
           {
             <div className={'square player-icon-container'}>
               <img
-                src={playerIconSVGs[turn]}
+                src={playerIconSVGs[currentBoardData.turn]}
                 className="piece play-icon"
-                alt={'player-icon-' + turn}
+                alt={'player-icon-' + currentBoardData.turn}
               />
             </div>
           }
@@ -165,7 +162,7 @@ export function DicePanel({
         </div>
         <div className="dice-area">
           {currentBoardData.diceRoll === -1 &&
-          !isOpponentsTurn(currentGameSettings) ? (
+          !isOpponentsTurn(currentGameSettings, currentBoardData) ? (
             <span
               className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
               ref={rollDiceButtonBorderRef}>
@@ -181,7 +178,7 @@ export function DicePanel({
               </button>
             </span>
           ) : currentBoardData.diceRoll === -1 ? null : (
-            <div className="dice-icons-box" key={board.turn}>
+            <div className="dice-icons-box" key={currentBoardData.turn}>
               <img
                 className={diceClassName}
                 src={diceSVGs['Icon_Dice' + currentBoardData.diceRoll1]}

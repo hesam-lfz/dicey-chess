@@ -36,6 +36,7 @@ const defaultCurrentGameSettings: CurrentGameSettings = {
 };
 
 const defaultCurrentBoardData: CurrentBoardData = {
+  turn: WHITE,
   diceRoll: -1,
   diceRoll1: -1,
   diceRoll2: -1,

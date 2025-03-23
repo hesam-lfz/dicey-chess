@@ -223,6 +223,7 @@ export function Settings() {
         // if status = 0 (both parties have sent mutual invites and we are
         // ready to start web socket connection to start game):
         onlineGameApi_initialize(
+          currentGameSettings,
           currentBoardData,
           setNewCurrentBoardData,
           user!.userId,
