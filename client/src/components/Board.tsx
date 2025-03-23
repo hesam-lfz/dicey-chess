@@ -17,6 +17,7 @@ import {
   BasicMove,
   DebugOn,
   internalSettings,
+  isOpponentsTurn,
 } from '../lib';
 import { Color, WHITE, type Piece, type Square } from 'chess.js';
 
@@ -174,8 +175,8 @@ export function Board({
           currShouldTriggerAITurn,
           'shouldTriggerAITurn',
           shouldTriggerAITurn,
-          'isAITurn()',
-          isAITurn(currentGameSettings),
+          'isOpponentsTurn()',
+          isOpponentsTurn(currentGameSettings),
           'replayModeOn',
           replayModeOn,
           'replayStepMove',
@@ -272,7 +273,7 @@ export function Board({
         return;
       }
       // if in 1-player mode and it's not player's turn, clicking is not allowed:
-      if (isAITurn(currentGameSettings)) return;
+      if (isOpponentsTurn(currentGameSettings)) return;
       // find the square element which was clicked on so we can get the square coords:
       let $clickedSq = e.target as HTMLElement;
       if ($clickedSq.tagName === 'IMG')

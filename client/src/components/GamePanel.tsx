@@ -1,5 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
-import { board, boardEngine, DebugOn, isAITurn, swapTurn } from '../lib';
+import {
+  board,
+  boardEngine,
+  DebugOn,
+  isAITurn,
+  isGameAgainstOnlineFriend,
+  onlineGameApi_sendDiceRoll,
+  swapTurn,
+} from '../lib';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
@@ -123,6 +131,9 @@ export function GamePanel({
       }
       // if we're in 1-player mode and it's AI's turn, trigger AI move:
       else setShouldTriggerAITurn(isAITurn(currentGameSettings));
+      // if this is an online game with a friend, send the roll data:
+      if (isGameAgainstOnlineFriend(currentGameSettings))
+        onlineGameApi_sendDiceRoll(roll, roll1, roll2);
     },
     [currentGameSettings, shouldTriggerAITurn]
   );

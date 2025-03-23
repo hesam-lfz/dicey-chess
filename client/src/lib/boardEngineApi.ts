@@ -42,6 +42,7 @@ import {
   chessAiEngineApi_initChessAiEngine,
 } from './gameAiApi';
 import { readToken, saveAuth, User } from './auth';
+import { onlineGameApi_close } from './onlineGameApi';
 
 // General internal game settings:
 export type InternalSettings = {
@@ -262,6 +263,9 @@ export const resetSettings = (
   setNewCurrentGameSettings: () => void,
   resetToDefaultSettings: boolean = false
 ) => {
+  // If we're currently in a game with an online friend, close the web socket
+  // connection:
+  if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
   if (resetToDefaultSettings) initSettings = defaultInitSettings;
   settings = { ...initSettings };
   setCurrentGameSettingsBasedOnSettings(
@@ -293,6 +297,9 @@ export const setCurrentGameSettingsBasedOnSettings = (
 
 // Reset the board to start a new game:
 export const resetBoard = (currentGameSettings: CurrentGameSettings) => {
+  // If we're currently in a game with an online friend, close the web socket
+  // connection:
+  if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
   // increment gameId to trigger all components to reset:
   currentGameSettings.gameId += 1;
   board = { ...initBoard };
@@ -501,7 +508,16 @@ export function undoMove(): Move | null {
 }
 */
 
+// Returns true if we're in 1-player mode
+export const isOnePlayerMode: () => boolean = () => settings.onePlayerMode;
+
 // Returns true if we're in 1-player mode and it's not human player's turn:
+export const isOpponentsTurn: (
+  currentGameSettings: CurrentGameSettings
+) => boolean = (currentGameSettings: CurrentGameSettings) =>
+  settings.onePlayerMode && board.turn !== currentGameSettings.userPlaysColor;
+
+// Returns true if we're in 1-player mode against AI and it's not human player's turn:
 export const isAITurn: (currentGameSettings: CurrentGameSettings) => boolean = (
   currentGameSettings: CurrentGameSettings
 ) =>
@@ -633,6 +649,11 @@ export const inCheck = (fen: string): boolean => new Chess(fen).inCheck();
 // Is game against AI:
 export const isGameAgainstAI = (currentGameSettings: CurrentGameSettings) =>
   currentGameSettings.opponentIsAI && settings.onePlayerMode;
+
+// Is game against online friend:
+export const isGameAgainstOnlineFriend = (
+  currentGameSettings: CurrentGameSettings
+) => !currentGameSettings.opponentIsAI && settings.onePlayerMode;
 
 export function displayGameDuration(secs: number): string {
   const min = Math.floor(secs / 60);

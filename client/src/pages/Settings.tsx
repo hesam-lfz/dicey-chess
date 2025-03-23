@@ -175,6 +175,7 @@ export function Settings() {
     friendUsername: string,
     userPlaysColor: Color
   ): void {
+    setIsWaitingForFriendInviteModalOpen(false);
     currentGameSettings.opponentIsAI = false;
     currentGameSettings.opponent = friendUsername;
     currentGameSettings.userPlaysColor = userPlaysColor;
@@ -211,10 +212,11 @@ export function Settings() {
     } else {
       const { status, pin } = requestResponse;
       console.log('invite sent -> response =', requestResponse);
+      if (!isWaitingForFriendInviteModalOpen)
+        setIsWaitingForFriendInviteModalOpen(true);
       if (status === 0) {
         // if status = 0 (both parties have sent mutual invites and we are
         // ready to start web socket connection to start game):
-        setIsWaitingForFriendInviteModalOpen(false);
         onlineGameApi_initialize(user!.userId, pin!, (userPlaysColor: Color) =>
           onOnlineGameReadyCallback(formFriendUsername, userPlaysColor)
         );
@@ -222,8 +224,6 @@ export function Settings() {
         recheckAttemptNumber <
         internalSettings.friendInviteRequestRecheckMaxAttempts
       ) {
-        if (!isWaitingForFriendInviteModalOpen)
-          setIsWaitingForFriendInviteModalOpen(true);
         // if status = 1 (we are still waiting for friend to send
         // the invite our way to complete the mutual invite):
         // check back after a bit of time...:

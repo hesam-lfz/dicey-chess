@@ -6,9 +6,10 @@ type SocketResponseMessage = {
   data?: Record<string, any>;
 };
 
-//let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
+let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
 //let socketBusy: boolean = false;
-
+let theUserId: number;
+let thePin: string;
 // Starts a new web socket connection to server to establish connection between
 // 2 players:
 export function onlineGameApi_initialize(
@@ -16,9 +17,10 @@ export function onlineGameApi_initialize(
   pin: string,
   onOnlineGameReadyCallback: (userPlaysColor: Color) => void
 ): void {
+  theUserId = userId;
+  thePin = pin;
   // Set up socket communication:
-
-  const onlineGameApi_socket = new WebSocket(
+  onlineGameApi_socket = new WebSocket(
     '/ws'
     //'ws://${window.location.host}/ws'
   );
@@ -54,6 +56,11 @@ export function onlineGameApi_initialize(
       } else if (msg === 'ready') {
         onOnlineGameReadyCallback(data!.color);
       }
+    } else if (type === 'game') {
+      // Receiving a game event (roll or move) from the opponent friend:
+      if (msg === 'roll') {
+        console.log('got friend roll', data);
+      }
     }
   };
 
@@ -64,4 +71,33 @@ export function onlineGameApi_initialize(
   onlineGameApi_socket.onerror = (error) => {
     console.error('WebSocket error:', error);
   };
+}
+
+// Close the online game socket:
+export function onlineGameApi_close(): void {
+  if (
+    !(
+      onlineGameApi_socket.readyState === onlineGameApi_socket.CLOSED ||
+      onlineGameApi_socket.readyState === onlineGameApi_socket.CLOSING
+    )
+  )
+    onlineGameApi_socket.close();
+}
+
+// Sends data about the player's recent roll to server to forward to online friend
+// during an online game:
+export function onlineGameApi_sendDiceRoll(
+  roll: number,
+  roll1: number,
+  roll2: number
+): void {
+  onlineGameApi_socket.send(
+    JSON.stringify({
+      userId: theUserId,
+      pin: thePin,
+      type: 'game',
+      msg: 'roll',
+      data: { roll, roll1, roll2 },
+    })
+  );
 }

@@ -440,11 +440,18 @@ wsServer.on('connection', (ws) => {
             closeStaleGameConnection(userId, false);
             removeStaleGameData(userId);
           }, gameTimeout);
-        } // else {
-        // One party hasn't established connection yet. Tell the user
-        // to wait (not necessary!):
-        // ws.send(JSON.stringify({ type: 'connection', msg: 'wait' }));
-        // }
+        }
+      }
+    } else if (type === 'game') {
+      // forwarding a game event (roll or move) from the user to the opponent:
+      const friendWs = inProgressGameConnections[friendId];
+      if (!friendWs)
+        throw new ClientError(
+          400,
+          'Websocket connection for friend was not found!'
+        );
+      if (msg === 'roll') {
+        friendWs.send(message.toString());
       }
     }
   });

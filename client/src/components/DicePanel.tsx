@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
-import { board, DebugOn, diceSVGs, isAITurn, playerIconSVGs } from '../lib';
+import {
+  board,
+  DebugOn,
+  diceSVGs,
+  isAITurn,
+  isOpponentsTurn,
+  playerIconSVGs,
+} from '../lib';
 import { type Color } from 'chess.js';
 import Icon_dice from '../assets/dice.svg';
 import './DicePanel.css';
@@ -82,8 +89,8 @@ export function DicePanel({
         currShouldTriggerAIRoll,
         'shouldTriggerAIRoll',
         shouldTriggerAIRoll,
-        'isAITurn()',
-        isAITurn(currentGameSettings),
+        'isOpponentsTurn()',
+        isOpponentsTurn(currentGameSettings),
         'turn',
         board.turn,
         'userPlaysColor',
@@ -153,7 +160,7 @@ export function DicePanel({
           <span>'s Move</span>
         </div>
         <div className="dice-area">
-          {board.diceRoll === -1 && !isAITurn(currentGameSettings) ? (
+          {board.diceRoll === -1 && !isOpponentsTurn(currentGameSettings) ? (
             <span
               className="roll-dice-button-border rainbow-colored-border shadow-grow-and-back"
               ref={rollDiceButtonBorderRef}>
