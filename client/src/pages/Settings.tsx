@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { ToggleSwitch } from '../components/ToggleSwitch';
-import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
+import { useCurrentGameContext } from '../components/useCurrentGameContext';
 import { Modal } from '../components/Modal';
 import {
   type InviteRequestResponse,
@@ -28,7 +28,7 @@ let inviteRequestSentWaitingResponse = false;
 
 export function Settings() {
   const { currentGameSettings, setNewCurrentGameSettings, user } =
-    useCurrentGameSettings();
+    useCurrentGameContext();
   const [
     isSigninToPlayFriendOnlineModalOpen,
     setIsSigninToPlayFriendOnlineModalOpen,

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { DicePanel } from '../components/DicePanel';
 import { ReplayPanel } from '../components/ReplayPanel';
 import { WHITE, type Color } from 'chess.js';
-import { useCurrentGameSettings } from './useCurrentGameSettings';
+import { useCurrentGameContext } from './useCurrentGameContext';
 import { playerIconSVGs, shorten } from '../lib';
 
 type Props = {
@@ -26,7 +26,7 @@ export function RightPanel({
   containerOnDiceRoll,
   containerOnStepReplayMoveIndex,
 }: Props) {
-  const { currentGameSettings, user } = useCurrentGameSettings();
+  const { currentGameSettings, user } = useCurrentGameContext();
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
 
   useEffect(() => {

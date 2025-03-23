@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
+import { useCurrentGameContext } from '../components/useCurrentGameContext';
 import {
   board,
   DebugOn,
@@ -33,7 +33,7 @@ export function DicePanel({
   const diceRightRef = useRef<null | HTMLImageElement>(null);
   const rollDiceButtonBorderRef = useRef<null | HTMLSpanElement>(null);
   const rollDiceButtonIconRef = useRef<null | HTMLImageElement>(null);
-  const { currentGameSettings } = useCurrentGameSettings();
+  const { currentGameSettings } = useCurrentGameContext();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [turn, setTurn] = useState<Color>(board.turn);
   const [numMovesInTurn, setNumMovesInTurn] =
@@ -49,6 +49,7 @@ export function DicePanel({
   const [roll, setRoll] = useState<number>(board.diceRoll);
   const [dice1IconRotation, setDice1IconRotation] = useState<number>(0);
   const [dice2IconRotation, setDice2IconRotation] = useState<number>(0);
+
   const handleRollButtonClick = useCallback(() => {
     const roll1 = Math.floor(Math.random() * 6) + 1;
     const roll2 = Math.floor(Math.random() * 6) + 1;

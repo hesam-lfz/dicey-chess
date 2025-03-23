@@ -1,6 +1,6 @@
 import { type FormEvent, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
+import { useCurrentGameContext } from '../components/useCurrentGameContext';
 import { type Auth } from '../lib';
 import { Modal } from '../components/Modal';
 import { AppSubdomain } from '../App';
@@ -12,7 +12,7 @@ const infoMessageModalMessageOffline: string =
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Signin() {
-  const { handleSignIn } = useCurrentGameSettings();
+  const { handleSignIn } = useCurrentGameContext();
   const passwordInputRef = useRef<null | HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =

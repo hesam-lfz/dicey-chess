@@ -1,23 +1,27 @@
-// A context to keep track of current user auth and settings selection...
+// A context to keep track of current game data: user auth, settings selection,
+// current board data...
 
 import { createContext, useState, useEffect } from 'react';
 import {
   type CurrentGameSettings,
+  type CurrentBoardData,
+  type User,
   loadSettings,
   resetBoard,
   readToken,
   readUser,
   removeAuth,
   saveAuth,
-  User,
   storageApi_handleSignInOut,
   DebugOn,
 } from '../lib';
 import { WHITE } from 'chess.js';
 
-export type CurrentGameSettingsContextValues = {
+export type CurrentGameContextValues = {
   currentGameSettings: CurrentGameSettings;
   setNewCurrentGameSettings: () => void;
+  currentBoardData: CurrentBoardData;
+  setNewCurrentBoardData: () => void;
   user: User | undefined;
   token: string | undefined;
   handleSignIn: (user: User, token: string) => void;
@@ -31,15 +35,22 @@ const defaultCurrentGameSettings: CurrentGameSettings = {
   opponent: 'AI',
 };
 
-export const CurrentGameSettingsContext =
-  createContext<CurrentGameSettingsContextValues>({
-    currentGameSettings: defaultCurrentGameSettings,
-    setNewCurrentGameSettings: () => undefined,
-    user: undefined,
-    token: undefined,
-    handleSignIn: () => undefined,
-    handleSignOut: () => undefined,
-  });
+const defaultCurrentBoardData: CurrentBoardData = {
+  diceRoll: -1,
+  diceRoll1: -1,
+  diceRoll2: -1,
+};
+
+export const CurrentGameContext = createContext<CurrentGameContextValues>({
+  currentGameSettings: defaultCurrentGameSettings,
+  setNewCurrentGameSettings: () => undefined,
+  currentBoardData: defaultCurrentBoardData,
+  setNewCurrentBoardData: () => undefined,
+  user: undefined,
+  token: undefined,
+  handleSignIn: () => undefined,
+  handleSignOut: () => undefined,
+});
 
 type Props = {
   children: React.ReactNode;
@@ -47,9 +58,12 @@ type Props = {
 
 let gameInitDone = false;
 
-export function CurrentGameSettingsProvider({ children }: Props) {
+export function CurrentGameContextProvider({ children }: Props) {
   const [currentGameSettings, setCurrentGameSettings] =
     useState<CurrentGameSettings>(defaultCurrentGameSettings);
+  const [currentBoardData, setCurrentBoardData] = useState<CurrentBoardData>(
+    defaultCurrentBoardData
+  );
   const [user, setUser] = useState<User>();
   const [token, setToken] = useState<string>();
 
@@ -57,9 +71,15 @@ export function CurrentGameSettingsProvider({ children }: Props) {
     setCurrentGameSettings({ ...currentGameSettings });
   }
 
-  const currentGameSettingsContextValues = {
+  function setNewCurrentBoardData(): void {
+    setCurrentBoardData({ ...currentBoardData });
+  }
+
+  const currentGameContextValues = {
     currentGameSettings,
     setNewCurrentGameSettings,
+    currentBoardData,
+    setNewCurrentBoardData,
     user,
     token,
     handleSignIn,
@@ -100,10 +120,10 @@ export function CurrentGameSettingsProvider({ children }: Props) {
     if (DebugOn) console.log('reset board...');
     resetBoard(currentGameSettings);
   }
+
   return (
-    <CurrentGameSettingsContext.Provider
-      value={currentGameSettingsContextValues}>
+    <CurrentGameContext.Provider value={currentGameContextValues}>
       {children}
-    </CurrentGameSettingsContext.Provider>
+    </CurrentGameContext.Provider>
   );
 }

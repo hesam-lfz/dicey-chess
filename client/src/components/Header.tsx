@@ -1,11 +1,12 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import LogoIcon from '../assets/dicey-chess-logo-c.png';
-import { useCurrentGameSettings } from './useCurrentGameSettings';
+import { useCurrentGameContext } from './useCurrentGameContext';
+
 import { AppSubdomain } from '../App';
 import { shorten } from '../lib';
 
 export function Header() {
-  const { user, handleSignOut } = useCurrentGameSettings();
+  const { user, handleSignOut } = useCurrentGameContext();
   const navigate = useNavigate();
 
   return (

@@ -8,7 +8,7 @@ import {
   onlineGameApi_sendDiceRoll,
   swapTurn,
 } from '../lib';
-import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
+import { useCurrentGameContext } from '../components/useCurrentGameContext';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Board } from './Board';
@@ -31,7 +31,7 @@ export function GamePanel({
   onNewGame,
   onLoadGame,
 }: Props) {
-  const { currentGameSettings } = useCurrentGameSettings();
+  const { currentGameSettings } = useCurrentGameContext();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [replayStepMove, setReplayStepMove] = useState<number>(0);

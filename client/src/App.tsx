@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import { CurrentGameSettingsProvider } from './components/CurrentGameSettingsContext';
+import { CurrentGameContextProvider } from './components/CurrentGameContext';
 import { Header } from './components/Header';
 import { Game } from './pages/Game';
 import { About } from './pages/About';
@@ -14,7 +14,7 @@ export const AppSubdomain = '/' + import.meta.env.VITE_APP_SUB_DOMAIN;
 
 export default function App() {
   return (
-    <CurrentGameSettingsProvider>
+    <CurrentGameContextProvider>
       <Routes>
         <Route path={AppSubdomain} element={<Header />}>
           <Route index element={<Game />} />
@@ -25,6 +25,6 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </CurrentGameSettingsProvider>
+    </CurrentGameContextProvider>
   );
 }

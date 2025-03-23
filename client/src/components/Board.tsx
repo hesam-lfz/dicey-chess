@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, MouseEvent } from 'react';
-import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
+import { useCurrentGameContext } from '../components/useCurrentGameContext';
+
 import {
   pieceSVGs,
   allFiles,
@@ -61,7 +62,7 @@ export function Board({
   containerOnMove,
   containerOnAlertDiceRoll,
 }: Props) {
-  const { currentGameSettings, user } = useCurrentGameSettings();
+  const { currentGameSettings, user } = useCurrentGameContext();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [replayStepMove, setReplayStepMove] =

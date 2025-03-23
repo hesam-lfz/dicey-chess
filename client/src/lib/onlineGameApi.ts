@@ -1,9 +1,16 @@
 import { Color } from 'chess.js';
+import { board } from './boardEngineApi';
 
 type SocketResponseMessage = {
   type: string;
   msg: string;
   data?: Record<string, any>;
+};
+
+type DiceRollData = {
+  roll: number;
+  roll1: number;
+  roll2: number;
 };
 
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
@@ -60,6 +67,10 @@ export function onlineGameApi_initialize(
       // Receiving a game event (roll or move) from the opponent friend:
       if (msg === 'roll') {
         console.log('got friend roll', data);
+        const diceData = data as DiceRollData;
+        board.diceRoll = diceData.roll;
+        board.diceRoll1 = diceData.roll1;
+        board.diceRoll1 = diceData.roll2;
       }
     }
   };

@@ -14,7 +14,7 @@ import {
   resetSettings,
   type SavedGame,
 } from '../lib';
-import { useCurrentGameSettings } from '../components/useCurrentGameSettings';
+import { useCurrentGameContext } from '../components/useCurrentGameContext';
 import {
   storageApi_deleteGame,
   storageApi_loadGames,
@@ -26,7 +26,7 @@ let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Game() {
   const { currentGameSettings, setNewCurrentGameSettings, user } =
-    useCurrentGameSettings();
+    useCurrentGameContext();
   const [savedGames, setSavedGames] = useState<SavedGame[]>();
   const [isGameSaveModalOpen, setIsGameSaveModalOpen] =
     useState<boolean>(false);

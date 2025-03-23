@@ -1,5 +1,5 @@
 import { HistoryPanel } from './HistoryPanel';
-import { useCurrentGameSettings } from './useCurrentGameSettings';
+import { useCurrentGameContext } from './useCurrentGameContext';
 
 type Props = {
   currNumSingleMovesMade: number;
@@ -12,7 +12,7 @@ export function LeftPanel({
   containerOnNewGame,
   containerOnLoadGame,
 }: Props) {
-  const { user } = useCurrentGameSettings();
+  const { user } = useCurrentGameContext();
   return (
     <div className="left-panel side-panel">
       <h2>History</h2>

@@ -75,6 +75,13 @@ export type CurrentGameSettings = {
   opponent: string;
 };
 
+// Settings specific for a given game:
+export type CurrentBoardData = {
+  diceRoll: number;
+  diceRoll1: number;
+  diceRoll2: number;
+};
+
 export type SavedGame = {
   userId: number;
   at: number;
