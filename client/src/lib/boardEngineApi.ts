@@ -45,6 +45,7 @@ import { readToken, saveAuth, User } from './auth';
 import {
   onlineGameApi_close,
   onlineGameApi_sendDiceRoll,
+  onlineGameApi_sendMove,
 } from './onlineGameApi';
 
 // General internal game settings:
