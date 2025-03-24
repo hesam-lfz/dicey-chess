@@ -1,10 +1,12 @@
-import { Color } from 'chess.js';
+import { Color, PieceSymbol, Square } from 'chess.js';
 import {
   CurrentBoardData,
   CurrentGameSettings,
   DebugOn,
   handleDiceRoll,
+  makeMove,
 } from './boardEngineApi';
+import { User } from './auth';
 
 type SocketResponseMessage = {
   type: string;
@@ -12,10 +14,16 @@ type SocketResponseMessage = {
   data?: Record<string, any>;
 };
 
-type DiceRollData = {
+type RemoteDiceRollData = {
   roll: number;
   roll1: number;
   roll2: number;
+};
+
+type RemoteMoveData = {
+  from: string;
+  to: string;
+  promotion: string;
 };
 
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
@@ -28,11 +36,11 @@ export function onlineGameApi_initialize(
   currentGameSettings: CurrentGameSettings,
   currentBoardData: CurrentBoardData,
   setNewCurrentBoardData: () => void,
-  userId: number,
+  user: User,
   pin: string,
   onOnlineGameReadyCallback: (userPlaysColor: Color) => void
 ): void {
-  theUserId = userId;
+  theUserId = user.userId;
   thePin = pin;
   // Set up socket communication:
   onlineGameApi_socket = new WebSocket(
@@ -44,8 +52,8 @@ export function onlineGameApi_initialize(
     if (DebugOn) console.log('Connected to server');
     onlineGameApi_socket.send(
       JSON.stringify({
-        userId: userId,
-        pin: pin,
+        userId: theUserId,
+        pin: thePin,
         type: 'connection',
         msg: 'open',
       })
@@ -62,8 +70,8 @@ export function onlineGameApi_initialize(
         // Send "shake" to complete handshake with socket server:
         onlineGameApi_socket.send(
           JSON.stringify({
-            userId: userId,
-            pin: pin,
+            userId: theUserId,
+            pin: thePin,
             type: 'connection',
             msg: 'shake',
           })
@@ -72,17 +80,31 @@ export function onlineGameApi_initialize(
         onOnlineGameReadyCallback(data!.color);
       }
     } else if (type === 'game') {
-      // Receiving a game event (roll or move) from the opponent friend:
+      // Receiving a game event: roll from the opponent friend:
       if (msg === 'roll') {
         if (DebugOn) console.log('got friend roll', data);
-        const diceData = data as DiceRollData;
+        const diceData = data as RemoteDiceRollData;
         handleDiceRoll(
           currentGameSettings,
           currentBoardData,
           setNewCurrentBoardData,
           diceData.roll,
           diceData.roll1,
-          diceData.roll2
+          diceData.roll2,
+          true
+        );
+      } // Receiving a game event: roll from the opponent friend:
+      else if (msg === 'move') {
+        if (DebugOn) console.log('got friend move', data);
+        const moveData = data as RemoteMoveData;
+        makeMove(
+          currentGameSettings,
+          currentBoardData,
+          user,
+          moveData.from as Square,
+          moveData.to as Square,
+          moveData.promotion as PieceSymbol | undefined,
+          true
         );
       }
     }
@@ -122,6 +144,24 @@ export function onlineGameApi_sendDiceRoll(
       type: 'game',
       msg: 'roll',
       data: { roll, roll1, roll2 },
+    })
+  );
+}
+
+// Sends data about the player's recent move to server to forward to online friend
+// during an online game:
+export function onlineGameApi_sendMove(
+  from: string,
+  to: string,
+  promotion: string
+): void {
+  onlineGameApi_socket.send(
+    JSON.stringify({
+      userId: theUserId,
+      pin: thePin,
+      type: 'game',
+      msg: 'move',
+      data: { from, to, promotion },
     })
   );
 }

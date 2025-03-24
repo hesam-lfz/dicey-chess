@@ -463,7 +463,8 @@ export function makeMove(
   user: User | undefined,
   fromSquare: Square,
   toSquare: Square,
-  promotion?: PieceSymbol
+  promotion?: PieceSymbol,
+  isOnlineGameRemoteRoll: boolean = false
 ): void {
   const move: Move = boardEngine.move({
     from: fromSquare,
@@ -494,6 +495,14 @@ export function makeMove(
   board.flatBoardFenHistory.push(boardEngine.fen());
   board.flatSquareMoveHistory.push(move);
 
+  // if this is an online game with a friend, send the roll data:
+  if (
+    isGameAgainstOnlineFriend(currentGameSettings) &&
+    !isOnlineGameRemoteRoll &&
+    !isOpponentsTurn(currentGameSettings, currentBoardData)
+  )
+    onlineGameApi_sendMove(fromSquare, toSquare, promotion);
+
   // After each move we need to check for game over because if player has moves left
   // in the turn but has no valid moves then it's a draw:
   checkForGameOver(currentGameSettings, currentBoardData, user);
@@ -506,7 +515,8 @@ export function handleDiceRoll(
   setNewCurrentBoardData: () => void,
   roll: number,
   roll1: number,
-  roll2: number
+  roll2: number,
+  isOnlineGameRemoteRoll: boolean = false
 ): void {
   async function runSwapTurn() {
     // player got 0 roll, so no moves in this turn...
@@ -532,19 +542,25 @@ export function handleDiceRoll(
   currentBoardData.diceRoll2 = roll2;
   currentBoardData.numMovesInTurn = roll;
 
-  // add a bit of delay if the roll was 0 and we're changing turn:
-  if (roll == 0) {
-    //setTimeout(runSwapTurn, 2000);
-    runSwapTurn();
-  } else {
-    setNewCurrentBoardData(); //Need here????
-  }
   // if this is an online game with a friend, send the roll data:
   if (
     isGameAgainstOnlineFriend(currentGameSettings) &&
+    !isOnlineGameRemoteRoll &&
     !isOpponentsTurn(currentGameSettings, currentBoardData)
   )
     onlineGameApi_sendDiceRoll(roll, roll1, roll2);
+
+  if (roll == 0) {
+    // In case of this fn being called as a result of a remote roll in an online game,
+    // add a bit of delay if the roll was 0 and we're changing turn (so player can see
+    // the 0 roll before getting the turn back):
+    if (isOnlineGameRemoteRoll) {
+      setNewCurrentBoardData();
+      setTimeout(runSwapTurn, 2000);
+    } else runSwapTurn();
+  } else {
+    setNewCurrentBoardData(); //Need here????
+  }
 }
 
 /*

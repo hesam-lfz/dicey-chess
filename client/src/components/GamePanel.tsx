@@ -76,7 +76,6 @@ export function GamePanel({
           currentBoardData.turn,
           currentBoardData.numMovesInTurn
         );
-      //setTurn(board.turn);
       if (
         currentBoardData.numMovesInTurn === -1 &&
         isAITurn(currentGameSettings, currentBoardData)

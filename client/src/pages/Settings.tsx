@@ -226,7 +226,7 @@ export function Settings() {
           currentGameSettings,
           currentBoardData,
           setNewCurrentBoardData,
-          user!.userId,
+          user!,
           pin!,
           (userPlaysColor: Color) =>
             onOnlineGameReadyCallback(formFriendUsername, userPlaysColor)

@@ -103,7 +103,8 @@ export function Board({
         user,
         movingFromSq!,
         movingToSq!,
-        pawnPromotion
+        pawnPromotion,
+        false
       );
       setShouldTriggerAITurn(false);
     }
@@ -166,6 +167,8 @@ export function Board({
           'rendered Board',
           'currentGameSettings',
           currentGameSettings,
+          'currentBoardData',
+          currentBoardData,
           'currGameId',
           currGameId,
           'gameId',
