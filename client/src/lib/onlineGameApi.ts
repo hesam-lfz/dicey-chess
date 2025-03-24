@@ -23,7 +23,7 @@ type RemoteDiceRollData = {
 type RemoteMoveData = {
   from: string;
   to: string;
-  promotion: string;
+  promotion?: string;
 };
 
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
@@ -153,15 +153,17 @@ export function onlineGameApi_sendDiceRoll(
 export function onlineGameApi_sendMove(
   from: string,
   to: string,
-  promotion: string
+  promotion?: string
 ): void {
+  const data: RemoteMoveData = { from, to };
+  if (promotion) data.promotion = promotion;
   onlineGameApi_socket.send(
     JSON.stringify({
       userId: theUserId,
       pin: thePin,
       type: 'game',
       msg: 'move',
-      data: { from, to, promotion },
+      data: data,
     })
   );
 }
