@@ -114,6 +114,7 @@ export function onlineGameApi_initialize(
 
   onlineGameApi_socket.onclose = () => {
     console.log('Disconnected from server');
+    alert('Game ended, or aborted by the opponent or due to connection loss!');
   };
 
   onlineGameApi_socket.onerror = (error: Event) => {

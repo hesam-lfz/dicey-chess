@@ -49,6 +49,11 @@ const pendingGameConnectionCloseTimeout = 20000;
 const pendingGameFriendInviteRequestsFrom: Record<string, string> = {};
 const pendingGameFriendInviteRequestsTo: Record<string, string> = {};
 const pendingGameConnections: Record<string, WebSocket> = {};
+const pendingGameFriendInviteRequestsClearTimeoutIds: Record<
+  string,
+  NodeJS.Timeout | null
+> = {};
+const inProgressGameCloseTimeoutIds: Record<string, NodeJS.Timeout | null> = {};
 
 const gameConnectionPins: Record<string, string> = {};
 const inProgressFriendGameInvitedFrom: Record<string, string> = {};
@@ -346,10 +351,12 @@ app.get(
         JSON.stringify(pendingGameFriendInviteRequestsTo)
       );
       // timeout pending request after 5 min:
-      setTimeout(
-        () => cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
-        pendingGameConnectionTimeout
-      );
+      pendingGameFriendInviteRequestsClearTimeoutIds[requestingPlayerId] =
+        setTimeout(
+          () =>
+            cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
+          pendingGameConnectionTimeout
+        );
       // return status of request:
       const responseData: InviteRequestResponse = { status };
       // if we're ready to start establishing connection, add a pin for socket communication:
@@ -357,7 +364,7 @@ app.get(
         responseData.pin = generateConnectionPin();
         gameConnectionPins[requestingPlayerId] = responseData.pin!;
         // Timeout game after a while:
-        setTimeout(() => {
+        inProgressGameCloseTimeoutIds[requestingPlayerId] = setTimeout(() => {
           delete gameConnectionPins[requestingPlayerId];
         }, gameTimeout);
       }
@@ -388,10 +395,14 @@ const wsServer = new WebSocketServer({ server });
 wsServer.on('connection', (ws) => {
   console.log('Client connected');
 
-  // Remove connection after a while, if game hasn't gotten started:
-  let pendingGameCloseTimerId2: NodeJS.Timeout | null;
-  const pendingGameCloseTimerId1 = setTimeout(() => {
-    pendingGameCloseTimerId2 = closeStaleGameConnection(ws, true);
+  let theUserId: string;
+
+  // Remove connection after a while, if game hasn't gotten started or ended normally:
+  let pendingGameCloseTimeoutId2: NodeJS.Timeout | null;
+  let inProgressGameCloseTimeoutId1: NodeJS.Timeout | null;
+
+  const pendingGameCloseTimeoutId1 = setTimeout(() => {
+    pendingGameCloseTimeoutId2 = closeStaleGameConnection(ws, true);
   }, pendingGameConnectionTimeout);
 
   ws.on('message', (message) => {
@@ -409,6 +420,7 @@ wsServer.on('connection', (ws) => {
       throw new ClientError(400, 'Websocket message with invalid pin');
     if (type === 'connection') {
       if (msg === 'open') {
+        theUserId = userId;
         ws.send(JSON.stringify({ type: 'connection', msg: 'hand' }));
       } else if (msg === 'shake') {
         pendingGameConnections[userId] = ws;
@@ -434,8 +446,12 @@ wsServer.on('connection', (ws) => {
           // Move game from pending to in-progress:
           // Clear timeouts set out to clear unsuccessful connection attempts:
           clearTimeout(pendingGameDataCleanupTimerId);
-          clearTimeout(pendingGameCloseTimerId1);
-          if (pendingGameCloseTimerId2) clearTimeout(pendingGameCloseTimerId2);
+          clearTimeout(pendingGameCloseTimeoutId1);
+          if (pendingGameCloseTimeoutId2) {
+            clearTimeout(pendingGameCloseTimeoutId2);
+            pendingGameCloseTimeoutId2 = null;
+          }
+          cancelFriendInviteRequest(userId, friendId);
           delete pendingGameConnections[userId];
           delete pendingGameConnections[friendId];
           delete pendingGameFriendInviteRequestsFrom[userId];
@@ -445,7 +461,7 @@ wsServer.on('connection', (ws) => {
           inProgressGameConnections[userId] = ws;
           inProgressGameConnections[friendId] = friendWs;
           // Timeout game after a while:
-          setTimeout(() => {
+          inProgressGameCloseTimeoutId1 = setTimeout(() => {
             closeStaleGameConnection(userId, false);
             removeStaleGameData(userId);
           }, gameTimeout);
@@ -461,12 +477,29 @@ wsServer.on('connection', (ws) => {
         );
       if (['roll', 'move'].includes(msg)) {
         friendWs.send(message.toString());
+      } else if (msg === 'abort') {
+        // friend has aborted game or connection got lost, we need to close connection too:
+        // remove any cache data related to this connection:
+        removeConnectionData(theUserId, inProgressGameCloseTimeoutId1);
+        ws.close();
       }
     }
   });
 
   ws.on('close', () => {
-    console.log('Client disconnected');
+    console.log('Client disconnected', theUserId);
+    // alert the opponent player that connection is closed and game aborted:
+    const friendId =
+      inProgressFriendGameInvitedFrom[theUserId] ||
+      pendingGameFriendInviteRequestsFrom[theUserId];
+    if (friendId) {
+      const friendWs =
+        inProgressGameConnections[friendId] || pendingGameConnections[friendId];
+      if (friendWs)
+        friendWs.send(JSON.stringify({ type: 'game', msg: 'abort' }));
+    }
+    // remove any cache data related to this connection:
+    removeConnectionData(theUserId, inProgressGameCloseTimeoutId1);
   });
 
   ws.on('error', (error) => {
@@ -474,7 +507,7 @@ wsServer.on('connection', (ws) => {
   });
 });
 
-// Removes friend invite request (called after invite timeouts):
+// Removes friend invite request (called after connection established or invite timeouts):
 const cancelFriendInviteRequest = (
   requestingUserId: string,
   requestedUserId: string
@@ -485,6 +518,28 @@ const cancelFriendInviteRequest = (
     delete pendingGameFriendInviteRequestsFrom[requestingUserId];
     if (pendingGameFriendInviteRequestsTo[requestedUserId] === requestingUserId)
       delete pendingGameFriendInviteRequestsTo[requestedUserId];
+  }
+  const timeoutId =
+    pendingGameFriendInviteRequestsClearTimeoutIds[requestingUserId];
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    delete pendingGameFriendInviteRequestsClearTimeoutIds[requestingUserId];
+  }
+};
+
+// remove any cache data related to game connection:
+const removeConnectionData = (
+  userId: string,
+  inProgressGameCloseTimeoutId1: NodeJS.Timeout | null
+): void => {
+  if (inProgressGameCloseTimeoutId1) {
+    removeStaleGameData(userId);
+    inProgressGameCloseTimeoutId1 = null;
+  }
+  const timeoutId = inProgressGameCloseTimeoutIds[userId];
+  if (timeoutId) {
+    delete gameConnectionPins[userId];
+    delete inProgressGameCloseTimeoutIds[userId];
   }
 };
 
@@ -547,63 +602,3 @@ const removeStaleGameData = (userId: string): void => {
   delete inProgressFriendGameInvitedFrom[userId];
   if (friendId) delete inProgressFriendGameInvitedFrom[friendId];
 };
-
-/*
-
-// server.js
-import { WebSocketServer } from 'ws';
-
-
-//const wss = new WebSocketServer({ port: 8080 }); // <-- NO
-//const wsServer = new webSocketServer({ httpServer: server });
-const wsServer = new WebSocket.Server({ httpServer: server }); //?
-
-wsServer.on('connection', ws => {
-  console.log('Client connected');
-
-  ws.on('message', message => {
-    console.log(`Received: ${message}`);
-    ws.send(`Server: ${message}`); // Echo the message back to the client
-  });
-
-  ws.on('close', () => {
-    console.log('Client disconnected');
-  });
-
-  ws.on('error', error => {
-    console.error('WebSocket error:', error);
-  });
-});
-
-console.log('WebSocket server is running on ws://localhost:8080');
-
-// client.js
-import WebSocket from 'ws';
-
-const ws = new WebSocket('ws://localhost:8080');
-
-ws.on('open', () => {
-  console.log('Connected to server');
-  ws.send('Hello from client!');
-});
-
-ws.on('message', message => {
-  console.log(`Received: ${message}`);
-});
-
-ws.on('close', () => {
-  console.log('Disconnected from server');
-});
-
-ws.on('error', error => {
-  console.error('WebSocket error:', error);
-});
-
-// Send a message every 3 seconds
-setInterval(() => {
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send('Another message from client');
-  }
-}, 3000);
-
-*/
