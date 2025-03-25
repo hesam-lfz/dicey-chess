@@ -38,7 +38,8 @@ export function onlineGameApi_initialize(
   setNewCurrentBoardData: () => void,
   user: User,
   pin: string,
-  onOnlineGameReadyCallback: (userPlaysColor: Color) => void
+  onOnlineGameReadyCallback: (userPlaysColor: Color) => void,
+  onSocketFailureCallback: (error: Event) => void
 ): void {
   theUserId = user.userId;
   thePin = pin;
@@ -106,6 +107,7 @@ export function onlineGameApi_initialize(
           moveData.promotion as PieceSymbol | undefined,
           true
         );
+        //setNewCurrentBoardData();
       }
     }
   };
@@ -114,14 +116,16 @@ export function onlineGameApi_initialize(
     console.log('Disconnected from server');
   };
 
-  onlineGameApi_socket.onerror = (error) => {
+  onlineGameApi_socket.onerror = (error: Event) => {
     console.error('WebSocket error:', error);
+    onSocketFailureCallback(error);
   };
 }
 
 // Close the online game socket:
 export function onlineGameApi_close(): void {
   if (
+    onlineGameApi_socket &&
     !(
       onlineGameApi_socket.readyState === onlineGameApi_socket.CLOSED ||
       onlineGameApi_socket.readyState === onlineGameApi_socket.CLOSING

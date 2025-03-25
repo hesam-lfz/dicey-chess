@@ -6,6 +6,7 @@ import {
   handleDiceRoll,
   isAITurn,
   isGameAgainstAI,
+  isOpponentsTurn,
 } from '../lib';
 import { useCurrentGameContext } from '../components/useCurrentGameContext';
 import { LeftPanel } from './LeftPanel';
@@ -174,26 +175,33 @@ export function GamePanel({
           containerOnNewGame={onNewGame}
           containerOnLoadGame={onLoadGame}
         />
-        <div className="board-panel">
-          <BoardLabels
-            currUserPlaysColor={currentGameSettings.userPlaysColor}
-          />
-          <Board
-            currGameId={gameId}
-            currReplayModeOn={replayModeOn}
-            currReplayStepMove={replayStepMove}
-            currPrevMoveFromSq={
-              board.gameOver ? (currReplayMove!.from as Square) : null
-            }
-            currPrevMoveToSq={
-              board.gameOver ? (currReplayMove!.to as Square) : null
-            }
-            currUserPlaysColor={currentGameSettings.userPlaysColor}
-            currShouldTriggerAITurn={shouldTriggerAITurn}
-            currIsMovingDisabled={isMovingDisabled}
-            containerOnMove={onMove}
-            containerOnAlertDiceRoll={onAlertDiceRoll}
-          />
+        <div>
+          <div className="board-panel">
+            <BoardLabels
+              currUserPlaysColor={currentGameSettings.userPlaysColor}
+            />
+            <Board
+              currGameId={gameId}
+              currReplayModeOn={replayModeOn}
+              currReplayStepMove={replayStepMove}
+              currPrevMoveFromSq={
+                board.gameOver ? (currReplayMove!.from as Square) : null
+              }
+              currPrevMoveToSq={
+                board.gameOver ? (currReplayMove!.to as Square) : null
+              }
+              currUserPlaysColor={currentGameSettings.userPlaysColor}
+              currShouldTriggerAITurn={shouldTriggerAITurn}
+              currIsMovingDisabled={isMovingDisabled}
+              containerOnMove={onMove}
+              containerOnAlertDiceRoll={onAlertDiceRoll}
+            />
+          </div>
+          {isOpponentsTurn(currentGameSettings, currentBoardData) ? (
+            <div className="waiting-opponent-msg">
+              <span>Waiting for opponent move...</span>
+            </div>
+          ) : null}
         </div>
         <RightPanel
           currGameId={gameId}

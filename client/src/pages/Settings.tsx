@@ -222,6 +222,7 @@ export function Settings() {
       if (status === 0) {
         // if status = 0 (both parties have sent mutual invites and we are
         // ready to start web socket connection to start game):
+
         onlineGameApi_initialize(
           currentGameSettings,
           currentBoardData,
@@ -229,7 +230,12 @@ export function Settings() {
           user!,
           pin!,
           (userPlaysColor: Color) =>
-            onOnlineGameReadyCallback(formFriendUsername, userPlaysColor)
+            onOnlineGameReadyCallback(formFriendUsername, userPlaysColor),
+          (error: Event) => {
+            console.error('Socket connection failed! ', error);
+            infoMessageModalMessage = infoMessageModalMessageGeneralError;
+            setIsInfoMessageModalOpen(true);
+          }
         );
       } else if (
         recheckAttemptNumber <

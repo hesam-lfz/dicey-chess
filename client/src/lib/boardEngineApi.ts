@@ -243,6 +243,7 @@ export function loadSettings(
   setNewCurrentGameSettings: () => void
 ): void {
   const retrievedSettings = storageApi_loadSettings();
+  if (DebugOn) console.log('retrievedSettings', retrievedSettings);
   initSettings = retrievedSettings || defaultInitSettings;
   resetSettings(currentGameSettings, setNewCurrentGameSettings, false);
 }
@@ -266,6 +267,8 @@ export const resetSettings = (
   setNewCurrentGameSettings: () => void,
   resetToDefaultSettings: boolean = false
 ) => {
+  if (DebugOn)
+    console.log('start resetSettings', settings, currentGameSettings);
   // If we're currently in a game with an online friend, close the web socket
   // connection:
   if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
@@ -275,6 +278,7 @@ export const resetSettings = (
     currentGameSettings,
     setNewCurrentGameSettings
   );
+  if (DebugOn) console.log('done resetSettings', settings, currentGameSettings);
 };
 
 // Sets the current game settings based on current settings:
@@ -465,13 +469,21 @@ export function makeMove(
   fromSquare: Square,
   toSquare: Square,
   promotion?: PieceSymbol,
-  isOnlineGameRemoteRoll: boolean = false
+  isOnlineGameRemoteMove: boolean = false
 ): void {
   const move: Move = boardEngine.move({
     from: fromSquare,
     to: toSquare,
     promotion: promotion,
   });
+  // if this is an online game with a friend, send the roll data:
+  if (
+    isGameAgainstOnlineFriend(currentGameSettings) &&
+    !isOnlineGameRemoteMove &&
+    !isOpponentsTurn(currentGameSettings, currentBoardData)
+  )
+    onlineGameApi_sendMove(fromSquare, toSquare, promotion);
+
   // if it's a promotion, update the the type of promoted piece:
   if (promotion) getSquarePiece(toSquare)!.type = promotion;
   currentBoardData.turn = boardEngine.turn();
@@ -495,14 +507,6 @@ export function makeMove(
   board.replayCurrentFlatIndex += 1;
   board.flatBoardFenHistory.push(boardEngine.fen());
   board.flatSquareMoveHistory.push(move);
-
-  // if this is an online game with a friend, send the roll data:
-  if (
-    isGameAgainstOnlineFriend(currentGameSettings) &&
-    !isOnlineGameRemoteRoll &&
-    !isOpponentsTurn(currentGameSettings, currentBoardData)
-  )
-    onlineGameApi_sendMove(fromSquare, toSquare, promotion);
 
   // After each move we need to check for game over because if player has moves left
   // in the turn but has no valid moves then it's a draw:

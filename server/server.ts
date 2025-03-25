@@ -48,9 +48,10 @@ const pendingGameConnectionCloseTimeout = 20000;
 // FIXME: These caches need to go to db!!:
 const pendingGameFriendInviteRequestsFrom: Record<string, string> = {};
 const pendingGameFriendInviteRequestsTo: Record<string, string> = {};
-const gameConnectionPins: Record<string, string> = {};
-
 const pendingGameConnections: Record<string, WebSocket> = {};
+
+const gameConnectionPins: Record<string, string> = {};
+const inProgressFriendGameInvitedFrom: Record<string, string> = {};
 const inProgressGameConnections: Record<string, WebSocket> = {};
 
 const db = new pg.Pool({
@@ -397,7 +398,11 @@ wsServer.on('connection', (ws) => {
     console.log(`Received: ${message}`);
     const { userId, pin, type, msg } = JSON.parse(message.toString());
     if (!userId) throw new ClientError(400, 'Websocket message missing userId');
-    const friendId = pendingGameFriendInviteRequestsFrom[userId];
+    const friendId = (
+      type === 'connection'
+        ? pendingGameFriendInviteRequestsFrom
+        : inProgressFriendGameInvitedFrom
+    )[userId];
     if (!friendId)
       throw new ClientError(400, 'There is no pending invite from userId');
     if (!(pin && gameConnectionPins[userId] === pin))
@@ -433,6 +438,10 @@ wsServer.on('connection', (ws) => {
           if (pendingGameCloseTimerId2) clearTimeout(pendingGameCloseTimerId2);
           delete pendingGameConnections[userId];
           delete pendingGameConnections[friendId];
+          delete pendingGameFriendInviteRequestsFrom[userId];
+          delete pendingGameFriendInviteRequestsTo[friendId];
+          inProgressFriendGameInvitedFrom[userId] = friendId;
+          inProgressFriendGameInvitedFrom[friendId] = userId;
           inProgressGameConnections[userId] = ws;
           inProgressGameConnections[friendId] = friendWs;
           // Timeout game after a while:
@@ -450,7 +459,7 @@ wsServer.on('connection', (ws) => {
           400,
           'Websocket connection for friend was not found!'
         );
-      if (msg === 'roll') {
+      if (['roll', 'move'].includes(msg)) {
         friendWs.send(message.toString());
       }
     }
@@ -534,6 +543,9 @@ const closeStaleGameConnectionCheck = (
 const removeStaleGameData = (userId: string): void => {
   delete pendingGameConnections[userId];
   delete inProgressGameConnections[userId];
+  const friendId = inProgressFriendGameInvitedFrom[userId];
+  delete inProgressFriendGameInvitedFrom[userId];
+  if (friendId) delete inProgressFriendGameInvitedFrom[friendId];
 };
 
 /*
