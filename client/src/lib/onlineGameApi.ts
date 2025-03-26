@@ -39,7 +39,8 @@ export function onlineGameApi_initialize(
   user: User,
   pin: string,
   onOnlineGameReadyCallback: (userPlaysColor: Color) => void,
-  onSocketFailureCallback: (error: Event) => void
+  onSocketFailureCallback: (error: Event) => void,
+  onGameAbortCallback: () => void
 ): void {
   theUserId = user.userId;
   thePin = pin;
@@ -110,9 +111,8 @@ export function onlineGameApi_initialize(
         //setNewCurrentBoardData();
       } else if (msg === 'abort') {
         onlineGameApi_socket.close();
-        alert(
-          'Game ended, or aborted by the opponent or due to connection loss!'
-        );
+
+        onGameAbortCallback();
       }
     }
   };

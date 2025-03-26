@@ -402,7 +402,7 @@ wsServer.on('connection', (ws) => {
   let inProgressGameCloseTimeoutId1: NodeJS.Timeout | null;
 
   const pendingGameCloseTimeoutId1 = setTimeout(() => {
-    pendingGameCloseTimeoutId2 = closeStaleGameConnection(ws, true);
+    pendingGameCloseTimeoutId2 = closeStaleGameConnection(ws);
   }, pendingGameConnectionTimeout);
 
   ws.on('message', (message) => {
@@ -462,8 +462,7 @@ wsServer.on('connection', (ws) => {
           inProgressGameConnections[friendId] = friendWs;
           // Timeout game after a while:
           inProgressGameCloseTimeoutId1 = setTimeout(() => {
-            closeStaleGameConnection(userId, false);
-            removeStaleGameData(userId);
+            closeStaleGameConnectionAndRemoveData(userId, null);
           }, gameTimeout);
         }
       }
@@ -494,8 +493,10 @@ wsServer.on('connection', (ws) => {
         friendWs.send(JSON.stringify({ type: 'game', msg: 'abort' }));
     }
     // remove any cache data related to this connection:
-    removeConnectionData(theUserId, friendId, inProgressGameCloseTimeoutId1);
-
+    closeStaleGameConnectionAndRemoveData(
+      theUserId,
+      inProgressGameCloseTimeoutId1
+    );
     cacheLog();
   });
 
@@ -521,26 +522,52 @@ const cancelFriendInviteRequest = (
   }
   const timeoutId =
     pendingGameFriendInviteRequestsClearTimeoutIds[requestingUserId];
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-    delete pendingGameFriendInviteRequestsClearTimeoutIds[requestingUserId];
-  }
+  if (timeoutId) clearTimeout(timeoutId);
+  delete pendingGameFriendInviteRequestsClearTimeoutIds[requestingUserId];
 };
 
-// remove any cache data related to game connection:
-const removeConnectionData = (
+// Closes game connection and remove any cache data related to game:
+const closeStaleGameConnectionAndRemoveData = (
   userId: string,
-  friendId: string | undefined,
   inProgressGameCloseTimeoutId1: NodeJS.Timeout | null
 ): void => {
   if (inProgressGameCloseTimeoutId1) {
-    removeStaleGameData(userId);
+    clearTimeout(inProgressGameCloseTimeoutId1);
     inProgressGameCloseTimeoutId1 = null;
   }
+  const connection =
+    inProgressGameConnections[userId] || pendingGameConnections[userId];
+  if (connection) closeStaleGameConnection(connection);
   const timeoutId = inProgressGameCloseTimeoutIds[userId];
   if (timeoutId) {
-    delete gameConnectionPins[userId];
     delete inProgressGameCloseTimeoutIds[userId];
+    clearTimeout(timeoutId);
+  }
+  removeStaleGameData(userId);
+};
+
+// Removes any cached data on a game that's ended:
+const removeStaleGameData = (userId: string): void => {
+  const friendId =
+    inProgressFriendGameInvitedFrom[userId] ||
+    pendingGameFriendInviteRequestsFrom[userId];
+  delete pendingGameConnections[userId];
+  delete pendingGameFriendInviteRequestsFrom[userId];
+  delete pendingGameFriendInviteRequestsTo[userId];
+  delete pendingGameFriendInviteRequestsClearTimeoutIds[userId];
+  delete inProgressGameConnections[userId];
+  delete inProgressFriendGameInvitedFrom[userId];
+  delete inProgressGameCloseTimeoutIds[userId];
+  delete gameConnectionPins[userId];
+  if (friendId) {
+    delete pendingGameFriendInviteRequestsTo[friendId];
+    delete pendingGameFriendInviteRequestsFrom[friendId];
+    delete pendingGameFriendInviteRequestsClearTimeoutIds[friendId];
+    delete pendingGameConnections[friendId];
+    delete inProgressFriendGameInvitedFrom[friendId];
+    delete inProgressGameConnections[friendId];
+    delete inProgressGameCloseTimeoutIds[friendId];
+    delete gameConnectionPins[friendId];
   }
   cancelFriendInviteRequest(userId, friendId);
 };
@@ -548,8 +575,7 @@ const removeConnectionData = (
 // Starts the process of forcing a game connection to close, forcing a
 // a termination if client is unresponsive after a while:
 const closeStaleGameConnection = (
-  connection: WebSocket,
-  isForPendingGame: boolean
+  connection: WebSocket
 ): NodeJS.Timeout | null => {
   // If connection is already closed, then nothing to do:
   if (!connection || connection.readyState === connection.CLOSED) return null;
@@ -557,15 +583,14 @@ const closeStaleGameConnection = (
   if (connection.readyState !== connection.CLOSING) connection.close();
   // check back later and if it is still pending close, force close it then:
   return setTimeout(
-    () => closeStaleGameConnectionCheck(connection, isForPendingGame, 1),
-    isForPendingGame ? pendingGameConnectionCloseTimeout : gameTimeout
+    () => closeStaleGameConnectionCheck(connection, 1),
+    pendingGameConnectionCloseTimeout
   );
 };
 
 // Helper for function above to force a connection termination if needed:
 const closeStaleGameConnectionCheck = (
   connection: WebSocket,
-  isForPendingGame: boolean,
   attemptNumber: number = 1
 ): void => {
   // If connection is already closed, then nothing to do:
@@ -573,25 +598,11 @@ const closeStaleGameConnectionCheck = (
   if (attemptNumber <= 1)
     // check back later and if it is still pending close, force close it then:
     setTimeout(
-      () =>
-        closeStaleGameConnectionCheck(
-          connection,
-          isForPendingGame,
-          attemptNumber + 1
-        ),
-      isForPendingGame ? pendingGameConnectionCloseTimeout : gameTimeout
+      () => closeStaleGameConnectionCheck(connection, attemptNumber + 1),
+      pendingGameConnectionCloseTimeout
     );
   // force a terminate
   else connection.terminate();
-};
-
-// Removes any cached data on a game that's ended:
-const removeStaleGameData = (userId: string): void => {
-  delete pendingGameConnections[userId];
-  delete inProgressGameConnections[userId];
-  const friendId = inProgressFriendGameInvitedFrom[userId];
-  delete inProgressFriendGameInvitedFrom[userId];
-  if (friendId) delete inProgressFriendGameInvitedFrom[friendId];
 };
 
 // Generates a random pin for user connections

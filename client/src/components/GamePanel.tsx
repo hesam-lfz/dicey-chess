@@ -197,11 +197,16 @@ export function GamePanel({
               containerOnAlertDiceRoll={onAlertDiceRoll}
             />
           </div>
-          {isOpponentsTurn(currentGameSettings, currentBoardData) ? (
-            <div className="waiting-opponent-msg">
-              <span>Waiting for opponent move...</span>
-            </div>
-          ) : null}
+
+          <div
+            className={
+              'waiting-opponent-msg' +
+              (isOpponentsTurn(currentGameSettings, currentBoardData)
+                ? ''
+                : ' invisible')
+            }>
+            <span>Waiting for opponent move...</span>
+          </div>
         </div>
         <RightPanel
           currGameId={gameId}
