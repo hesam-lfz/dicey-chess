@@ -477,11 +477,6 @@ wsServer.on('connection', (ws) => {
         );
       if (['roll', 'move'].includes(msg)) {
         friendWs.send(message.toString());
-      } else if (msg === 'abort') {
-        // friend has aborted game or connection got lost, we need to close connection too:
-        // remove any cache data related to this connection:
-        removeConnectionData(theUserId, inProgressGameCloseTimeoutId1);
-        ws.close();
       }
     }
   });
@@ -499,7 +494,9 @@ wsServer.on('connection', (ws) => {
         friendWs.send(JSON.stringify({ type: 'game', msg: 'abort' }));
     }
     // remove any cache data related to this connection:
-    removeConnectionData(theUserId, inProgressGameCloseTimeoutId1);
+    removeConnectionData(theUserId, friendId, inProgressGameCloseTimeoutId1);
+
+    cacheLog();
   });
 
   ws.on('error', (error) => {
@@ -510,13 +507,16 @@ wsServer.on('connection', (ws) => {
 // Removes friend invite request (called after connection established or invite timeouts):
 const cancelFriendInviteRequest = (
   requestingUserId: string,
-  requestedUserId: string
+  requestedUserId: string | undefined
 ): void => {
   const priorRequestedFriendId =
     pendingGameFriendInviteRequestsFrom[requestingUserId];
   if (priorRequestedFriendId) {
     delete pendingGameFriendInviteRequestsFrom[requestingUserId];
-    if (pendingGameFriendInviteRequestsTo[requestedUserId] === requestingUserId)
+    if (
+      requestedUserId &&
+      pendingGameFriendInviteRequestsTo[requestedUserId] === requestingUserId
+    )
       delete pendingGameFriendInviteRequestsTo[requestedUserId];
   }
   const timeoutId =
@@ -530,6 +530,7 @@ const cancelFriendInviteRequest = (
 // remove any cache data related to game connection:
 const removeConnectionData = (
   userId: string,
+  friendId: string | undefined,
   inProgressGameCloseTimeoutId1: NodeJS.Timeout | null
 ): void => {
   if (inProgressGameCloseTimeoutId1) {
@@ -541,17 +542,7 @@ const removeConnectionData = (
     delete gameConnectionPins[userId];
     delete inProgressGameCloseTimeoutIds[userId];
   }
-};
-
-// Generates a random pin for user connections
-const generateConnectionPin = (): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * 26);
-    result += chars[randomIndex];
-  }
-  return result;
+  cancelFriendInviteRequest(userId, friendId);
 };
 
 // Starts the process of forcing a game connection to close, forcing a
@@ -601,4 +592,36 @@ const removeStaleGameData = (userId: string): void => {
   const friendId = inProgressFriendGameInvitedFrom[userId];
   delete inProgressFriendGameInvitedFrom[userId];
   if (friendId) delete inProgressFriendGameInvitedFrom[friendId];
+};
+
+// Generates a random pin for user connections
+const generateConnectionPin = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * 26);
+    result += chars[randomIndex];
+  }
+  return result;
+};
+
+const cacheLog = (): void => {
+  console.log(
+    'pendingGameFriendInviteRequestsFrom',
+    pendingGameFriendInviteRequestsFrom,
+    'pendingGameFriendInviteRequestsTo',
+    pendingGameFriendInviteRequestsTo,
+    'pendingGameConnections',
+    Object.keys(pendingGameConnections),
+    'pendingGameFriendInviteRequestsClearTimeoutIds',
+    Object.keys(pendingGameFriendInviteRequestsClearTimeoutIds),
+    'inProgressGameCloseTimeoutIds',
+    Object.keys(inProgressGameCloseTimeoutIds),
+    'gameConnectionPins',
+    gameConnectionPins,
+    'inProgressFriendGameInvitedFrom',
+    inProgressFriendGameInvitedFrom,
+    'inProgressGameConnections',
+    Object.keys(inProgressGameConnections)
+  );
 };

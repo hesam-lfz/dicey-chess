@@ -108,13 +108,17 @@ export function onlineGameApi_initialize(
           true
         );
         //setNewCurrentBoardData();
+      } else if (msg === 'abort') {
+        onlineGameApi_socket.close();
+        alert(
+          'Game ended, or aborted by the opponent or due to connection loss!'
+        );
       }
     }
   };
 
   onlineGameApi_socket.onclose = () => {
     console.log('Disconnected from server');
-    alert('Game ended, or aborted by the opponent or due to connection loss!');
   };
 
   onlineGameApi_socket.onerror = (error: Event) => {
