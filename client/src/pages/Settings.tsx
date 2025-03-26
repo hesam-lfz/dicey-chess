@@ -169,6 +169,7 @@ export function Settings() {
       } catch (error) {
         console.error('Error sending invitation', error);
         infoMessageModalMessage = infoMessageModalMessageGeneralError;
+        setIsWaitingForFriendInviteModalOpen(false);
         setIsInfoMessageModalOpen(true);
       }
     }
@@ -234,6 +235,7 @@ export function Settings() {
           (error: Event) => {
             console.error('Socket connection failed! ', error);
             infoMessageModalMessage = infoMessageModalMessageGeneralError;
+            setIsWaitingForFriendInviteModalOpen(false);
             setIsInfoMessageModalOpen(true);
           }
         );
