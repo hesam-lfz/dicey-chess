@@ -492,12 +492,12 @@ wsServer.on('connection', (ws) => {
       if (friendWs)
         friendWs.send(JSON.stringify({ type: 'game', msg: 'abort' }));
     }
-    // remove any cache data related to this connection:
+    // force connections close and remove any cache data related to this game:
     closeStaleGameConnectionAndRemoveData(
       theUserId,
       inProgressGameCloseTimeoutId1
     );
-    cacheLog();
+    // cacheLog();
   });
 
   ws.on('error', (error) => {

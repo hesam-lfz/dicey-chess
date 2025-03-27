@@ -201,7 +201,8 @@ export function GamePanel({
           <div
             className={
               'waiting-opponent-msg' +
-              (isOpponentsTurn(currentGameSettings, currentBoardData)
+              (!replayModeOn &&
+              isOpponentsTurn(currentGameSettings, currentBoardData)
                 ? ''
                 : ' invisible')
             }>

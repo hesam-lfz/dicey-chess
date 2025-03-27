@@ -248,7 +248,6 @@ export function Settings() {
             setIsInfoMessageModalOpen(true);
             resetBoard(currentGameSettings, currentBoardData);
             saveSettings(currentGameSettings, setNewCurrentGameSettings);
-            navigate(AppSubdomain + 'settings');
           }
         );
       } else if (
