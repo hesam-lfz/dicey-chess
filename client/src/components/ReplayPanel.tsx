@@ -9,6 +9,8 @@ type Props = {
   containerOnStepReplayMoveIndex: (step: number) => void;
 };
 
+let replayMoveIndexCallbackBusy = false;
+
 export function ReplayPanel({
   currGameId,
   containerOnStepReplayMoveIndex,
@@ -21,7 +23,8 @@ export function ReplayPanel({
 
   // turn moving replay position back on after a short delay to avoid bugs:
   useEffect(() => {
-    if (!readyToMoveIndex) setTimeout(() => setReadyToMoveIndex(true), 250);
+    if (!readyToMoveIndex)
+      setTimeout(() => setReadyToMoveIndex(!replayMoveIndexCallbackBusy), 500);
     // if we've just loaded another game, reset the replay index:
     if (gameId !== currGameId) {
       setReplayMoveIndex(board.replayCurrentFlatIndex);
@@ -32,12 +35,14 @@ export function ReplayPanel({
   const stepReplayMoveIndex = useCallback(
     (step: number) => {
       if (readyToMoveIndex) {
+        replayMoveIndexCallbackBusy = true;
         const idx = replayMoveIndex + step;
         if (idx >= 0 && idx < board.historyNumMoves) {
           setReadyToMoveIndex(false);
           setReplayMoveIndex(replayMoveIndex + step);
           containerOnStepReplayMoveIndex(step);
         }
+        replayMoveIndexCallbackBusy = false;
       }
     },
     [readyToMoveIndex, replayMoveIndex, containerOnStepReplayMoveIndex]
@@ -49,13 +54,18 @@ export function ReplayPanel({
       <div className="replay-controls-box dotted-border flex flex-row flex-align-center">
         <button
           className={
-            !readyToMoveIndex || replayMoveIndex === 0 ? ' disabled' : ''
+            replayMoveIndexCallbackBusy ||
+            !readyToMoveIndex ||
+            replayMoveIndex === 0
+              ? ' disabled'
+              : ''
           }
           onClick={() => stepReplayMoveIndex(-1)}>
           <img
             src={Icon_ffwd}
             className={'replay-control-icon rotate180'}
             alt={'replay-fwd-icon'}
+            draggable="false"
           />
         </button>
         <span className="replay-controls-move">
@@ -65,7 +75,9 @@ export function ReplayPanel({
         </span>
         <button
           className={
-            !readyToMoveIndex || replayMoveIndex === board.historyNumMoves - 1
+            replayMoveIndexCallbackBusy ||
+            !readyToMoveIndex ||
+            replayMoveIndex === board.historyNumMoves - 1
               ? ' disabled'
               : ''
           }
@@ -74,6 +86,7 @@ export function ReplayPanel({
             src={Icon_ffwd}
             className="replay-control-icon"
             alt={'replay-fwd-icon'}
+            draggable="false"
           />
         </button>
       </div>

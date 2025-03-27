@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import './Game.css';
 import { GamePanel } from '../components/GamePanel';
@@ -22,6 +22,8 @@ import {
 } from '../lib/storageApi';
 
 const infoMessageModalMessageDefault: string = 'Game saved.';
+const infoMessageModalMessageGameAbortedError =
+  'Online game was aborted by a player or due to connection loss.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
 export function Game() {
@@ -29,6 +31,7 @@ export function Game() {
     currentGameSettings,
     setNewCurrentGameSettings,
     currentBoardData,
+    setOnlineGameAbortedCallback,
     user,
   } = useCurrentGameContext();
   const [savedGames, setSavedGames] = useState<SavedGame[]>();
@@ -93,12 +96,19 @@ export function Game() {
     handleResetGameModalClose();
   }
 
+  const handleOnlineGameAborted = useCallback(() => {
+    infoMessageModalMessage = infoMessageModalMessageGameAbortedError;
+    setIsInfoMessageModalOpen(true);
+    resetBoard(currentGameSettings, currentBoardData);
+  }, [currentBoardData, currentGameSettings]);
+
   function resetGame(): void {
     if (DebugOn) console.log('Resetting game!');
     resetSettings(currentGameSettings, setNewCurrentGameSettings, false);
     resetBoard(currentGameSettings, currentBoardData);
     setGameId(currentGameSettings.gameId);
     setReplayModeOn(false);
+    setOnlineGameAbortedCallback(handleOnlineGameAborted);
   }
 
   function handleInfoMessageDone() {

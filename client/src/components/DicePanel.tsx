@@ -155,6 +155,7 @@ export function DicePanel({
                 src={playerIconSVGs[currentBoardData.turn]}
                 className="piece play-icon"
                 alt={'player-icon-' + currentBoardData.turn}
+                draggable="false"
               />
             </div>
           }
@@ -174,6 +175,7 @@ export function DicePanel({
                   className="dice-icon grow-and-back"
                   alt={'dice-icon'}
                   ref={rollDiceButtonIconRef}
+                  draggable="false"
                 />
               </button>
             </span>
@@ -185,6 +187,7 @@ export function DicePanel({
                 alt="dice-left-logo"
                 style={{ transform: 'rotate(' + dice1IconRotation + 'deg)' }}
                 ref={diceLeftRef}
+                draggable="false"
               />
               <img
                 className={diceClassName}
@@ -192,24 +195,27 @@ export function DicePanel({
                 alt="dice-right-logo"
                 style={{ transform: 'rotate(' + dice2IconRotation + 'deg)' }}
                 ref={diceRightRef}
+                draggable="false"
               />
             </div>
           )}
         </div>
+        <p
+          className={
+            'num-moves-left-text' +
+            (currentBoardData.diceRoll <= 0 ||
+            currentBoardData.numMovesInTurn === -1
+              ? ' invisible'
+              : '')
+          }>
+          <span className="num-moves-left-num">
+            {currentBoardData.numMovesInTurn}
+          </span>
+          {' move' +
+            (currentBoardData.numMovesInTurn > 1 ? 's' : '') +
+            ' left.'}
+        </p>
       </div>
-      <p
-        className={
-          'num-moves-left-text' +
-          (currentBoardData.diceRoll <= 0 ||
-          currentBoardData.numMovesInTurn === -1
-            ? ' invisible'
-            : '')
-        }>
-        <span className="num-moves-left-num">
-          {currentBoardData.numMovesInTurn}
-        </span>
-        {' move' + (currentBoardData.numMovesInTurn > 1 ? 's' : '') + ' left.'}
-      </p>
     </>
   );
 }

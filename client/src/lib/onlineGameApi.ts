@@ -45,10 +45,7 @@ export function onlineGameApi_initialize(
   theUserId = user.userId;
   thePin = pin;
   // Set up socket communication:
-  onlineGameApi_socket = new WebSocket(
-    '/ws'
-    //'ws://${window.location.host}/ws'
-  );
+  onlineGameApi_socket = new WebSocket('/ws');
 
   onlineGameApi_socket.onopen = () => {
     if (DebugOn) console.log('Connected to server');
@@ -108,10 +105,8 @@ export function onlineGameApi_initialize(
           moveData.promotion as PieceSymbol | undefined,
           true
         );
-        //setNewCurrentBoardData();
       } else if (msg === 'abort') {
         onlineGameApi_socket.close();
-
         onGameAbortCallback();
       }
     }

@@ -22,8 +22,6 @@ const infoMessageModalMessageDefault =
 const infoMessageModalMessageUsernameError = 'Username(s) incorrect';
 const infoMessageModalMessageInviteDeniedError =
   'Friend username incorrect or invite request disallowed!';
-const infoMessageModalMessageGameAbortedError =
-  'Online game aborted by the opponent or due to connection loss!';
 const infoMessageModalMessageGeneralError = 'Sending friend invite failed!';
 let infoMessageModalMessage = infoMessageModalMessageDefault;
 let inviteRequestSentWaitingResponse = false;
@@ -34,6 +32,7 @@ export function Settings() {
     setNewCurrentGameSettings,
     currentBoardData,
     setNewCurrentBoardData,
+    onlineGameAbortedCallback,
     user,
   } = useCurrentGameContext();
   const [
@@ -243,12 +242,7 @@ export function Settings() {
             setIsInfoMessageModalOpen(true);
           },
           // this callback is called if game is aborted by online opponent:
-          () => {
-            infoMessageModalMessage = infoMessageModalMessageGameAbortedError;
-            setIsInfoMessageModalOpen(true);
-            resetBoard(currentGameSettings, currentBoardData);
-            saveSettings(currentGameSettings, setNewCurrentGameSettings);
-          }
+          onlineGameAbortedCallback
         );
       } else if (
         recheckAttemptNumber <
