@@ -122,16 +122,19 @@ export function Board({
 
   const triggerAIMove = useCallback(() => {
     const run = async () => {
+      const gameIdBeforeCall = currentGameSettings.gameId;
       const move: BasicMove = await chessAiEngineApi_getAIMove(
         currentBoardData.numMovesInTurn === 1
       );
+      // If game has been reset since we called the api, just ignore the response:
+      if (gameIdBeforeCall !== currentGameSettings.gameId) return;
       //console.log('getAIMove got', move);
       setMovingFromSq(move.from);
       setMovingToSq(move.to);
       setPawnPromotion(move.promotion);
     };
     run();
-  }, [currentBoardData.numMovesInTurn]);
+  }, [currentBoardData.numMovesInTurn, currentGameSettings.gameId]);
 
   // Move to next/prev move during game replay:
   const triggerReplayStepMove = useCallback(

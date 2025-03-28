@@ -63,8 +63,6 @@ export function DicePanel({
   ]);
 
   useEffect(() => {
-    //setTurn(board.turn);
-    setGameId(currGameId);
     if (DebugOn)
       console.log(
         'rendered DicePanel',
@@ -112,6 +110,10 @@ export function DicePanel({
         setTimeout(handleRollButtonClick, 500);
       }
     } else setAIMoveTriggered(false);
+    // we're resetting the game:
+    //if (currGameId !== gameId) {
+    //}
+    setGameId(currGameId);
     // if user was clicking somewhere else while they need to be rolling dice,
     // alert them with some animation to show them where they need to click:
     if (currShouldAlertDiceRoll) {
