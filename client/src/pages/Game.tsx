@@ -12,6 +12,7 @@ import {
   outcomes,
   resetBoard,
   resetSettings,
+  saveSettings,
   type SavedGame,
 } from '../lib';
 import { useCurrentGameContext } from '../components/useCurrentGameContext';
@@ -20,18 +21,20 @@ import {
   storageApi_loadGames,
   storageApi_saveGame,
 } from '../lib/storageApi';
+import { onlineGameApi_globals } from '../lib';
 
 const infoMessageModalMessageDefault: string = 'Game saved.';
 const infoMessageModalMessageGameAbortedError =
   'Online game was aborted by a player or due to connection loss.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
 
+let onlineGameAbortedCallbackSet = false;
+
 export function Game() {
   const {
     currentGameSettings,
     setNewCurrentGameSettings,
     currentBoardData,
-    setOnlineGameAbortedCallback,
     user,
   } = useCurrentGameContext();
   const [savedGames, setSavedGames] = useState<SavedGame[]>();
@@ -97,10 +100,12 @@ export function Game() {
   }
 
   const handleOnlineGameAborted = useCallback(() => {
+    console.log('game abort handler');
+    resetBoard(currentGameSettings, currentBoardData);
+    saveSettings(currentGameSettings, setNewCurrentGameSettings);
     infoMessageModalMessage = infoMessageModalMessageGameAbortedError;
     setIsInfoMessageModalOpen(true);
-    resetBoard(currentGameSettings, currentBoardData);
-  }, [currentBoardData, currentGameSettings]);
+  }, [currentBoardData, currentGameSettings, setNewCurrentGameSettings]);
 
   function resetGame(): void {
     if (DebugOn) console.log('Resetting game!');
@@ -108,7 +113,6 @@ export function Game() {
     resetBoard(currentGameSettings, currentBoardData);
     setGameId(currentGameSettings.gameId);
     setReplayModeOn(false);
-    setOnlineGameAbortedCallback(handleOnlineGameAborted);
   }
 
   function handleInfoMessageDone() {
@@ -214,6 +218,11 @@ export function Game() {
       }
       handleChooseGameToLoadModalClose();
     }
+  }
+
+  if (!onlineGameAbortedCallbackSet) {
+    onlineGameAbortedCallbackSet = true;
+    onlineGameApi_globals.onlineGameAbortedCallback = handleOnlineGameAborted;
   }
 
   return (

@@ -22,10 +22,6 @@ export type CurrentGameContextValues = {
   setNewCurrentGameSettings: () => void;
   currentBoardData: CurrentBoardData;
   setNewCurrentBoardData: () => void;
-  onlineGameAbortedCallback: () => void;
-  setOnlineGameAbortedCallback: React.Dispatch<
-    React.SetStateAction<() => void>
-  >;
   user: User | undefined;
   token: string | undefined;
   handleSignIn: (user: User, token: string) => void;
@@ -52,8 +48,6 @@ export const CurrentGameContext = createContext<CurrentGameContextValues>({
   setNewCurrentGameSettings: () => undefined,
   currentBoardData: defaultCurrentBoardData,
   setNewCurrentBoardData: () => undefined,
-  onlineGameAbortedCallback: () => undefined,
-  setOnlineGameAbortedCallback: () => undefined,
   user: undefined,
   token: undefined,
   handleSignIn: () => undefined,
@@ -86,13 +80,17 @@ export function CurrentGameContextProvider({ children }: Props) {
     setCurrentBoardData({ ...currentBoardData });
   }
 
+  function setNewOnlineGameAbortedCallback(fn: () => void): void {
+    setOnlineGameAbortedCallback(fn);
+  }
+
   const currentGameContextValues = {
     currentGameSettings,
     setNewCurrentGameSettings,
     currentBoardData,
     setNewCurrentBoardData,
     onlineGameAbortedCallback,
-    setOnlineGameAbortedCallback,
+    setNewOnlineGameAbortedCallback,
     user,
     token,
     handleSignIn,

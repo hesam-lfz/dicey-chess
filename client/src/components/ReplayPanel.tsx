@@ -21,16 +21,26 @@ export function ReplayPanel({
   );
   const [readyToMoveIndex, setReadyToMoveIndex] = useState<boolean>(true);
 
-  // turn moving replay position back on after a short delay to avoid bugs:
+  const recheckMoveIndexBusy = useCallback(() => {
+    if (replayMoveIndexCallbackBusy) setTimeout(recheckMoveIndexBusy, 350);
+    else setReadyToMoveIndex(true);
+  }, []);
+
   useEffect(() => {
-    if (!readyToMoveIndex)
-      setTimeout(() => setReadyToMoveIndex(!replayMoveIndexCallbackBusy), 500);
+    // turn moving replay position back on after a short delay to avoid bugs:
+    if (!readyToMoveIndex) recheckMoveIndexBusy();
     // if we've just loaded another game, reset the replay index:
     if (gameId !== currGameId) {
       setReplayMoveIndex(board.replayCurrentFlatIndex);
       setGameId(currGameId);
     }
-  }, [currGameId, gameId, readyToMoveIndex, setReadyToMoveIndex]);
+  }, [
+    currGameId,
+    gameId,
+    readyToMoveIndex,
+    recheckMoveIndexBusy,
+    setReadyToMoveIndex,
+  ]);
 
   const stepReplayMoveIndex = useCallback(
     (step: number) => {

@@ -8,6 +8,10 @@ import {
 } from './boardEngineApi';
 import { User } from './auth';
 
+export type OnlineGameGlobals = {
+  onlineGameAbortedCallback: () => void;
+};
+
 type SocketResponseMessage = {
   type: string;
   msg: string;
@@ -24,6 +28,11 @@ type RemoteMoveData = {
   from: string;
   to: string;
   promotion?: string;
+};
+
+// Some globals accessed by various components/pages:
+export const onlineGameApi_globals: OnlineGameGlobals = {
+  onlineGameAbortedCallback: () => undefined,
 };
 
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
@@ -107,6 +116,7 @@ export function onlineGameApi_initialize(
         );
       } else if (msg === 'abort') {
         onlineGameApi_socket.close();
+        console.log('will call abort handler', onGameAbortCallback);
         onGameAbortCallback();
       }
     }

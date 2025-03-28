@@ -7,6 +7,7 @@ import {
   database_sendInviteFriendRequestByUsername,
   DebugOn,
   internalSettings,
+  onlineGameApi_globals,
   onlineGameApi_initialize,
   resetBoard,
   resetSettings,
@@ -32,7 +33,7 @@ export function Settings() {
     setNewCurrentGameSettings,
     currentBoardData,
     setNewCurrentBoardData,
-    onlineGameAbortedCallback,
+    //onlineGameAbortedCallback,
     user,
   } = useCurrentGameContext();
   const [
@@ -242,7 +243,7 @@ export function Settings() {
             setIsInfoMessageModalOpen(true);
           },
           // this callback is called if game is aborted by online opponent:
-          onlineGameAbortedCallback
+          onlineGameApi_globals.onlineGameAbortedCallback
         );
       } else if (
         recheckAttemptNumber <
