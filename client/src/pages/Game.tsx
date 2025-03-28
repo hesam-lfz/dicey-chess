@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import './Game.css';
 import { GamePanel } from '../components/GamePanel';
@@ -12,7 +12,6 @@ import {
   outcomes,
   resetBoard,
   resetSettings,
-  saveSettings,
   type SavedGame,
 } from '../lib';
 import { useCurrentGameContext } from '../components/useCurrentGameContext';
@@ -99,21 +98,24 @@ export function Game() {
     handleResetGameModalClose();
   }
 
-  const handleOnlineGameAborted = useCallback(() => {
-    console.log('game abort handler');
-    resetBoard(currentGameSettings, currentBoardData);
-    saveSettings(currentGameSettings, setNewCurrentGameSettings);
-    infoMessageModalMessage = infoMessageModalMessageGameAbortedError;
-    setIsInfoMessageModalOpen(true);
-  }, [currentBoardData, currentGameSettings, setNewCurrentGameSettings]);
+  useEffect(() => {
+    if (DebugOn) console.log('rendered Game', isInfoMessageModalOpen);
+  }, [isInfoMessageModalOpen]);
 
-  function resetGame(): void {
+  const resetGame = useCallback(() => {
     if (DebugOn) console.log('Resetting game!');
     resetSettings(currentGameSettings, setNewCurrentGameSettings, false);
     resetBoard(currentGameSettings, currentBoardData);
     setGameId(currentGameSettings.gameId);
     setReplayModeOn(false);
-  }
+  }, [currentBoardData, currentGameSettings, setNewCurrentGameSettings]);
+
+  const handleOnlineGameAborted = useCallback(() => {
+    console.log('game abort handler');
+    infoMessageModalMessage = infoMessageModalMessageGameAbortedError;
+    setIsInfoMessageModalOpen(true);
+    resetGame();
+  }, [resetGame]);
 
   function handleInfoMessageDone() {
     infoMessageModalMessage = infoMessageModalMessageDefault;
