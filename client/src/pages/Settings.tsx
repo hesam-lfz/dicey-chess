@@ -69,8 +69,12 @@ export function Settings() {
   const navigate = useNavigate();
 
   const onResetSettings = useCallback(() => {
-    resetSettings(currentGameSettings, setNewCurrentGameSettings, true);
-    resetBoard(currentGameSettings, currentBoardData);
+    resetSettings(currentGameSettings, setNewCurrentGameSettings, true, true);
+    resetBoard(
+      currentGameSettings,
+      setNewCurrentGameSettings,
+      currentBoardData
+    );
     saveSettings(currentGameSettings, setNewCurrentGameSettings);
     setOnePlayer(settings.onePlayerMode);
     setOpponentIsAI(settings.opponentIsAI);
@@ -93,7 +97,11 @@ export function Settings() {
       setOpponentIsAI(isOpponentAI);
       settings.onePlayerMode = onePlayer;
       settings.opponentIsAI = isOpponentAI;
-      resetBoard(currentGameSettings, currentBoardData);
+      resetBoard(
+        currentGameSettings,
+        setNewCurrentGameSettings,
+        currentBoardData
+      );
       saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
     [currentBoardData, currentGameSettings, setNewCurrentGameSettings, user]
@@ -119,7 +127,11 @@ export function Settings() {
       setUserPlaysColorRandomly(randomOn);
       settings.userPlaysColor = colorToSet;
       settings.userPlaysColorRandomly = randomOn;
-      resetBoard(currentGameSettings, currentBoardData);
+      resetBoard(
+        currentGameSettings,
+        setNewCurrentGameSettings,
+        currentBoardData
+      );
       saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
     [currentBoardData, currentGameSettings, setNewCurrentGameSettings]
@@ -129,7 +141,11 @@ export function Settings() {
     (checked: boolean) => {
       setAIPlayerIsSmart(checked);
       settings.AIPlayerIsSmart = checked;
-      resetBoard(currentGameSettings, currentBoardData);
+      resetBoard(
+        currentGameSettings,
+        setNewCurrentGameSettings,
+        currentBoardData
+      );
       saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
     [currentBoardData, currentGameSettings, setNewCurrentGameSettings]

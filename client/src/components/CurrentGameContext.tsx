@@ -129,7 +129,11 @@ export function CurrentGameContextProvider({ children }: Props) {
     // FIXME: This needs to be somewhere else??
     // Reset the board:
     if (DebugOn) console.log('reset board...');
-    resetBoard(currentGameSettings, currentBoardData);
+    resetBoard(
+      currentGameSettings,
+      setNewCurrentGameSettings,
+      currentBoardData
+    );
   }
 
   return (

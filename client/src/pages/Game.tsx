@@ -104,8 +104,12 @@ export function Game() {
 
   const resetGame = useCallback(() => {
     if (DebugOn) console.log('Resetting game!');
-    resetSettings(currentGameSettings, setNewCurrentGameSettings, false);
-    resetBoard(currentGameSettings, currentBoardData);
+    resetSettings(currentGameSettings, setNewCurrentGameSettings, false, false);
+    resetBoard(
+      currentGameSettings,
+      setNewCurrentGameSettings,
+      currentBoardData
+    );
     setGameId(currentGameSettings.gameId);
     setReplayModeOn(false);
   }, [currentBoardData, currentGameSettings, setNewCurrentGameSettings]);
@@ -113,8 +117,9 @@ export function Game() {
   const handleOnlineGameAborted = useCallback(() => {
     console.log('game abort handler');
     infoMessageModalMessage = infoMessageModalMessageGameAbortedError;
-    setIsInfoMessageModalOpen(true);
     resetGame();
+    setIsInfoMessageModalOpen(true);
+    //setGameId(currentGameSettings.gameId + 1);
   }, [resetGame]);
 
   function handleInfoMessageDone() {
@@ -183,6 +188,7 @@ export function Game() {
           // Prepare the board for replay of this saved game:
           loadSuccess = initBoardForGameReplay(
             currentGameSettings,
+            setNewCurrentGameSettings,
             currentBoardData,
             g
           );
@@ -193,9 +199,7 @@ export function Game() {
       if (loadedGame && loadSuccess) {
         setGameId(currentGameSettings.gameId);
         setReplayModeOn(true);
-      } else {
-        resetGame();
-      }
+      } else resetGame();
       handleChooseGameToLoadModalClose();
       if (!loadSuccess) {
         infoMessageModalMessage =

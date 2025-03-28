@@ -245,7 +245,7 @@ export function loadSettings(
   const retrievedSettings = storageApi_loadSettings();
   if (DebugOn) console.log('retrievedSettings', retrievedSettings);
   initSettings = retrievedSettings || defaultInitSettings;
-  resetSettings(currentGameSettings, setNewCurrentGameSettings, false);
+  resetSettings(currentGameSettings, setNewCurrentGameSettings, true, false);
 }
 
 // Save the current settings:
@@ -265,6 +265,7 @@ export function saveSettings(
 export const resetSettings = (
   currentGameSettings: CurrentGameSettings,
   setNewCurrentGameSettings: () => void,
+  resetToInitSettings: boolean = false,
   resetToDefaultSettings: boolean = false
 ) => {
   if (DebugOn)
@@ -273,7 +274,7 @@ export const resetSettings = (
   // connection:
   if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
   if (resetToDefaultSettings) initSettings = defaultInitSettings;
-  settings = { ...initSettings };
+  if (resetToInitSettings) settings = { ...initSettings };
   setCurrentGameSettingsBasedOnSettings(
     currentGameSettings,
     setNewCurrentGameSettings
@@ -305,12 +306,14 @@ export const setCurrentGameSettingsBasedOnSettings = (
 // Reset the board to start a new game:
 export const resetBoard = (
   currentGameSettings: CurrentGameSettings,
+  setNewCurrentGameSettings: () => void,
   currentBoardData: CurrentBoardData
 ) => {
   // If we're currently in a game with an online friend, close the web socket
   // connection:
   if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
   // increment gameId to trigger all components to reset:
+  console.log('reset board before', currentGameSettings.gameId);
   currentGameSettings.gameId += 1;
   currentBoardData.diceRoll = -1;
   currentBoardData.diceRoll1 = -1;
@@ -325,6 +328,7 @@ export const resetBoard = (
   boardEngine = new Chess(board.initPositionFen);
   currentBoardData.turn = boardEngine.turn();
   board.flatBoardFenHistory.push(boardEngine.fen());
+  setNewCurrentGameSettings();
   // close the chess AI engine socket if we have one running currently:
   if (chessAiEngine_socket) chessAiEngineApi_closeChessAiEngine_socket();
   // If we need the chess aI engine (1-player game) set it up:
@@ -338,10 +342,11 @@ export const resetBoard = (
 // Returns false if fails
 export function initBoardForGameReplay(
   currentGameSettings: CurrentGameSettings,
+  setNewCurrentGameSettings: () => void,
   currentBoardData: CurrentBoardData,
   game: SavedGame
 ): boolean {
-  resetBoard(currentGameSettings, currentBoardData);
+  resetBoard(currentGameSettings, setNewCurrentGameSettings, currentBoardData);
   /*
   console.log(
     'before prepping board',
@@ -408,7 +413,11 @@ export function initBoardForGameReplay(
       'Loading the saved game failed. The game was not saved properly and will be removed: ',
       error
     );
-    resetBoard(currentGameSettings, currentBoardData);
+    resetBoard(
+      currentGameSettings,
+      setNewCurrentGameSettings,
+      currentBoardData
+    );
     return false;
   }
 }

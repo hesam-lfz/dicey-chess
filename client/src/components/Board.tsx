@@ -50,6 +50,9 @@ type Props = {
   containerOnAlertDiceRoll: () => void;
 };
 
+let makeMoveDelayTimeoutId: NodeJS.Timeout | undefined = undefined;
+let AIMoveDelayTimeoutId: NodeJS.Timeout | undefined = undefined;
+
 export function Board({
   currGameId,
   currReplayModeOn,
@@ -206,9 +209,12 @@ export function Board({
 
       // if the 'from' and 'to' of a move were just determined, ready to execute the move:
       if (movingFromSq && movingToSq) {
-        replayModeOn
-          ? handleMove()
-          : setTimeout(handleMove, internalSettings.makeMoveDelay);
+        if (replayModeOn) handleMove();
+        else
+          makeMoveDelayTimeoutId = setTimeout(
+            handleMove,
+            internalSettings.makeMoveDelay
+          );
         return;
       }
 
@@ -225,7 +231,10 @@ export function Board({
         // mechanism to trigger AI move automatically, if needed (part two):
         if (shouldTriggerAITurn) {
           //console.log('triggering move');
-          setTimeout(triggerAIMove, internalSettings.AIMoveDelay);
+          AIMoveDelayTimeoutId = setTimeout(
+            triggerAIMove,
+            internalSettings.AIMoveDelay
+          );
           return;
         }
         // mechanism to trigger AI move automatically, if needed (part one)
@@ -239,6 +248,15 @@ export function Board({
       }
       // we're resetting the game:
       if (currGameId !== gameId) {
+        // cancel any delayed moves:
+        if (makeMoveDelayTimeoutId !== undefined) {
+          clearTimeout(makeMoveDelayTimeoutId);
+          makeMoveDelayTimeoutId = undefined;
+        }
+        if (AIMoveDelayTimeoutId !== undefined) {
+          clearTimeout(AIMoveDelayTimeoutId);
+          AIMoveDelayTimeoutId = undefined;
+        }
         setPrevMoveFromSq(null);
         setPrevMoveToSq(null);
       }
