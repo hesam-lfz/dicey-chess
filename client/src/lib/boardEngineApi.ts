@@ -54,6 +54,9 @@ export type InternalSettings = {
   rankPerGameUpdateIncrement: number;
   makeMoveDelay: number;
   AIMoveDelay: number;
+  pauseOnZeroRollDelay: number;
+  dialogOpenDelay: number;
+  localStorageOpDelay: number;
   AIEngineUsesSocket: boolean;
   // When requesting to play online friend with an invite, frequently recheck
   // until the friend has send mutual invite back to us. This is the timeout
@@ -214,8 +217,11 @@ export const internalSettings: InternalSettings = {
   initPlayerRank: 400,
   rankPerGameUpdateIncrement: 12,
   AIMoveDelay: 500,
-  AIEngineUsesSocket: false,
   makeMoveDelay: 50,
+  pauseOnZeroRollDelay: 2000,
+  dialogOpenDelay: 200,
+  localStorageOpDelay: 500,
+  AIEngineUsesSocket: false,
   friendInviteRequestRecheckTimeout: 10000,
   friendInviteRequestRecheckMaxAttempts: 12,
 };
@@ -570,7 +576,7 @@ export function handleDiceRoll(
     // the 0 roll before getting the turn back):
     if (isOnlineGameRemoteRoll) {
       setNewCurrentBoardData();
-      setTimeout(runSwapTurn, 2000);
+      setTimeout(runSwapTurn, internalSettings.pauseOnZeroRollDelay);
     } else runSwapTurn();
   } else {
     setNewCurrentBoardData(); //Need here????

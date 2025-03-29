@@ -4,6 +4,7 @@ import {
   board,
   DebugOn,
   diceSVGs,
+  internalSettings,
   isAITurn,
   isOpponentsTurn,
   playerIconSVGs,
@@ -17,6 +18,8 @@ type Props = {
   currShouldAlertDiceRoll: boolean;
   containerOnDiceRoll: (n: number, n1: number, n2: number) => void;
 };
+
+let triggerRollDelayTimeoutId: NodeJS.Timeout | undefined = undefined;
 
 export function DicePanel({
   currGameId,
@@ -105,14 +108,23 @@ export function DicePanel({
           setShouldTriggerAIRoll(true);
         }
       } else {
+        // Triggering an AI roll:
         if (DebugOn) console.log('roll trigger');
         setAIMoveTriggered(true);
-        setTimeout(handleRollButtonClick, 500);
+        triggerRollDelayTimeoutId = setTimeout(
+          handleRollButtonClick,
+          internalSettings.AIMoveDelay
+        );
       }
     } else setAIMoveTriggered(false);
     // we're resetting the game:
-    //if (currGameId !== gameId) {
-    //}
+    if (currGameId !== gameId) {
+      // cancel any delayed rolls:
+      if (triggerRollDelayTimeoutId !== undefined) {
+        clearTimeout(triggerRollDelayTimeoutId);
+        triggerRollDelayTimeoutId = undefined;
+      }
+    }
     setGameId(currGameId);
     // if user was clicking somewhere else while they need to be rolling dice,
     // alert them with some animation to show them where they need to click:

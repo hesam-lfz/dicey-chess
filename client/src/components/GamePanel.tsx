@@ -4,6 +4,7 @@ import {
   boardEngine,
   DebugOn,
   handleDiceRoll,
+  internalSettings,
   isAITurn,
   isGameAgainstAI,
   isOpponentsTurn,
@@ -132,7 +133,7 @@ export function GamePanel({
       if (roll == 0) {
         setIsMovingDisabled(true);
         setShouldTriggerAITurn(false);
-        setTimeout(runSwapTurn, 2000);
+        setTimeout(runSwapTurn, internalSettings.pauseOnZeroRollDelay);
       }
       // if we're in 1-player mode and it's AI's turn, trigger AI move:
       else {

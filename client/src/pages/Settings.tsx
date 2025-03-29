@@ -33,7 +33,6 @@ export function Settings() {
     setNewCurrentGameSettings,
     currentBoardData,
     setNewCurrentBoardData,
-    //onlineGameAbortedCallback,
     user,
   } = useCurrentGameContext();
   const [
@@ -235,7 +234,7 @@ export function Settings() {
       return;
     } else {
       const { status, pin } = requestResponse;
-      console.log('invite sent -> response =', requestResponse);
+      if (DebugOn) console.log('invite sent -> response =', requestResponse);
       if (!isWaitingForFriendInviteModalOpen)
         setIsWaitingForFriendInviteModalOpen(true);
       if (status === 0) {

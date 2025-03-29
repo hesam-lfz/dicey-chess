@@ -5,6 +5,7 @@ import {
   type Settings,
   type CurrentGameSettings,
   DebugOn,
+  internalSettings,
 } from './boardEngineApi';
 import { type User, readToken } from './auth';
 
@@ -93,7 +94,7 @@ async function localStorage_loadGames(): Promise<SavedGame[]> {
         : [];
       //console.log(cachedSavedGames);
       resolve(cachedSavedGames);
-    }, 1000);
+    }, internalSettings.localStorageOpDelay);
   });
 }
 
@@ -191,7 +192,7 @@ export async function localStorage_saveGame(
         savedGamesDataJSON
       );
       resolve(false);
-    }, 1000);
+    }, internalSettings.localStorageOpDelay);
   });
 }
 
@@ -263,7 +264,7 @@ async function localStorage_deleteGame(
         savedGamesDataJSON
       );
       resolve(true);
-    }, 1000);
+    }, internalSettings.localStorageOpDelay);
   });
 }
 

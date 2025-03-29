@@ -9,6 +9,7 @@ import {
   DebugOn,
   displayGameDuration,
   initBoardForGameReplay,
+  internalSettings,
   outcomes,
   resetBoard,
   resetSettings,
@@ -70,8 +71,8 @@ export function Game() {
           : ' Sign in to save your games across all your devices.');
       setTimeout(async () => {
         setIsInfoMessageModalOpen(true);
-      }, 200);
-    }, 200);
+      }, internalSettings.dialogOpenDelay);
+    }, internalSettings.dialogOpenDelay);
     infoMessageModalMessage = 'Saving game...';
     setIsInfoMessageModalOpen(true);
   }
@@ -115,12 +116,16 @@ export function Game() {
   }, [currentBoardData, currentGameSettings, setNewCurrentGameSettings]);
 
   const handleOnlineGameAborted = useCallback(() => {
-    console.log('game abort handler');
+    if (DebugOn) console.log('game abort handler');
     infoMessageModalMessage = infoMessageModalMessageGameAbortedError;
     resetGame();
+    alert(infoMessageModalMessageGameAbortedError);
+    // FIXME: why is this not working to force component render?...
+    // (probably because the callback is created in the wrong page so these
+    // state setters don't affect this component)
+    setGameId(currentGameSettings.gameId);
     setIsInfoMessageModalOpen(true);
-    //setGameId(currentGameSettings.gameId + 1);
-  }, [resetGame]);
+  }, [currentGameSettings.gameId, resetGame]);
 
   function handleInfoMessageDone() {
     infoMessageModalMessage = infoMessageModalMessageDefault;
@@ -144,7 +149,7 @@ export function Game() {
         setIsChooseGameToLoadModalOpen(true);
       }
       handleLoadGameModalClose();
-    }, 200);
+    }, internalSettings.dialogOpenDelay);
   }
 
   function handleLoadGameModalClose(): void {
@@ -165,7 +170,7 @@ export function Game() {
     infoMessageModalMessage = 'Game deleted.';
     setTimeout(async () => {
       setIsInfoMessageModalOpen(true);
-    }, 200);
+    }, internalSettings.dialogOpenDelay);
     handleGameDeleteModalClose();
   }
 
@@ -207,7 +212,7 @@ export function Game() {
         setTimeout(async () => {
           setIsInfoMessageModalOpen(true);
           await storageApi_deleteGame(user, gameId);
-        }, 200);
+        }, internalSettings.dialogOpenDelay);
       }
     } else if (target.tagName === 'DIV') {
       // Deleting a game....
