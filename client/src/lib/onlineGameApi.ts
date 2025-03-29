@@ -9,7 +9,8 @@ import {
 import { User } from './auth';
 
 export type OnlineGameGlobals = {
-  onlineGameAbortedCallback: () => void;
+  //onlineGameAbortedCallback: () => void;
+  aborted: boolean;
 };
 
 type SocketResponseMessage = {
@@ -32,7 +33,7 @@ type RemoteMoveData = {
 
 // Some globals accessed by various components/pages:
 export const onlineGameApi_globals: OnlineGameGlobals = {
-  onlineGameAbortedCallback: () => undefined,
+  aborted: false,
 };
 
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)

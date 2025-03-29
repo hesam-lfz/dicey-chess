@@ -24,6 +24,9 @@ const infoMessageModalMessageUsernameError = 'Username(s) incorrect';
 const infoMessageModalMessageInviteDeniedError =
   'Friend username incorrect or invite request disallowed!';
 const infoMessageModalMessageGeneralError = 'Sending friend invite failed!';
+const infoMessageModalMessageGameAbortedError =
+  'Online game was aborted by a player or due to connection loss.';
+
 let infoMessageModalMessage = infoMessageModalMessageDefault;
 let inviteRequestSentWaitingResponse = false;
 
@@ -45,8 +48,9 @@ export function Settings() {
     isWaitingForFriendInviteModalOpen,
     setIsWaitingForFriendInviteModalOpen,
   ] = useState<boolean>(false);
-  const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
-    useState<boolean>(false);
+  const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] = useState<boolean>(
+    onlineGameApi_globals.aborted
+  );
 
   const [onePlayer, setOnePlayer] = useState<boolean>(settings.onePlayerMode);
   const [opponentIsAI, setOpponentIsAI] = useState<boolean>(
@@ -258,7 +262,24 @@ export function Settings() {
             setIsInfoMessageModalOpen(true);
           },
           // this callback is called if game is aborted by online opponent:
-          onlineGameApi_globals.onlineGameAbortedCallback
+          () => {
+            onlineGameApi_globals.aborted = true;
+            if (DebugOn) console.log('game abort handler');
+            infoMessageModalMessage = infoMessageModalMessageGameAbortedError;
+            resetSettings(
+              currentGameSettings,
+              setNewCurrentGameSettings,
+              false,
+              false
+            );
+            resetBoard(
+              currentGameSettings,
+              setNewCurrentGameSettings,
+              currentBoardData
+            );
+            setIsInfoMessageModalOpen(true);
+            navigate(AppSubdomain + 'settings');
+          }
         );
       } else if (
         recheckAttemptNumber <
@@ -286,6 +307,7 @@ export function Settings() {
 
   function handleInfoMessageDone() {
     infoMessageModalMessage = infoMessageModalMessageDefault;
+    onlineGameApi_globals.aborted = false;
     setIsInfoMessageModalOpen(false);
   }
 

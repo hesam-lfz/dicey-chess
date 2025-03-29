@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import './Game.css';
 import { GamePanel } from '../components/GamePanel';
@@ -21,14 +21,9 @@ import {
   storageApi_loadGames,
   storageApi_saveGame,
 } from '../lib/storageApi';
-import { onlineGameApi_globals } from '../lib';
 
 const infoMessageModalMessageDefault: string = 'Game saved.';
-const infoMessageModalMessageGameAbortedError =
-  'Online game was aborted by a player or due to connection loss.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
-
-let onlineGameAbortedCallbackSet = false;
 
 export function Game() {
   const {
@@ -99,10 +94,6 @@ export function Game() {
     handleResetGameModalClose();
   }
 
-  useEffect(() => {
-    if (DebugOn) console.log('rendered Game', isInfoMessageModalOpen);
-  }, [isInfoMessageModalOpen]);
-
   const resetGame = useCallback(() => {
     if (DebugOn) console.log('Resetting game!');
     resetSettings(currentGameSettings, setNewCurrentGameSettings, false, false);
@@ -114,18 +105,6 @@ export function Game() {
     setGameId(currentGameSettings.gameId);
     setReplayModeOn(false);
   }, [currentBoardData, currentGameSettings, setNewCurrentGameSettings]);
-
-  const handleOnlineGameAborted = useCallback(() => {
-    if (DebugOn) console.log('game abort handler');
-    infoMessageModalMessage = infoMessageModalMessageGameAbortedError;
-    resetGame();
-    alert(infoMessageModalMessageGameAbortedError);
-    // FIXME: why is this not working to force component render?...
-    // (probably because the callback is created in the wrong page so these
-    // state setters don't affect this component)
-    setGameId(currentGameSettings.gameId);
-    setIsInfoMessageModalOpen(true);
-  }, [currentGameSettings.gameId, resetGame]);
 
   function handleInfoMessageDone() {
     infoMessageModalMessage = infoMessageModalMessageDefault;
@@ -231,10 +210,12 @@ export function Game() {
     }
   }
 
+  /*
   if (!onlineGameAbortedCallbackSet) {
     onlineGameAbortedCallbackSet = true;
     onlineGameApi_globals.onlineGameAbortedCallback = handleOnlineGameAborted;
   }
+    */
 
   return (
     <>

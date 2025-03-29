@@ -319,7 +319,6 @@ export const resetBoard = (
   // connection:
   if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
   // increment gameId to trigger all components to reset:
-  console.log('reset board before', currentGameSettings.gameId);
   currentGameSettings.gameId += 1;
   currentBoardData.diceRoll = -1;
   currentBoardData.diceRoll1 = -1;
