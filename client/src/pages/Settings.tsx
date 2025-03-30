@@ -76,7 +76,7 @@ export function Settings() {
     resetBoard(
       currentGameSettings,
       setNewCurrentGameSettings,
-      currentBoardData
+      setNewCurrentBoardData
     );
     saveSettings(currentGameSettings, setNewCurrentGameSettings);
     setOnePlayer(settings.onePlayerMode);
@@ -84,7 +84,7 @@ export function Settings() {
     setUserPlaysColor(settings.userPlaysColor);
     setUserPlaysColorRandomly(settings.userPlaysColorRandomly);
     setAIPlayerIsSmart(settings.AIPlayerIsSmart);
-  }, [currentBoardData, currentGameSettings, setNewCurrentGameSettings]);
+  }, [currentGameSettings, setNewCurrentBoardData, setNewCurrentGameSettings]);
 
   const onPlayerModeChange = useCallback(
     (onePlayer: boolean, isOpponentAI: boolean) => {
@@ -103,11 +103,16 @@ export function Settings() {
       resetBoard(
         currentGameSettings,
         setNewCurrentGameSettings,
-        currentBoardData
+        setNewCurrentBoardData
       );
       saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
-    [currentBoardData, currentGameSettings, setNewCurrentGameSettings, user]
+    [
+      currentGameSettings,
+      setNewCurrentBoardData,
+      setNewCurrentGameSettings,
+      user,
+    ]
   );
 
   const onUserPlaysColorChange = useCallback(
@@ -133,11 +138,11 @@ export function Settings() {
       resetBoard(
         currentGameSettings,
         setNewCurrentGameSettings,
-        currentBoardData
+        setNewCurrentBoardData
       );
       saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
-    [currentBoardData, currentGameSettings, setNewCurrentGameSettings]
+    [currentGameSettings, setNewCurrentBoardData, setNewCurrentGameSettings]
   );
 
   const onAISmartChange = useCallback(
@@ -147,11 +152,11 @@ export function Settings() {
       resetBoard(
         currentGameSettings,
         setNewCurrentGameSettings,
-        currentBoardData
+        setNewCurrentBoardData
       );
       saveSettings(currentGameSettings, setNewCurrentGameSettings);
     },
-    [currentBoardData, currentGameSettings, setNewCurrentGameSettings]
+    [currentGameSettings, setNewCurrentBoardData, setNewCurrentGameSettings]
   );
 
   function handleSigninToPlayFriendOnlineModalClose(): void {
@@ -275,7 +280,7 @@ export function Settings() {
             resetBoard(
               currentGameSettings,
               setNewCurrentGameSettings,
-              currentBoardData
+              setNewCurrentBoardData
             );
             setIsInfoMessageModalOpen(true);
             navigate(AppSubdomain + 'settings');

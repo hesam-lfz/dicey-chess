@@ -29,7 +29,7 @@ export function Game() {
   const {
     currentGameSettings,
     setNewCurrentGameSettings,
-    currentBoardData,
+    setNewCurrentBoardData,
     user,
   } = useCurrentGameContext();
   const [savedGames, setSavedGames] = useState<SavedGame[]>();
@@ -100,11 +100,11 @@ export function Game() {
     resetBoard(
       currentGameSettings,
       setNewCurrentGameSettings,
-      currentBoardData
+      setNewCurrentBoardData
     );
     setGameId(currentGameSettings.gameId);
     setReplayModeOn(false);
-  }, [currentBoardData, currentGameSettings, setNewCurrentGameSettings]);
+  }, [currentGameSettings, setNewCurrentBoardData, setNewCurrentGameSettings]);
 
   function handleInfoMessageDone() {
     infoMessageModalMessage = infoMessageModalMessageDefault;
@@ -173,7 +173,7 @@ export function Game() {
           loadSuccess = initBoardForGameReplay(
             currentGameSettings,
             setNewCurrentGameSettings,
-            currentBoardData,
+            setNewCurrentBoardData,
             g
           );
           loadedGame = true;

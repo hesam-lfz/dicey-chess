@@ -95,6 +95,17 @@ export type CurrentBoardData = {
   currMovePromotion: PieceSymbol | undefined;
 };
 
+export type SetCurrentBoardData = {
+  turn?: Color;
+  diceRoll?: number;
+  diceRoll1?: number;
+  diceRoll2?: number;
+  numMovesInTurn?: number;
+  currMoveFromSq?: Square | null;
+  currMoveToSq?: Square | null;
+  currMovePromotion?: PieceSymbol | undefined;
+};
+
 export type SavedGame = {
   userId: number;
   at: number;
@@ -317,19 +328,12 @@ export const setCurrentGameSettingsBasedOnSettings = (
 export const resetBoard = (
   currentGameSettings: CurrentGameSettings,
   setNewCurrentGameSettings: () => void,
-  currentBoardData: CurrentBoardData
+  setNewCurrentBoardData: (data: SetCurrentBoardData, setState: boolean) => void
 ) => {
   // If we're currently in a game with an online friend, close the web socket
   // connection:
   if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
-  // increment gameId to trigger all components to reset:
-  currentGameSettings.gameId += 1;
-  currentBoardData.diceRoll = -1;
-  currentBoardData.diceRoll1 = -1;
-  currentBoardData.diceRoll2 = -1;
-  currentBoardData.currMoveFromSq = null;
-  currentBoardData.currMoveToSq = null;
-  currentBoardData.currMovePromotion = undefined;
+
   board = { ...initBoard };
   board.history = [[]];
   board.flatSanMoveHistory = [];
@@ -338,7 +342,27 @@ export const resetBoard = (
   board.diceRollHistory = [];
   board.gameStartTime = Math.floor(Date.now() / 1000);
   boardEngine = new Chess(board.initPositionFen);
-  currentBoardData.turn = boardEngine.turn();
+  // increment gameId to trigger all components to reset:
+  currentGameSettings.gameId += 1;
+  //currentBoardData.diceRoll = -1;
+  //currentBoardData.diceRoll1 = -1;
+  //currentBoardData.diceRoll2 = -1;
+  //currentBoardData.currMoveFromSq = null;
+  //currentBoardData.currMoveToSq = null;
+  //currentBoardData.currMovePromotion = undefined;
+  //currentBoardData.turn = boardEngine.turn();
+  setNewCurrentBoardData(
+    {
+      diceRoll: -1,
+      diceRoll1: -1,
+      diceRoll2: -1,
+      currMoveFromSq: null,
+      currMoveToSq: null,
+      currMovePromotion: undefined,
+      turn: boardEngine.turn(),
+    },
+    false
+  );
   board.flatBoardFenHistory.push(boardEngine.fen());
   setNewCurrentGameSettings();
   // close the chess AI engine socket if we have one running currently:
@@ -355,10 +379,17 @@ export const resetBoard = (
 export function initBoardForGameReplay(
   currentGameSettings: CurrentGameSettings,
   setNewCurrentGameSettings: () => void,
-  currentBoardData: CurrentBoardData,
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
   game: SavedGame
 ): boolean {
-  resetBoard(currentGameSettings, setNewCurrentGameSettings, currentBoardData);
+  resetBoard(
+    currentGameSettings,
+    setNewCurrentGameSettings,
+    setNewCurrentBoardData
+  );
   /*
   console.log(
     'before prepping board',
@@ -396,7 +427,7 @@ export function initBoardForGameReplay(
       if (diceRoll === 0) {
         // roll was 0 and turn need to be given back to the other player:
         flatBoardFenHistory.pop();
-        swapTurn(currentBoardData);
+        swapTurn(setNewCurrentBoardData);
         flatBoardFenHistory.push(boardEngine.fen());
       } else {
         while (currTurnMoveIdx < diceRoll) {
@@ -404,7 +435,7 @@ export function initBoardForGameReplay(
           const move = boardEngine.move(flatSanMoveHistory[currFlatMoveIdx++]);
           // If this is not the last move in the current turn move set,
           // we need to manually change the turn back to the same player:
-          if (currTurnMoveIdx < diceRoll - 1) swapTurn(currentBoardData);
+          if (currTurnMoveIdx < diceRoll - 1) swapTurn(setNewCurrentBoardData);
           currMoveSet.push(move.san);
           flatSquareMoveHistory.push(move);
           flatBoardFenHistory.push(boardEngine.fen());
@@ -415,8 +446,9 @@ export function initBoardForGameReplay(
     }
     // Move the game back to beginning:
     boardEngine = new Chess(board.flatBoardFenHistory[1]);
-    currentBoardData.turn = boardEngine.turn();
-    if (board.diceRollHistory[0] > 1) swapTurn(currentBoardData);
+    //currentBoardData.turn = boardEngine.turn();
+    setNewCurrentBoardData({ turn: boardEngine.turn() }, false);
+    if (board.diceRollHistory[0] > 1) swapTurn(setNewCurrentBoardData);
     board.replayCurrentFlatIndex = 0;
     //console.log('done prepping board', board, boardEngine.turn());
     return true;
@@ -428,7 +460,7 @@ export function initBoardForGameReplay(
     resetBoard(
       currentGameSettings,
       setNewCurrentGameSettings,
-      currentBoardData
+      setNewCurrentBoardData
     );
     return false;
   }
@@ -484,23 +516,32 @@ export function getPossibleSanMoves(
 
 // Marks the squares for the move that's happening:
 export function setNewMoveOnBoard(
-  currentBoardData: CurrentBoardData,
-  setNewCurrentBoardData: () => void,
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
   fromSquare: Square,
   toSquare: Square,
   promotion?: PieceSymbol
 ): void {
-  currentBoardData.currMoveFromSq = fromSquare;
-  currentBoardData.currMoveToSq = toSquare;
-  currentBoardData.currMovePromotion = promotion;
-  setNewCurrentBoardData();
+  setNewCurrentBoardData(
+    {
+      currMoveFromSq: fromSquare,
+      currMoveToSq: toSquare,
+      currMovePromotion: promotion,
+    },
+    true
+  );
 }
 
 // Execute the given move from to square:
 export function makeMove(
   currentGameSettings: CurrentGameSettings,
   currentBoardData: CurrentBoardData,
-  //setNewCurrentBoardData: () => void,
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
   user: User | undefined,
   fromSquare: Square,
   toSquare: Square,
@@ -530,23 +571,30 @@ export function makeMove(
 
   // if it's a promotion, update the the type of promoted piece:
   if (promotion) getSquarePiece(toSquare)!.type = promotion;
-  currentBoardData.turn = boardEngine.turn();
+  const currentBoardDataUpdates: SetCurrentBoardData = {};
+  //currentBoardData.turn = boardEngine.turn();
+  currentBoardDataUpdates.turn = boardEngine.turn();
   board.history[board.history.length - 1].push(move.san);
   board.flatSanMoveHistory.push(move.san);
   board.historyNumMoves += 1;
-  currentBoardData.numMovesInTurn -= 1;
+  //currentBoardData.numMovesInTurn -= 1;
+  currentBoardDataUpdates.numMovesInTurn = currentBoardData.numMovesInTurn - 1;
+  setNewCurrentBoardData(currentBoardDataUpdates, false);
   //board.replayCurrentMoveInTurnIndex += 1;
   if (currentBoardData.numMovesInTurn === 0) {
     // The player has played current turn's all the number of moves according to the dice roll:
-    currentBoardData.diceRoll = -1;
-    currentBoardData.numMovesInTurn = -1;
+    //currentBoardData.diceRoll = -1;
+    currentBoardDataUpdates.diceRoll = -1;
+    //currentBoardData.numMovesInTurn = -1;
+    currentBoardDataUpdates.numMovesInTurn = -1;
+    setNewCurrentBoardData(currentBoardDataUpdates, false);
     board.firstMoveInTurn = true;
     board.history.push([]);
   } else {
     // The player still has moves left in the current turn, according to the dice roll:
     board.firstMoveInTurn = false;
     // swap turn back to the player who just moved since there's still more to make:
-    swapTurn(currentBoardData);
+    swapTurn(setNewCurrentBoardData);
   }
   board.replayCurrentFlatIndex += 1;
   board.flatBoardFenHistory.push(boardEngine.fen());
@@ -561,7 +609,10 @@ export function makeMove(
 export function handleDiceRoll(
   currentGameSettings: CurrentGameSettings,
   currentBoardData: CurrentBoardData,
-  setNewCurrentBoardData: () => void,
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
   roll: number,
   roll1: number,
   roll2: number,
@@ -576,21 +627,29 @@ export function handleDiceRoll(
       // pop the last roll so player in check can re-roll dice:
       board.diceRollHistory.pop();
     } else {
-      swapTurn(currentBoardData);
+      swapTurn(setNewCurrentBoardData);
       board.history.push([]);
     }
     roll = -1;
-    currentBoardData.diceRoll = roll;
-    currentBoardData.numMovesInTurn = roll;
-    setNewCurrentBoardData(); //Need here????
+    //currentBoardData. = roll;
+    //currentBoardData. = roll;
+    setNewCurrentBoardData({ diceRoll: roll, numMovesInTurn: roll }, true); //Need here????
   }
 
   board.diceRollHistory.push(roll);
-  currentBoardData.diceRoll = roll;
-  currentBoardData.diceRoll1 = roll1;
-  currentBoardData.diceRoll2 = roll2;
-  currentBoardData.numMovesInTurn = roll;
-
+  //currentBoardData.diceRoll = roll;
+  //currentBoardData.diceRoll1 = roll1;
+  //currentBoardData.diceRoll2 = roll2;
+  //currentBoardData.numMovesInTurn = roll;
+  setNewCurrentBoardData(
+    {
+      diceRoll: roll,
+      diceRoll1: roll1,
+      diceRoll2: roll2,
+      numMovesInTurn: roll,
+    },
+    false
+  );
   // if this is an online game with a friend, send the roll data:
   if (
     isGameAgainstOnlineFriend(currentGameSettings) &&
@@ -604,11 +663,11 @@ export function handleDiceRoll(
     // add a bit of delay if the roll was 0 and we're changing turn (so player can see
     // the 0 roll before getting the turn back):
     if (isOnlineGameRemoteRoll) {
-      setNewCurrentBoardData();
+      setNewCurrentBoardData({}, true);
       setTimeout(runSwapTurn, internalSettings.pauseOnZeroRollDelay);
     } else runSwapTurn();
   } else {
-    setNewCurrentBoardData(); //Need here????
+    setNewCurrentBoardData({}, true); //Need here????
   }
 }
 
@@ -757,13 +816,16 @@ export function promptUserIfPromotionMove(
 
 // Move board fwd or bkwd in replay mode:
 export function boardReplayStepMove(
-  currentBoardData: CurrentBoardData,
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
   step: number
 ): Move | null {
   const newReplayCurrentFlatIndex = board.replayCurrentFlatIndex + step;
   board.replayCurrentFlatIndex = newReplayCurrentFlatIndex;
   setBoard(
-    currentBoardData,
+    setNewCurrentBoardData,
     board.flatBoardFenHistory[newReplayCurrentFlatIndex]
   );
   const move: Move | null =
@@ -775,21 +837,27 @@ export function boardReplayStepMove(
 // Manually manipulate the current board to make it the other player's turn.
 // This is needed since we want to make a player make multiple moves in a single
 // turn:
-export function swapTurn(currentBoardData: CurrentBoardData): void {
+export function swapTurn(
+  setNewCurrentBoardData: (data: SetCurrentBoardData, setState: boolean) => void
+): void {
   let fen = boardEngine.fen();
   const fenA = fen.split(' ');
   fenA[1] = fenA[1] === 'w' ? 'b' : 'w';
   fen = fenA.join(' ');
-  setBoard(currentBoardData, fen);
+  setBoard(setNewCurrentBoardData, fen);
 }
 
 // Manually modify the state of the board:
 export function setBoard(
-  currentBoardData: CurrentBoardData,
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
   fen: string
 ): void {
   boardEngine = new Chess(fen);
-  currentBoardData.turn = boardEngine.turn();
+  //currentBoardData.turn = boardEngine.turn();
+  setNewCurrentBoardData({ turn: boardEngine.turn() }, false);
 }
 
 // Given board fen position, is the player with turn in check:

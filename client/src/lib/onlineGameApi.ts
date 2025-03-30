@@ -4,6 +4,7 @@ import {
   CurrentGameSettings,
   DebugOn,
   handleDiceRoll,
+  SetCurrentBoardData,
   setNewMoveOnBoard,
 } from './boardEngineApi';
 import { User } from './auth';
@@ -44,7 +45,10 @@ let thePin: string;
 export function onlineGameApi_initialize(
   currentGameSettings: CurrentGameSettings,
   currentBoardData: CurrentBoardData,
-  setNewCurrentBoardData: () => void,
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
   user: User,
   pin: string,
   onOnlineGameReadyCallback: (userPlaysColor: Color) => void,
@@ -106,7 +110,6 @@ export function onlineGameApi_initialize(
         if (DebugOn) console.log('got friend move', data, currentBoardData);
         const moveData = data as RemoteMoveData;
         setNewMoveOnBoard(
-          currentBoardData,
           setNewCurrentBoardData,
           moveData.from as Square,
           moveData.to as Square,

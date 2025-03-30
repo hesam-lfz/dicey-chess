@@ -14,6 +14,7 @@ import {
   saveAuth,
   storageApi_handleSignInOut,
   DebugOn,
+  SetCurrentBoardData,
 } from '../lib';
 import { WHITE } from 'chess.js';
 
@@ -21,13 +22,17 @@ export type CurrentGameContextValues = {
   currentGameSettings: CurrentGameSettings;
   setNewCurrentGameSettings: () => void;
   currentBoardData: CurrentBoardData;
-  setNewCurrentBoardData: () => void;
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void;
   user: User | undefined;
   token: string | undefined;
   handleSignIn: (user: User, token: string) => void;
   handleSignOut: () => void;
 };
 
+// Settings specific for a given game:
 const defaultCurrentGameSettings: CurrentGameSettings = {
   gameId: 0,
   userPlaysColor: WHITE,
@@ -80,11 +85,35 @@ export function CurrentGameContextProvider({ children }: Props) {
     setCurrentGameSettings({ ...currentGameSettings });
   }
 
-  function setNewCurrentBoardData(): void {
-    if (DebugOn) console.log('setNewCurrentBoardData', currentBoardData);
-    const cbd = { ...currentBoardData };
-    cbd.version += 1;
-    setCurrentBoardData(cbd);
+  function setNewCurrentBoardData(
+    data: SetCurrentBoardData,
+    setState: boolean = true
+  ): void {
+    if (DebugOn)
+      console.log(
+        'setNewCurrentBoardData current',
+        currentBoardData,
+        'data',
+        data
+      );
+    if (data.turn !== undefined) currentBoardData.turn = data.turn;
+    if (data.diceRoll !== undefined) currentBoardData.diceRoll = data.diceRoll;
+    if (data.diceRoll1 !== undefined)
+      currentBoardData.diceRoll1 = data.diceRoll1;
+    if (data.diceRoll2 !== undefined)
+      currentBoardData.diceRoll2 = data.diceRoll2;
+    if (data.numMovesInTurn !== undefined)
+      currentBoardData.numMovesInTurn = data.numMovesInTurn;
+    if (data.currMoveFromSq !== undefined)
+      currentBoardData.currMoveFromSq = data.currMoveFromSq;
+    if (data.currMoveToSq !== undefined)
+      currentBoardData.currMoveToSq = data.currMoveToSq;
+    //if (data.currMovePromotion !== undefined)
+    currentBoardData.currMovePromotion = data.currMovePromotion;
+    currentBoardData.version += 1;
+    if (setState) {
+      setCurrentBoardData({ ...currentBoardData });
+    }
   }
 
   function setNewOnlineGameAbortedCallback(fn: () => void): void {
@@ -139,7 +168,7 @@ export function CurrentGameContextProvider({ children }: Props) {
     resetBoard(
       currentGameSettings,
       setNewCurrentGameSettings,
-      currentBoardData
+      setNewCurrentBoardData
     );
   }
 

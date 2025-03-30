@@ -50,32 +50,31 @@ export function DicePanel({
     // If we re-rolled due to an AI 0 roll on check, and again we got a 0,
     // then force another re-roll:
     if (roll === 0 && alreadyTriggeredAIRoll) setAlreadyTriggeredAIRoll(false);
-    currentBoardData.numMovesInTurn = roll;
-    currentBoardData.diceRoll = roll;
-    currentBoardData.diceRoll1 = roll1;
-    currentBoardData.diceRoll2 = roll2;
-    setNewCurrentBoardData();
+    //currentBoardData.numMovesInTurn = roll;
+    //currentBoardData.diceRoll = roll;
+    //currentBoardData.diceRoll1 = roll1;
+    //currentBoardData.diceRoll2 = roll2;
+    setNewCurrentBoardData(
+      {
+        numMovesInTurn: roll,
+        diceRoll: roll,
+        diceRoll1: roll1,
+        diceRoll2: roll2,
+      },
+      true
+    );
     setDice1IconRotation(Math.floor(Math.random() * 50) - 25);
     setDice2IconRotation(Math.floor(Math.random() * 50) - 25);
     containerOnDiceRoll(roll, roll1, roll2);
-  }, [
-    alreadyTriggeredAIRoll,
-    containerOnDiceRoll,
-    currentBoardData,
-    setNewCurrentBoardData,
-  ]);
+  }, [alreadyTriggeredAIRoll, containerOnDiceRoll, setNewCurrentBoardData]);
 
   useEffect(() => {
     if (DebugOn)
       console.log(
         'rendered DicePanel',
         currGameId,
-        'theRoll',
-        currentBoardData.diceRoll,
-        'roll1',
-        currentBoardData.diceRoll1,
-        'roll2',
-        currentBoardData.diceRoll2,
+        'currentBoardData',
+        currentBoardData,
         'theRoll === -1 && !itIsAITurn',
         currentBoardData.diceRoll === -1 &&
           !isAITurn(currentGameSettings, currentBoardData),

@@ -21,13 +21,7 @@ import {
   isOpponentsTurn,
   setNewMoveOnBoard,
 } from '../lib';
-import {
-  Color,
-  //PieceSymbol,
-  WHITE,
-  type Piece,
-  type Square,
-} from 'chess.js';
+import { Color, WHITE, type Piece, type Square } from 'chess.js';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -105,7 +99,7 @@ export function Board({
       makeMove(
         currentGameSettings,
         currentBoardData,
-        //setNewCurrentBoardData,
+        setNewCurrentBoardData,
         user,
         currentBoardData.currMoveFromSq!,
         currentBoardData.currMoveToSq!,
@@ -117,9 +111,9 @@ export function Board({
     containerOnMove();
     setPrevMoveFromSq(currentBoardData.currMoveFromSq);
     setPrevMoveToSq(currentBoardData.currMoveToSq);
-    currentBoardData.currMoveFromSq = null;
-    currentBoardData.currMoveToSq = null;
-    setNewCurrentBoardData();
+    //currentBoardData.currMoveFromSq = null;
+    //currentBoardData.currMoveToSq = null;
+    setNewCurrentBoardData({ currMoveFromSq: null, currMoveToSq: null }, true);
   }, [
     replayModeOn,
     containerOnMove,
@@ -139,7 +133,6 @@ export function Board({
       if (gameIdBeforeCall !== currentGameSettings.gameId) return;
       //console.log('getAIMove got', move);
       setNewMoveOnBoard(
-        currentBoardData,
         setNewCurrentBoardData,
         move.from,
         move.to,
@@ -153,24 +146,39 @@ export function Board({
   const triggerReplayStepMove = useCallback(
     (step: number) => {
       const run = async () => {
-        const move = boardReplayStepMove(currentBoardData, step);
+        const move = boardReplayStepMove(setNewCurrentBoardData, step);
         if (move) {
-          currentBoardData.currMoveFromSq = move.from;
-          currentBoardData.currMoveToSq = move.to;
-          currentBoardData.currMovePromotion = move.promotion;
-          setNewCurrentBoardData();
+          //currentBoardData.currMoveFromSq = move.from;
+          //currentBoardData.currMoveToSq = move.to;
+          //currentBoardData.currMovePromotion = move.promotion;
+          setNewCurrentBoardData(
+            {
+              currMoveFromSq: move.from,
+              currMoveToSq: move.to,
+              currMovePromotion: move.promotion,
+            },
+            true
+          );
         } else {
           setPrevMoveFromSq(null);
           setPrevMoveToSq(null);
-          currentBoardData.currMoveFromSq = null;
-          currentBoardData.currMoveToSq = null;
-          currentBoardData.currMovePromotion = undefined;
+          //currentBoardData.currMoveFromSq = null;
+          //currentBoardData.currMoveToSq = null;
+          //currentBoardData.currMovePromotion = undefined;
+          setNewCurrentBoardData(
+            {
+              currMoveFromSq: null,
+              currMoveToSq: null,
+              currMovePromotion: undefined,
+            },
+            true
+          );
         }
         setReplayStepMove(0);
       };
       run();
     },
-    [currentBoardData, setNewCurrentBoardData]
+    [setNewCurrentBoardData]
   );
 
   useEffect(() => {
@@ -331,10 +339,10 @@ export function Board({
             currentBoardData.turn
           )
         : undefined;
-      let squareChosen = false;
+
       if (clickedPiece && clickedPiece.color === currentBoardData.turn) {
-        currentBoardData.currMoveFromSq = square;
-        squareChosen = true;
+        //currentBoardData.currMoveFromSq = square;
+        setNewCurrentBoardData({ currMoveFromSq: square }, true);
       } else if (
         currentBoardData.currMoveFromSq &&
         validateMove(
@@ -344,11 +352,13 @@ export function Board({
           promotion
         )
       ) {
-        currentBoardData.currMoveToSq = square;
-        currentBoardData.currMovePromotion = promotion;
-        squareChosen = true;
+        //currentBoardData.currMoveToSq = square;
+        //currentBoardData.currMovePromotion = promotion;
+        setNewCurrentBoardData(
+          { currMoveToSq: square, currMovePromotion: promotion },
+          true
+        );
       }
-      if (squareChosen) setNewCurrentBoardData();
     },
     [
       isMovingDisabled,
