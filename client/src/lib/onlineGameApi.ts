@@ -4,12 +4,11 @@ import {
   CurrentGameSettings,
   DebugOn,
   handleDiceRoll,
-  makeMove,
+  setNewMoveOnBoard,
 } from './boardEngineApi';
 import { User } from './auth';
 
 export type OnlineGameGlobals = {
-  //onlineGameAbortedCallback: () => void;
   aborted: boolean;
 };
 
@@ -106,14 +105,12 @@ export function onlineGameApi_initialize(
       else if (msg === 'move') {
         if (DebugOn) console.log('got friend move', data);
         const moveData = data as RemoteMoveData;
-        makeMove(
-          currentGameSettings,
+        setNewMoveOnBoard(
           currentBoardData,
-          user,
+          setNewCurrentBoardData,
           moveData.from as Square,
           moveData.to as Square,
-          moveData.promotion as PieceSymbol | undefined,
-          true
+          moveData.promotion as PieceSymbol | undefined
         );
       } else if (msg === 'abort') {
         onlineGameApi_socket.close();

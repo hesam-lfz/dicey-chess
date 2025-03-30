@@ -216,7 +216,7 @@ export function Settings() {
   }
 
   // Sends an invite to play online friend and waits for friend to do the same
-  // If mutual invites have been sent, we're ready to start a websocket connection
+  // If 2-way invites have been sent, we're ready to start a websocket connection
   // to play online game:
   async function sendInviteFriendRequestAndHandleResponse(
     formFriendUsername: string,
@@ -242,7 +242,7 @@ export function Settings() {
       if (!isWaitingForFriendInviteModalOpen)
         setIsWaitingForFriendInviteModalOpen(true);
       if (status === 0) {
-        // if status = 0 (both parties have sent mutual invites and we are
+        // if status = 0 (both parties have sent 2-way invites and we are
         // ready to start web socket connection to start game):
 
         onlineGameApi_initialize(
@@ -286,7 +286,7 @@ export function Settings() {
         internalSettings.friendInviteRequestRecheckMaxAttempts
       ) {
         // if status = 1 (we are still waiting for friend to send
-        // the invite our way to complete the mutual invite):
+        // the invite our way to complete the 2-way invite):
         // check back after a bit of time...:
         setTimeout(
           () =>
@@ -449,7 +449,7 @@ export function Settings() {
           <p>Waiting to receive your friend's invite back...</p>
           <p>
             <em className="smaller pink">
-              Once mutual invites are sent, a connection will be established to
+              Once 2-way invites are sent, a connection will be established to
               start the game.
             </em>
           </p>

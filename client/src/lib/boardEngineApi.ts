@@ -89,6 +89,9 @@ export type CurrentBoardData = {
   diceRoll1: number;
   diceRoll2: number;
   numMovesInTurn: number;
+  currMoveFromSq: Square | null;
+  currMoveToSq: Square | null;
+  currMovePromotion: PieceSymbol | undefined;
 };
 
 export type SavedGame = {
@@ -323,6 +326,9 @@ export const resetBoard = (
   currentBoardData.diceRoll = -1;
   currentBoardData.diceRoll1 = -1;
   currentBoardData.diceRoll2 = -1;
+  currentBoardData.currMoveFromSq = null;
+  currentBoardData.currMoveToSq = null;
+  currentBoardData.currMovePromotion = undefined;
   board = { ...initBoard };
   board.history = [[]];
   board.flatSanMoveHistory = [];
@@ -475,16 +481,39 @@ export function getPossibleSanMoves(
     .join(' ');
 }
 
+// Marks the squares for the move that's happening:
+export function setNewMoveOnBoard(
+  currentBoardData: CurrentBoardData,
+  setNewCurrentBoardData: () => void,
+  fromSquare: Square,
+  toSquare: Square,
+  promotion?: PieceSymbol
+): void {
+  currentBoardData.currMoveFromSq = fromSquare;
+  currentBoardData.currMoveToSq = toSquare;
+  currentBoardData.currMovePromotion = promotion;
+  setNewCurrentBoardData();
+}
+
 // Execute the given move from to square:
 export function makeMove(
   currentGameSettings: CurrentGameSettings,
   currentBoardData: CurrentBoardData,
+  //setNewCurrentBoardData: () => void,
   user: User | undefined,
   fromSquare: Square,
   toSquare: Square,
   promotion?: PieceSymbol,
   isOnlineGameRemoteMove: boolean = false
 ): void {
+  if (DebugOn)
+    console.log(
+      'before makeMove',
+      'currentGameSettings',
+      currentGameSettings,
+      'currentBoardData',
+      currentBoardData
+    );
   const move: Move = boardEngine.move({
     from: fromSquare,
     to: toSquare,

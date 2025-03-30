@@ -19,8 +19,15 @@ import {
   DebugOn,
   internalSettings,
   isOpponentsTurn,
+  setNewMoveOnBoard,
 } from '../lib';
-import { Color, PieceSymbol, WHITE, type Piece, type Square } from 'chess.js';
+import {
+  Color,
+  //PieceSymbol,
+  WHITE,
+  type Piece,
+  type Square,
+} from 'chess.js';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -65,8 +72,12 @@ export function Board({
   containerOnMove,
   containerOnAlertDiceRoll,
 }: Props) {
-  const { currentGameSettings, currentBoardData, user } =
-    useCurrentGameContext();
+  const {
+    currentGameSettings,
+    currentBoardData,
+    setNewCurrentBoardData,
+    user,
+  } = useCurrentGameContext();
   const [gameId, setGameId] = useState<number>(currGameId);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(currReplayModeOn);
   const [replayStepMove, setReplayStepMove] =
@@ -78,11 +89,6 @@ export function Board({
   const [shouldTriggerAITurn, setShouldTriggerAITurn] = useState<boolean>(
     currShouldTriggerAITurn
   );
-  const [movingFromSq, setMovingFromSq] = useState<Square | null>(null);
-  const [movingToSq, setMovingToSq] = useState<Square | null>(null);
-  const [pawnPromotion, setPawnPromotion] = useState<PieceSymbol | undefined>(
-    undefined
-  );
   const [prevMoveFromSq, setPrevMoveFromSq] = useState<Square | null>(
     currPrevMoveFromSq
   );
@@ -93,34 +99,34 @@ export function Board({
     useState<boolean>(currIsMovingDisabled);
 
   const handleMove = useCallback(() => {
-    setPrevMoveFromSq(movingFromSq);
-    setPrevMoveToSq(movingToSq);
-    setMovingFromSq(null);
-    setMovingToSq(null);
     if (replayModeOn) {
       setReplayStepMoveTriggered(false);
     } else {
       makeMove(
         currentGameSettings,
         currentBoardData,
+        //setNewCurrentBoardData,
         user,
-        movingFromSq!,
-        movingToSq!,
-        pawnPromotion,
+        currentBoardData.currMoveFromSq!,
+        currentBoardData.currMoveToSq!,
+        currentBoardData.currMovePromotion,
         false
       );
       setShouldTriggerAITurn(false);
     }
     containerOnMove();
+    setPrevMoveFromSq(currentBoardData.currMoveFromSq);
+    setPrevMoveToSq(currentBoardData.currMoveToSq);
+    currentBoardData.currMoveFromSq = null;
+    currentBoardData.currMoveToSq = null;
+    setNewCurrentBoardData();
   }, [
-    movingFromSq,
-    movingToSq,
     replayModeOn,
     containerOnMove,
-    currentGameSettings,
     currentBoardData,
+    currentGameSettings,
+    setNewCurrentBoardData,
     user,
-    pawnPromotion,
   ]);
 
   const triggerAIMove = useCallback(() => {
@@ -132,12 +138,16 @@ export function Board({
       // If game has been reset since we called the api, just ignore the response:
       if (gameIdBeforeCall !== currentGameSettings.gameId) return;
       //console.log('getAIMove got', move);
-      setMovingFromSq(move.from);
-      setMovingToSq(move.to);
-      setPawnPromotion(move.promotion);
+      setNewMoveOnBoard(
+        currentBoardData,
+        setNewCurrentBoardData,
+        move.from,
+        move.to,
+        move.promotion
+      );
     };
     run();
-  }, [currentBoardData.numMovesInTurn, currentGameSettings.gameId]);
+  }, [currentBoardData, currentGameSettings.gameId, setNewCurrentBoardData]);
 
   // Move to next/prev move during game replay:
   const triggerReplayStepMove = useCallback(
@@ -145,21 +155,22 @@ export function Board({
       const run = async () => {
         const move = boardReplayStepMove(currentBoardData, step);
         if (move) {
-          setMovingFromSq(move.from);
-          setMovingToSq(move.to);
-          setPawnPromotion(move.promotion);
+          currentBoardData.currMoveFromSq = move.from;
+          currentBoardData.currMoveToSq = move.to;
+          currentBoardData.currMovePromotion = move.promotion;
+          setNewCurrentBoardData();
         } else {
           setPrevMoveFromSq(null);
           setPrevMoveToSq(null);
-          setMovingFromSq(null);
-          setMovingToSq(null);
-          setPawnPromotion(undefined);
+          currentBoardData.currMoveFromSq = null;
+          currentBoardData.currMoveToSq = null;
+          currentBoardData.currMovePromotion = undefined;
         }
         setReplayStepMove(0);
       };
       run();
     },
-    [currentBoardData]
+    [currentBoardData, setNewCurrentBoardData]
   );
 
   useEffect(() => {
@@ -180,9 +191,9 @@ export function Board({
           'gameId',
           gameId,
           'movingFromSq',
-          movingFromSq,
+          currentBoardData.currMoveFromSq,
           'movingToSq',
-          movingToSq,
+          currentBoardData.currMoveToSq,
           'prevMoveFromSq',
           prevMoveFromSq,
           'prevMoveToSq',
@@ -208,7 +219,7 @@ export function Board({
       }
 
       // if the 'from' and 'to' of a move were just determined, ready to execute the move:
-      if (movingFromSq && movingToSq) {
+      if (currentBoardData.currMoveFromSq && currentBoardData.currMoveToSq) {
         if (replayModeOn) handleMove();
         else
           makeMoveDelayTimeoutId = setTimeout(
@@ -271,8 +282,6 @@ export function Board({
     };
     run();
   }, [
-    movingFromSq,
-    movingToSq,
     handleMove,
     currGameId,
     currUserPlaysColor,
@@ -315,29 +324,37 @@ export function Board({
         $clickedSq = $clickedSq!.closest('.square') ?? $clickedSq;
       const square = $clickedSq.id as Square;
       const clickedPiece = getSquarePiece(square);
-      const promotion = movingFromSq
-        ? promptUserIfPromotionMove(movingFromSq, square, currentBoardData.turn)
+      const promotion = currentBoardData.currMoveFromSq
+        ? promptUserIfPromotionMove(
+            currentBoardData.currMoveFromSq,
+            square,
+            currentBoardData.turn
+          )
         : undefined;
-      if (clickedPiece && clickedPiece.color === currentBoardData.turn)
-        setMovingFromSq(square);
-      else if (
-        movingFromSq &&
+      let squareChosen = false;
+      if (clickedPiece && clickedPiece.color === currentBoardData.turn) {
+        currentBoardData.currMoveFromSq = square;
+        squareChosen = true;
+      } else if (
+        currentBoardData.currMoveFromSq &&
         validateMove(
-          movingFromSq,
+          currentBoardData.currMoveFromSq,
           square,
           currentBoardData.numMovesInTurn === 1,
           promotion
         )
       ) {
-        setMovingToSq(square);
-        setPawnPromotion(promotion);
+        currentBoardData.currMoveToSq = square;
+        currentBoardData.currMovePromotion = promotion;
+        squareChosen = true;
       }
+      if (squareChosen) setNewCurrentBoardData();
     },
     [
       isMovingDisabled,
       currentBoardData,
       currentGameSettings,
-      movingFromSq,
+      setNewCurrentBoardData,
       containerOnAlertDiceRoll,
     ]
   );
@@ -352,10 +369,10 @@ export function Board({
           {files.map((f) => {
             const sq = (f + allRanks[8 - r]) as Square;
             let squareClasses = 'square';
-            if (movingFromSq === sq)
+            if (currentBoardData.currMoveFromSq === sq)
               squareClasses +=
                 ' border-highlighted-square highlighted-square-from';
-            else if (movingToSq === sq)
+            else if (currentBoardData.currMoveToSq === sq)
               squareClasses +=
                 ' border-highlighted-square highlighted-square-to';
             else if (prevMoveFromSq === sq || prevMoveToSq === sq)

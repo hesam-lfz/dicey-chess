@@ -164,9 +164,10 @@ export function GamePanel({
     setReplayStepMove(step);
   }, []);
 
-  const currReplayMove = board.gameOver
-    ? board.flatSquareMoveHistory[board.replayCurrentFlatIndex]
-    : null;
+  const latestBoardMove =
+    board.flatSquareMoveHistory[
+      board.gameOver ? board.replayCurrentFlatIndex : board.historyNumMoves - 1
+    ];
 
   return (
     <>
@@ -185,12 +186,8 @@ export function GamePanel({
               currGameId={gameId}
               currReplayModeOn={replayModeOn}
               currReplayStepMove={replayStepMove}
-              currPrevMoveFromSq={
-                board.gameOver ? (currReplayMove!.from as Square) : null
-              }
-              currPrevMoveToSq={
-                board.gameOver ? (currReplayMove!.to as Square) : null
-              }
+              currPrevMoveFromSq={(latestBoardMove?.from as Square) || null}
+              currPrevMoveToSq={(latestBoardMove?.to as Square) || null}
               currUserPlaysColor={currentGameSettings.userPlaysColor}
               currShouldTriggerAITurn={shouldTriggerAITurn}
               currIsMovingDisabled={isMovingDisabled}

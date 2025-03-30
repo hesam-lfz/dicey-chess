@@ -41,6 +41,9 @@ const defaultCurrentBoardData: CurrentBoardData = {
   diceRoll1: -1,
   diceRoll2: -1,
   numMovesInTurn: -1,
+  currMoveFromSq: null,
+  currMoveToSq: null,
+  currMovePromotion: undefined,
 };
 
 export const CurrentGameContext = createContext<CurrentGameContextValues>({

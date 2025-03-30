@@ -61,18 +61,20 @@ export async function storageApi_loadGames(
     } else {
       const run = async (): Promise<SavedGame[]> => {
         if (!user) {
-          console.log(
-            'No user session. Retrieving saved game from local storage....'
-          );
+          if (DebugOn)
+            console.log(
+              'No user session. Retrieving saved game from local storage....'
+            );
           return await localStorage_loadGames();
         } else {
           try {
             if (DebugOn) console.log('trying to load games from db...');
             return await database_loadGames();
           } catch (e) {
-            console.error(
-              'failed loading games from db. Accessing local storage...'
-            );
+            if (DebugOn)
+              console.log(
+                'failed loading games from db. Accessing local storage...'
+              );
             return await localStorage_loadGames();
           }
         }
@@ -92,7 +94,6 @@ async function localStorage_loadGames(): Promise<SavedGame[]> {
       cachedSavedGames = retrievedData
         ? ((await JSON.parse(retrievedData)) as SavedGame[])
         : [];
-      //console.log(cachedSavedGames);
       resolve(cachedSavedGames);
     }, internalSettings.localStorageOpDelay);
   });
@@ -109,11 +110,9 @@ async function database_loadGames(): Promise<SavedGame[]> {
         },
       };
       const res = await fetch('/api/games', req);
-      //console.log('result from db', res);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
       const retrievedData = (await res.json()) as SavedGame[];
       cachedSavedGames = retrievedData;
-      //console.log(cachedSavedGames);
       return cachedSavedGames;
     };
     resolve(run());
@@ -161,16 +160,18 @@ export async function storageApi_saveGame(
       allSavedGames.unshift(savedGameData);
       cachedSavedGames = allSavedGames;
       if (!user) {
-        console.log('No user session. Saving game on local storage....');
+        if (DebugOn)
+          console.log('No user session. Saving game on local storage....');
         return await localStorage_saveGame(allSavedGames);
       } else {
         try {
           if (DebugOn) console.log('Trying to save game on db...');
           return await database_saveGame(savedGameData);
         } catch (e) {
-          console.error(
-            'Failed saving game on db. Trying to save on local storage...'
-          );
+          if (DebugOn)
+            console.error(
+              'Failed saving game on db. Trying to save on local storage...'
+            );
           return await localStorage_saveGame(allSavedGames);
         }
       }
@@ -210,12 +211,9 @@ async function database_saveGame(savedGameData: SavedGame): Promise<boolean> {
         },
         body: JSON.stringify(savedGameData),
       };
-      //console.log('req', req);
       const res = await fetch('/api/games', req);
-      //console.log('result from db', res);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
       (await res.json()) as SavedGame;
-      //console.log(retrievedData);
       return true;
     };
     resolve(run());
@@ -234,16 +232,18 @@ export async function storageApi_deleteGame(
       ).filter((g) => g.at !== gameId);
       cachedSavedGames = allSavedGames;
       if (!user) {
-        console.log('No user session. Deleting game on local storage...');
+        if (DebugOn)
+          console.log('No user session. Deleting game on local storage...');
         return await localStorage_deleteGame(allSavedGames);
       } else {
         try {
-          console.log('Trying to delete game on db...');
+          if (DebugOn) console.log('Trying to delete game on db...');
           return await database_deleteGame(user, gameId);
         } catch (e) {
-          console.error(
-            'Failed deleting game on db. Trying to delete on local storage...'
-          );
+          if (DebugOn)
+            console.error(
+              'Failed deleting game on db. Trying to delete on local storage...'
+            );
           return await localStorage_deleteGame(allSavedGames);
         }
       }
@@ -287,12 +287,8 @@ async function database_deleteGame(
         },
         body: JSON.stringify(deletedGameData),
       };
-      //console.log('delete req', req);
       const res = await fetch('/api/games', req);
-      //console.log('result from db', res);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
-      //const retrievedData = (await res.json()) as SavedGame;
-      //console.log(retrievedData);
       return true;
     };
     resolve(run());
@@ -315,9 +311,7 @@ export async function storageApi_updatePlayerRank(
         },
         body: JSON.stringify({ rank: user.rank }),
       };
-      //console.log('req', req);
       const res = await fetch(`/api/users/${user.userId}`, req);
-      //console.log('result from db', res);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
       return true;
     };
@@ -345,10 +339,7 @@ export async function database_sendInviteFriendRequestByUsername(
           `/api/invite/username/${username}/isRecheck/${isRecheck}`,
           req
         );
-        console.log('res', res);
-        if (!res.ok) {
-          return null;
-        }
+        if (!res.ok) return null;
         const retrievedData = (await res.json()) as InviteRequestResponse;
         return retrievedData;
       } catch (e) {
