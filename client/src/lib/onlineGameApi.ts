@@ -103,7 +103,7 @@ export function onlineGameApi_initialize(
         );
       } // Receiving a game event: roll from the opponent friend:
       else if (msg === 'move') {
-        if (DebugOn) console.log('got friend move', data);
+        if (DebugOn) console.log('got friend move', data, currentBoardData);
         const moveData = data as RemoteMoveData;
         setNewMoveOnBoard(
           currentBoardData,

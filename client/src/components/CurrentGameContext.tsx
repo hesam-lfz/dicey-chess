@@ -36,6 +36,7 @@ const defaultCurrentGameSettings: CurrentGameSettings = {
 };
 
 const defaultCurrentBoardData: CurrentBoardData = {
+  version: 0,
   turn: WHITE,
   diceRoll: -1,
   diceRoll1: -1,
@@ -80,8 +81,10 @@ export function CurrentGameContextProvider({ children }: Props) {
   }
 
   function setNewCurrentBoardData(): void {
-    console.log('setNewCurrentBoardData', currentBoardData);
-    setCurrentBoardData({ ...currentBoardData });
+    if (DebugOn) console.log('setNewCurrentBoardData', currentBoardData);
+    const cbd = { ...currentBoardData };
+    cbd.version += 1;
+    setCurrentBoardData(cbd);
   }
 
   function setNewOnlineGameAbortedCallback(fn: () => void): void {
