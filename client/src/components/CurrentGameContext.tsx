@@ -80,6 +80,7 @@ export function CurrentGameContextProvider({ children }: Props) {
   }
 
   function setNewCurrentBoardData(): void {
+    console.log('setNewCurrentBoardData', currentBoardData);
     setCurrentBoardData({ ...currentBoardData });
   }
 
