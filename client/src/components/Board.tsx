@@ -69,6 +69,7 @@ export function Board({
   const {
     currentGameSettings,
     currentBoardData,
+    getCurrentBoardData,
     setNewCurrentBoardData,
     user,
   } = useCurrentGameContext();
@@ -98,7 +99,7 @@ export function Board({
     } else {
       makeMove(
         currentGameSettings,
-        currentBoardData,
+        getCurrentBoardData,
         setNewCurrentBoardData,
         user,
         currentBoardData.currMoveFromSq!,

@@ -34,7 +34,7 @@ export function Settings() {
   const {
     currentGameSettings,
     setNewCurrentGameSettings,
-    currentBoardData,
+    getCurrentBoardData,
     setNewCurrentBoardData,
     user,
   } = useCurrentGameContext();
@@ -252,7 +252,7 @@ export function Settings() {
 
         onlineGameApi_initialize(
           currentGameSettings,
-          currentBoardData,
+          getCurrentBoardData,
           setNewCurrentBoardData,
           user!,
           pin!,

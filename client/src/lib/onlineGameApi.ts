@@ -44,7 +44,7 @@ let thePin: string;
 // 2 players:
 export function onlineGameApi_initialize(
   currentGameSettings: CurrentGameSettings,
-  currentBoardData: CurrentBoardData,
+  getCurrentBoardData: () => CurrentBoardData,
   setNewCurrentBoardData: (
     data: SetCurrentBoardData,
     setState: boolean
@@ -98,7 +98,7 @@ export function onlineGameApi_initialize(
         const diceData = data as RemoteDiceRollData;
         handleDiceRoll(
           currentGameSettings,
-          currentBoardData,
+          getCurrentBoardData(),
           setNewCurrentBoardData,
           diceData.roll,
           diceData.roll1,
@@ -107,7 +107,7 @@ export function onlineGameApi_initialize(
         );
       } // Receiving a game event: roll from the opponent friend:
       else if (msg === 'move') {
-        if (DebugOn) console.log('got friend move', data, currentBoardData);
+        if (DebugOn) console.log('got friend move', data);
         const moveData = data as RemoteMoveData;
         setNewMoveOnBoard(
           setNewCurrentBoardData,

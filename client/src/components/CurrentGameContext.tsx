@@ -22,6 +22,7 @@ export type CurrentGameContextValues = {
   currentGameSettings: CurrentGameSettings;
   setNewCurrentGameSettings: () => void;
   currentBoardData: CurrentBoardData;
+  getCurrentBoardData: () => CurrentBoardData;
   setNewCurrentBoardData: (
     data: SetCurrentBoardData,
     setState: boolean
@@ -56,6 +57,7 @@ export const CurrentGameContext = createContext<CurrentGameContextValues>({
   currentGameSettings: defaultCurrentGameSettings,
   setNewCurrentGameSettings: () => undefined,
   currentBoardData: defaultCurrentBoardData,
+  getCurrentBoardData: () => defaultCurrentBoardData,
   setNewCurrentBoardData: () => undefined,
   user: undefined,
   token: undefined,
@@ -84,6 +86,8 @@ export function CurrentGameContextProvider({ children }: Props) {
   function setNewCurrentGameSettings(): void {
     setCurrentGameSettings({ ...currentGameSettings });
   }
+
+  const getCurrentBoardData = () => currentBoardData;
 
   function setNewCurrentBoardData(
     data: SetCurrentBoardData,
@@ -124,6 +128,7 @@ export function CurrentGameContextProvider({ children }: Props) {
     currentGameSettings,
     setNewCurrentGameSettings,
     currentBoardData,
+    getCurrentBoardData,
     setNewCurrentBoardData,
     onlineGameAbortedCallback,
     setNewOnlineGameAbortedCallback,

@@ -537,7 +537,7 @@ export function setNewMoveOnBoard(
 // Execute the given move from to square:
 export function makeMove(
   currentGameSettings: CurrentGameSettings,
-  currentBoardData: CurrentBoardData,
+  getCurrentBoardData: () => CurrentBoardData,
   setNewCurrentBoardData: (
     data: SetCurrentBoardData,
     setState: boolean
@@ -548,6 +548,7 @@ export function makeMove(
   promotion?: PieceSymbol,
   isOnlineGameRemoteMove: boolean = false
 ): void {
+  const currentBoardData = getCurrentBoardData();
   if (DebugOn)
     console.log(
       'before makeMove',
