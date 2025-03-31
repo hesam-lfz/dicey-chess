@@ -118,9 +118,12 @@ export function Board({
   }, [
     replayModeOn,
     containerOnMove,
-    currentBoardData,
-    currentGameSettings,
+    currentBoardData.currMoveFromSq,
+    currentBoardData.currMoveToSq,
+    currentBoardData.currMovePromotion,
     setNewCurrentBoardData,
+    currentGameSettings,
+    getCurrentBoardData,
     user,
   ]);
 
