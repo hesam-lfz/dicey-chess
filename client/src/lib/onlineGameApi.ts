@@ -58,7 +58,7 @@ export function onlineGameApi_initialize(
   theUserId = user.userId;
   thePin = pin;
   // Set up socket communication:
-  onlineGameApi_socket = new WebSocket('ws://diceychess.com/ws'); // /ws');
+  onlineGameApi_socket = new WebSocket('wss://diceychess.com/ws'); // /ws');
 
   onlineGameApi_socket.onopen = () => {
     if (DebugOn) console.log('Connected to server');
