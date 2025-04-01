@@ -344,13 +344,6 @@ export const resetBoard = (
   boardEngine = new Chess(board.initPositionFen);
   // increment gameId to trigger all components to reset:
   currentGameSettings.gameId += 1;
-  //currentBoardData.diceRoll = -1;
-  //currentBoardData.diceRoll1 = -1;
-  //currentBoardData.diceRoll2 = -1;
-  //currentBoardData.currMoveFromSq = null;
-  //currentBoardData.currMoveToSq = null;
-  //currentBoardData.currMovePromotion = undefined;
-  //currentBoardData.turn = boardEngine.turn();
   setNewCurrentBoardData(
     {
       diceRoll: -1,
@@ -446,7 +439,6 @@ export function initBoardForGameReplay(
     }
     // Move the game back to beginning:
     boardEngine = new Chess(board.flatBoardFenHistory[1]);
-    //currentBoardData.turn = boardEngine.turn();
     setNewCurrentBoardData({ turn: boardEngine.turn() }, false);
     if (board.diceRollHistory[0] > 1) swapTurn(setNewCurrentBoardData);
     board.replayCurrentFlatIndex = 0;
@@ -555,7 +547,7 @@ export function makeMove(
       'currentGameSettings',
       currentGameSettings,
       'currentBoardData',
-      currentBoardData
+      JSON.stringify(currentBoardData)
     );
   const move: Move = boardEngine.move({
     from: fromSquare,
@@ -573,20 +565,16 @@ export function makeMove(
   // if it's a promotion, update the the type of promoted piece:
   if (promotion) getSquarePiece(toSquare)!.type = promotion;
   const currentBoardDataUpdates: SetCurrentBoardData = {};
-  //currentBoardData.turn = boardEngine.turn();
   currentBoardDataUpdates.turn = boardEngine.turn();
   board.history[board.history.length - 1].push(move.san);
   board.flatSanMoveHistory.push(move.san);
   board.historyNumMoves += 1;
-  //currentBoardData.numMovesInTurn -= 1;
   currentBoardDataUpdates.numMovesInTurn = currentBoardData.numMovesInTurn - 1;
   setNewCurrentBoardData(currentBoardDataUpdates, false);
   //board.replayCurrentMoveInTurnIndex += 1;
   if (currentBoardData.numMovesInTurn === 0) {
     // The player has played current turn's all the number of moves according to the dice roll:
-    //currentBoardData.diceRoll = -1;
     currentBoardDataUpdates.diceRoll = -1;
-    //currentBoardData.numMovesInTurn = -1;
     currentBoardDataUpdates.numMovesInTurn = -1;
     setNewCurrentBoardData(currentBoardDataUpdates, false);
     board.firstMoveInTurn = true;
@@ -632,16 +620,10 @@ export function handleDiceRoll(
       board.history.push([]);
     }
     roll = -1;
-    //currentBoardData. = roll;
-    //currentBoardData. = roll;
     setNewCurrentBoardData({ diceRoll: roll, numMovesInTurn: roll }, true); //Need here????
   }
 
   board.diceRollHistory.push(roll);
-  //currentBoardData.diceRoll = roll;
-  //currentBoardData.diceRoll1 = roll1;
-  //currentBoardData.diceRoll2 = roll2;
-  //currentBoardData.numMovesInTurn = roll;
   setNewCurrentBoardData(
     {
       diceRoll: roll,
@@ -857,7 +839,6 @@ export function setBoard(
   fen: string
 ): void {
   boardEngine = new Chess(fen);
-  //currentBoardData.turn = boardEngine.turn();
   setNewCurrentBoardData({ turn: boardEngine.turn() }, false);
 }
 

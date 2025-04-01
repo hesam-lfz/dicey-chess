@@ -72,12 +72,7 @@ export function GamePanel({
     if (replayModeOn) {
       setReplayStepMove(0);
     } else {
-      if (DebugOn)
-        console.log(
-          'onmove',
-          currentBoardData.turn,
-          currentBoardData.numMovesInTurn
-        );
+      if (DebugOn) console.log('onmove', JSON.stringify(currentBoardData));
       if (
         currentBoardData.numMovesInTurn === -1 &&
         isAITurn(currentGameSettings, currentBoardData)

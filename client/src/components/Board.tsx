@@ -112,8 +112,6 @@ export function Board({
     containerOnMove();
     setPrevMoveFromSq(currentBoardData.currMoveFromSq);
     setPrevMoveToSq(currentBoardData.currMoveToSq);
-    //currentBoardData.currMoveFromSq = null;
-    //currentBoardData.currMoveToSq = null;
     setNewCurrentBoardData({ currMoveFromSq: null, currMoveToSq: null }, true);
   }, [
     replayModeOn,
@@ -152,9 +150,6 @@ export function Board({
       const run = async () => {
         const move = boardReplayStepMove(setNewCurrentBoardData, step);
         if (move) {
-          //currentBoardData.currMoveFromSq = move.from;
-          //currentBoardData.currMoveToSq = move.to;
-          //currentBoardData.currMovePromotion = move.promotion;
           setNewCurrentBoardData(
             {
               currMoveFromSq: move.from,
@@ -166,9 +161,6 @@ export function Board({
         } else {
           setPrevMoveFromSq(null);
           setPrevMoveToSq(null);
-          //currentBoardData.currMoveFromSq = null;
-          //currentBoardData.currMoveToSq = null;
-          //currentBoardData.currMovePromotion = undefined;
           setNewCurrentBoardData(
             {
               currMoveFromSq: null,
@@ -197,7 +189,7 @@ export function Board({
           'currentGameSettings',
           currentGameSettings,
           'currentBoardData',
-          currentBoardData,
+          JSON.stringify(currentBoardData),
           'currGameId',
           currGameId,
           'gameId',
@@ -344,10 +336,9 @@ export function Board({
           )
         : undefined;
 
-      if (clickedPiece && clickedPiece.color === currentBoardData.turn) {
-        //currentBoardData.currMoveFromSq = square;
+      if (clickedPiece && clickedPiece.color === currentBoardData.turn)
         setNewCurrentBoardData({ currMoveFromSq: square }, true);
-      } else if (
+      else if (
         currentBoardData.currMoveFromSq &&
         validateMove(
           currentBoardData.currMoveFromSq,
@@ -356,8 +347,6 @@ export function Board({
           promotion
         )
       ) {
-        //currentBoardData.currMoveToSq = square;
-        //currentBoardData.currMovePromotion = promotion;
         setNewCurrentBoardData(
           { currMoveToSq: square, currMovePromotion: promotion },
           true

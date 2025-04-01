@@ -50,10 +50,6 @@ export function DicePanel({
     // If we re-rolled due to an AI 0 roll on check, and again we got a 0,
     // then force another re-roll:
     if (roll === 0 && alreadyTriggeredAIRoll) setAlreadyTriggeredAIRoll(false);
-    //currentBoardData.numMovesInTurn = roll;
-    //currentBoardData.diceRoll = roll;
-    //currentBoardData.diceRoll1 = roll1;
-    //currentBoardData.diceRoll2 = roll2;
     setNewCurrentBoardData(
       {
         numMovesInTurn: roll,
@@ -74,7 +70,7 @@ export function DicePanel({
         'rendered DicePanel',
         currGameId,
         'currentBoardData',
-        currentBoardData,
+        JSON.stringify(currentBoardData),
         'theRoll === -1 && !itIsAITurn',
         currentBoardData.diceRoll === -1 &&
           !isAITurn(currentGameSettings, currentBoardData),
