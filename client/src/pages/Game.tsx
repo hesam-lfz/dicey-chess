@@ -75,6 +75,9 @@ export function Game() {
   }
 
   function handleGameOverModalClose(): void {
+    // If we're currently in a game with an online friend, close the web socket
+    // connection:
+    if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
     setIsGameSaveModalOpen(false);
   }
 
@@ -82,9 +85,6 @@ export function Game() {
   function onGameOver(): void {
     setReplayModeOn(true);
     setIsGameSaveModalOpen(true);
-    // If we're currently in a game with an online friend, close the web socket
-    // connection:
-    if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
   }
 
   function handleResetGameModalClose(): void {

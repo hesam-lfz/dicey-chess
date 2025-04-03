@@ -3,6 +3,7 @@ import {
   type CurrentBoardData,
   type CurrentGameSettings,
   type SetCurrentBoardData,
+  board,
   DebugOn,
   handleDiceRoll,
   setNewMoveOnBoard,
@@ -83,10 +84,12 @@ function handleGameMoveMessage(
 }
 
 // Handles receiving a game abort event from the opponent friend:
+// This will also happen if reached gameover:
 function handleGameAbortMessage(onGameAbortCallback: () => void): void {
-  onlineGameApi_socket.close();
-  console.log('will call abort handler', onGameAbortCallback);
-  onGameAbortCallback();
+  if (!board.gameOver) {
+    onlineGameApi_socket.close();
+    onGameAbortCallback();
+  }
 }
 
 // Starts a new web socket connection to server to establish connection between
@@ -125,7 +128,7 @@ export function onlineGameApi_initialize(
     //console.log(message);
     const response = JSON.parse(message.data) as SocketResponseMessage;
     const { type, msg, data } = response;
-    if (DebugOn) console.log('Received: ', response);
+    if (DebugOn) console.log('Received: ', JSON.stringify(response));
     if (type === 'connection') {
       if (msg === 'hand')
         // Send "shake" to complete handshake with socket server:
