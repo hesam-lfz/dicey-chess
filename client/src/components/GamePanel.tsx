@@ -49,24 +49,33 @@ export function GamePanel({
   const [isMovingDisabled, setIsMovingDisabled] = useState<boolean>(false);
 
   useEffect(() => {
-    /*
-    console.log(
-      'rendered GamePanel',
-      'shouldTriggerAITurn',
-      shouldTriggerAITurn,
-      'isAITurn()',
-      isAITurn(currentGameSettings),
-      JSON.stringify(board),
-      replayModeOn,
-      currReplayModeOn
-    );
-    */
+    if (DebugOn)
+      console.log(
+        'rendered GamePanel',
+        'currentGameSettings',
+        currentGameSettings,
+        'shouldTriggerAITurn',
+        shouldTriggerAITurn,
+        'isAITurn()',
+        isAITurn(currentGameSettings, currentBoardData),
+        JSON.stringify(board),
+        replayModeOn,
+        currReplayModeOn
+      );
     if (board.gameOver && !(board.isLoadedGame || currReplayModeOn))
       onGameOver();
     setGameId(currGameId);
     setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
-  }, [currGameId, currReplayModeOn, onGameOver, replayModeOn]);
+  }, [
+    currGameId,
+    currReplayModeOn,
+    currentBoardData,
+    currentGameSettings,
+    onGameOver,
+    replayModeOn,
+    shouldTriggerAITurn,
+  ]);
 
   const onMove = useCallback(() => {
     if (replayModeOn) {

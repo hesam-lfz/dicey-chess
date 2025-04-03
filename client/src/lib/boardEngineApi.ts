@@ -383,17 +383,17 @@ export function initBoardForGameReplay(
     setNewCurrentGameSettings,
     setNewCurrentBoardData
   );
-  /*
-  console.log(
-    'before prepping board',
-    'game',
-    JSON.stringify(game),
-    'board',
-    board
-  );
-  */
+  if (DebugOn)
+    console.log(
+      'loading saved game, before prepping board',
+      'game',
+      JSON.stringify(game),
+      'board',
+      board
+    );
+
   currentGameSettings.userPlaysColor = game.userPlaysWhite ? WHITE : BLACK;
-  currentGameSettings.opponentIsAI = true;
+  currentGameSettings.opponentIsAI = game.opponent === 'AI';
   currentGameSettings.opponent = game.opponent;
   board.gameOver = true;
   board.isLoadedGame = true;
@@ -442,7 +442,16 @@ export function initBoardForGameReplay(
     setNewCurrentBoardData({ turn: boardEngine.turn() }, false);
     if (board.diceRollHistory[0] > 1) swapTurn(setNewCurrentBoardData);
     board.replayCurrentFlatIndex = 0;
+    setNewCurrentGameSettings();
     //console.log('done prepping board', board, boardEngine.turn());
+    if (DebugOn)
+      console.log(
+        'loading saved game, done prepping board',
+        'currentGameSettings',
+        currentGameSettings,
+        'board',
+        board
+      );
     return true;
   } catch (error) {
     console.error(
@@ -647,7 +656,7 @@ export function handleDiceRoll(
     // the 0 roll before getting the turn back):
     if (isOnlineGameRemoteRoll) {
       setNewCurrentBoardData({}, true);
-      setTimeout(runSwapTurn, internalSettings.pauseOnZeroRollDelay);
+      setTimeout(runSwapTurn, internalSettings.pauseOnZeroRollDelay / 2);
     } else runSwapTurn();
   } else {
     setNewCurrentBoardData({}, true); //Need here????

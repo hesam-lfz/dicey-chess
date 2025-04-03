@@ -1,10 +1,10 @@
 import { Color, PieceSymbol, Square } from 'chess.js';
 import {
-  CurrentBoardData,
-  CurrentGameSettings,
+  type CurrentBoardData,
+  type CurrentGameSettings,
+  type SetCurrentBoardData,
   DebugOn,
   handleDiceRoll,
-  SetCurrentBoardData,
   setNewMoveOnBoard,
 } from './boardEngineApi';
 import { User } from './auth';
@@ -40,6 +40,55 @@ let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
 //let socketBusy: boolean = false;
 let theUserId: number;
 let thePin: string;
+
+// Handles receiving a game event: a dice roll from the opponent friend:
+function handleGameDiceRollMessage(
+  currentGameSettings: CurrentGameSettings,
+  getCurrentBoardData: () => CurrentBoardData,
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
+  data?: Record<string, any>
+): void {
+  if (DebugOn) console.log('got friend roll', data);
+  const diceData = data as RemoteDiceRollData;
+  handleDiceRoll(
+    currentGameSettings,
+    getCurrentBoardData(),
+    setNewCurrentBoardData,
+    diceData.roll,
+    diceData.roll1,
+    diceData.roll2,
+    true
+  );
+}
+
+// Handles receiving a game event: a move from the opponent friend:
+function handleGameMoveMessage(
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
+  data?: Record<string, any>
+): void {
+  if (DebugOn) console.log('got friend move', data);
+  const moveData = data as RemoteMoveData;
+  setNewMoveOnBoard(
+    setNewCurrentBoardData,
+    moveData.from as Square,
+    moveData.to as Square,
+    moveData.promotion as PieceSymbol | undefined
+  );
+}
+
+// Handles receiving a game abort event from the opponent friend:
+function handleGameAbortMessage(onGameAbortCallback: () => void): void {
+  onlineGameApi_socket.close();
+  console.log('will call abort handler', onGameAbortCallback);
+  onGameAbortCallback();
+}
+
 // Starts a new web socket connection to server to establish connection between
 // 2 players:
 export function onlineGameApi_initialize(
@@ -78,7 +127,7 @@ export function onlineGameApi_initialize(
     const { type, msg, data } = response;
     if (DebugOn) console.log('Received: ', response);
     if (type === 'connection') {
-      if (msg === 'hand') {
+      if (msg === 'hand')
         // Send "shake" to complete handshake with socket server:
         onlineGameApi_socket.send(
           JSON.stringify({
@@ -88,38 +137,21 @@ export function onlineGameApi_initialize(
             msg: 'shake',
           })
         );
-      } else if (msg === 'ready') {
-        onOnlineGameReadyCallback(data!.color);
-      }
+      else if (msg === 'ready') onOnlineGameReadyCallback(data!.color);
     } else if (type === 'game') {
-      // Receiving a game event: roll from the opponent friend:
-      if (msg === 'roll') {
-        if (DebugOn) console.log('got friend roll', data);
-        const diceData = data as RemoteDiceRollData;
-        handleDiceRoll(
+      // Receiving a game event: a dice roll from the opponent friend:
+      if (msg === 'roll')
+        handleGameDiceRollMessage(
           currentGameSettings,
-          getCurrentBoardData(),
+          getCurrentBoardData,
           setNewCurrentBoardData,
-          diceData.roll,
-          diceData.roll1,
-          diceData.roll2,
-          true
+          data
         );
-      } // Receiving a game event: roll from the opponent friend:
-      else if (msg === 'move') {
-        if (DebugOn) console.log('got friend move', data);
-        const moveData = data as RemoteMoveData;
-        setNewMoveOnBoard(
-          setNewCurrentBoardData,
-          moveData.from as Square,
-          moveData.to as Square,
-          moveData.promotion as PieceSymbol | undefined
-        );
-      } else if (msg === 'abort') {
-        onlineGameApi_socket.close();
-        console.log('will call abort handler', onGameAbortCallback);
-        onGameAbortCallback();
-      }
+      // Receiving a game event: a move from the opponent friend:
+      else if (msg === 'move')
+        handleGameMoveMessage(setNewCurrentBoardData, data);
+      // Receiving a game abort event from the opponent friend:
+      else if (msg === 'abort') handleGameAbortMessage(onGameAbortCallback);
     }
   };
 

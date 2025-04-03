@@ -10,6 +10,8 @@ import {
   displayGameDuration,
   initBoardForGameReplay,
   internalSettings,
+  isGameAgainstOnlineFriend,
+  onlineGameApi_close,
   outcomes,
   resetBoard,
   resetSettings,
@@ -76,9 +78,13 @@ export function Game() {
     setIsGameSaveModalOpen(false);
   }
 
+  // Handles gameover:
   function onGameOver(): void {
     setReplayModeOn(true);
     setIsGameSaveModalOpen(true);
+    // If we're currently in a game with an online friend, close the web socket
+    // connection:
+    if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
   }
 
   function handleResetGameModalClose(): void {
