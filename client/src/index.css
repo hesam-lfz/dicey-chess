@@ -10,7 +10,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-size-adjust: 100%;
-  width: 100vw;
+  width: 100%; /* 100vw; */
   user-select: none;
 }
 

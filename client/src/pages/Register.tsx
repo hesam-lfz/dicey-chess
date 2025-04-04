@@ -28,15 +28,21 @@ export function Register() {
       const userData = Object.fromEntries(formData) as Record<any, any>;
       // add the initial player rank to user data:
       userData.rank = internalSettings.initPlayerRank;
-      const usernameLength = (userData.username as string).length;
+      const username = userData.username as string;
+      const usernameLength = username.length;
       const passwordLength = (userData.password as string).length;
-      if (usernameLength < 5 || usernameLength > 15) {
+      if (!/^[a-z0-9_.@]+$/.test(username)) {
         formCheckError = 1;
+        infoMessageModalMessage =
+          'Username should only contain alphanumeric characters!';
+        throw new Error(infoMessageModalMessage);
+      } else if (usernameLength < 5 || usernameLength > 15) {
+        formCheckError = 2;
         infoMessageModalMessage =
           'Username should be 5-15 characters. Please try again!';
         throw new Error(infoMessageModalMessage);
       } else if (passwordLength < 5 || passwordLength > 20) {
-        formCheckError = 2;
+        formCheckError = 3;
         infoMessageModalMessage =
           'Password should be 5-20 characters. Please try again!';
         throw new Error(infoMessageModalMessage);
@@ -48,7 +54,7 @@ export function Register() {
       };
       const res = await fetch('/api/auth/register', req);
       if (!res.ok) {
-        formCheckError = 3;
+        formCheckError = 4;
         throw new Error(`fetch Error ${res.status}`);
       }
       const user = (await res.json()) as User;
@@ -67,7 +73,7 @@ export function Register() {
   function handleInfoMessageOpen(formCheckError: number) {
     passwordInputRef!.current!.value = '';
     passwordInputRef!.current!.focus();
-    if (formCheckError < 2) {
+    if (formCheckError < 3) {
       usernameInputRef!.current!.value = '';
       usernameInputRef!.current!.focus();
     }

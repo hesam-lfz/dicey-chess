@@ -40,8 +40,8 @@ type InviteRequestResponse = {
 const disallowedUsernames = ['AI', 'ai'];
 // Game connection requests timeout after 5 min.
 const pendingGameConnectionTimeout = 300000;
-// Games timeout after 20 min.
-const gameTimeout = 1200000;
+// Games timeout after 30 min.
+const gameTimeout = 1800000;
 // Timeout for waiting for a graceful closing of connection before a hard close:
 const pendingGameConnectionCloseTimeout = 20000;
 
@@ -91,6 +91,12 @@ app.post('/api/auth/register', async (req, res, next) => {
       throw new ClientError(400, 'Username and password are required fields');
     const usernameLength = username.length;
     const passwordLength = password.length;
+    if (!/^[a-z0-9_.@]+$/.test(username)) {
+      throw new ClientError(
+        400,
+        'Username should only contain alphanumeric characters!'
+      );
+    }
     if (usernameLength < 5 || usernameLength > 15)
       throw new ClientError(
         400,
@@ -510,6 +516,7 @@ const cancelFriendInviteRequest = (
   requestingUserId: string,
   requestedUserId: string | undefined
 ): void => {
+  console.log('cancelFriendInviteRequest', requestingUserId, requestedUserId);
   const priorRequestedFriendId =
     pendingGameFriendInviteRequestsFrom[requestingUserId];
   if (priorRequestedFriendId) {
@@ -548,6 +555,7 @@ const closeStaleGameConnectionAndRemoveData = (
 
 // Removes any cached data on a game that's ended:
 const removeStaleGameData = (userId: string): void => {
+  console.log('removeStaleGameData', userId);
   const friendId =
     inProgressFriendGameInvitedFrom[userId] ||
     pendingGameFriendInviteRequestsFrom[userId];
@@ -577,6 +585,7 @@ const removeStaleGameData = (userId: string): void => {
 const closeStaleGameConnection = (
   connection: WebSocket
 ): NodeJS.Timeout | null => {
+  console.log('closeStaleGameConnection');
   // If connection is already closed, then nothing to do:
   if (!connection || connection.readyState === connection.CLOSED) return null;
   // If connection is not already closing, start the closing process:

@@ -179,8 +179,12 @@ export function Settings() {
 
   async function handleInviteFriendOnline(): Promise<void> {
     handleInviteFriendOnlineModalClose();
-    const formUsername = inviteFormUsernameRef?.current?.value;
-    const formFriendUsername = inviteFormFriendUsernameRef?.current?.value;
+    const formUsername = inviteFormUsernameRef?.current?.value.replace(
+      / /g,
+      ''
+    );
+    const formFriendUsername =
+      inviteFormFriendUsernameRef?.current?.value.replace(/ /g, '');
     // Check if usernames entered are valid and existing in db:
     if (
       formUsername !== user?.username ||
