@@ -53,6 +53,10 @@ const pendingGameFriendInviteRequestsClearTimeoutIds: Record<
   string,
   NodeJS.Timeout | null
 > = {};
+const pendingGameCloseTimeoutId1s: Record<string, NodeJS.Timeout | null> = {};
+const pendingGameCloseTimeoutId2s: Record<string, NodeJS.Timeout | null> = {};
+const pendingGameDataCleanupTimerIds: Record<string, NodeJS.Timeout | null> =
+  {};
 const inProgressGameCloseTimeoutIds: Record<string, NodeJS.Timeout | null> = {};
 
 const gameConnectionPins: Record<string, string> = {};
@@ -304,6 +308,7 @@ app.get(
         pendingGameFriendInviteRequestsFrom[requestingPlayerId];
       // If any pending prior request from user, cancel and refuse invite:
       if (!isRecheck && priorRequestedFriendId) {
+        console.log('recheck!');
         cancelFriendInviteRequest(requestingPlayerId, priorRequestedFriendId);
         throw new ClientError(
           400,
@@ -357,6 +362,11 @@ app.get(
         JSON.stringify(pendingGameFriendInviteRequestsTo)
       );
       // timeout pending request after 5 min:
+      // first clear if there's already a timer:
+      const timeoutId =
+        pendingGameFriendInviteRequestsClearTimeoutIds[requestingPlayerId];
+      if (timeoutId) clearTimeout(timeoutId);
+      // now add (or re-add) the timer:
       pendingGameFriendInviteRequestsClearTimeoutIds[requestingPlayerId] =
         setTimeout(
           () =>
@@ -404,11 +414,10 @@ wsServer.on('connection', (ws) => {
   let theUserId: string;
 
   // Remove connection after a while, if game hasn't gotten started or ended normally:
-  let pendingGameCloseTimeoutId2: NodeJS.Timeout | null;
   let inProgressGameCloseTimeoutId1: NodeJS.Timeout | null;
 
   const pendingGameCloseTimeoutId1 = setTimeout(() => {
-    pendingGameCloseTimeoutId2 = closeStaleGameConnection(ws);
+    pendingGameCloseTimeoutId2s[theUserId] = closeStaleGameConnection(ws);
   }, pendingGameConnectionTimeout);
 
   ws.on('message', (message) => {
@@ -426,12 +435,13 @@ wsServer.on('connection', (ws) => {
       throw new ClientError(400, 'Websocket message with invalid pin');
     if (type === 'connection') {
       if (msg === 'open') {
+        pendingGameCloseTimeoutId1s[userId] = pendingGameCloseTimeoutId1;
         theUserId = userId;
         ws.send(JSON.stringify({ type: 'connection', msg: 'hand' }));
       } else if (msg === 'shake') {
         pendingGameConnections[userId] = ws;
         // remove after a while (if game hasn't gotten started):
-        const pendingGameDataCleanupTimerId = setTimeout(
+        pendingGameDataCleanupTimerIds[userId] = setTimeout(
           () => removeStaleGameData(userId),
           pendingGameConnectionTimeout
         );
@@ -451,11 +461,35 @@ wsServer.on('connection', (ws) => {
           connections[randomIndex === 0 ? 1 : 0].send(JSON.stringify(msg));
           // Move game from pending to in-progress:
           // Clear timeouts set out to clear unsuccessful connection attempts:
-          clearTimeout(pendingGameDataCleanupTimerId);
-          clearTimeout(pendingGameCloseTimeoutId1);
-          if (pendingGameCloseTimeoutId2) {
-            clearTimeout(pendingGameCloseTimeoutId2);
-            pendingGameCloseTimeoutId2 = null;
+          const tidUser = pendingGameDataCleanupTimerIds[userId];
+          if (tidUser) {
+            clearTimeout(tidUser);
+            delete pendingGameDataCleanupTimerIds[userId];
+          }
+          const tidFriend = pendingGameDataCleanupTimerIds[friendId];
+          if (tidFriend) {
+            clearTimeout(tidFriend);
+            delete pendingGameDataCleanupTimerIds[friendId];
+          }
+          const tid1User = pendingGameCloseTimeoutId1s[userId];
+          if (tid1User) {
+            clearTimeout(tid1User);
+            delete pendingGameCloseTimeoutId1s[userId];
+          }
+          const tid1Friend = pendingGameCloseTimeoutId1s[friendId];
+          if (tid1Friend) {
+            clearTimeout(tid1Friend);
+            delete pendingGameCloseTimeoutId1s[friendId];
+          }
+          const tid2User = pendingGameCloseTimeoutId2s[userId];
+          if (tid2User) {
+            clearTimeout(tid2User);
+            delete pendingGameCloseTimeoutId2s[userId];
+          }
+          const tid2Friend = pendingGameCloseTimeoutId2s[friendId];
+          if (tid2Friend) {
+            clearTimeout(tid2Friend);
+            delete pendingGameCloseTimeoutId2s[friendId];
           }
           cancelFriendInviteRequest(userId, friendId);
           delete pendingGameConnections[userId];
@@ -516,7 +550,7 @@ const cancelFriendInviteRequest = (
   requestingUserId: string,
   requestedUserId: string | undefined
 ): void => {
-  console.log('cancelFriendInviteRequest', requestingUserId, requestedUserId);
+  // console.log('cancelFriendInviteRequest', requestingUserId, requestedUserId);
   const priorRequestedFriendId =
     pendingGameFriendInviteRequestsFrom[requestingUserId];
   if (priorRequestedFriendId) {
@@ -527,10 +561,15 @@ const cancelFriendInviteRequest = (
     )
       delete pendingGameFriendInviteRequestsTo[requestedUserId];
   }
-  const timeoutId =
+  let timeoutId =
     pendingGameFriendInviteRequestsClearTimeoutIds[requestingUserId];
   if (timeoutId) clearTimeout(timeoutId);
   delete pendingGameFriendInviteRequestsClearTimeoutIds[requestingUserId];
+  if (requestedUserId) {
+    timeoutId = pendingGameFriendInviteRequestsClearTimeoutIds[requestedUserId];
+    if (timeoutId) clearTimeout(timeoutId);
+    delete pendingGameFriendInviteRequestsClearTimeoutIds[requestedUserId];
+  }
 };
 
 // Closes game connection and remove any cache data related to game:
@@ -585,7 +624,6 @@ const removeStaleGameData = (userId: string): void => {
 const closeStaleGameConnection = (
   connection: WebSocket
 ): NodeJS.Timeout | null => {
-  console.log('closeStaleGameConnection');
   // If connection is already closed, then nothing to do:
   if (!connection || connection.readyState === connection.CLOSED) return null;
   // If connection is not already closing, start the closing process:
@@ -635,13 +673,19 @@ const cacheLog = (): void => {
     Object.keys(pendingGameConnections),
     'pendingGameFriendInviteRequestsClearTimeoutIds',
     Object.keys(pendingGameFriendInviteRequestsClearTimeoutIds),
+    'pendingGameCloseTimeoutId1s',
+    Object.keys(pendingGameCloseTimeoutId1s),
+    'pendingGameCloseTimeoutId2s',
+    Object.keys(pendingGameCloseTimeoutId2s),
+    'pendingGameDataCleanupTimerIds',
+    Object.keys(pendingGameDataCleanupTimerIds),
     'inProgressGameCloseTimeoutIds',
     Object.keys(inProgressGameCloseTimeoutIds),
-    'gameConnectionPins',
-    gameConnectionPins,
     'inProgressFriendGameInvitedFrom',
     inProgressFriendGameInvitedFrom,
     'inProgressGameConnections',
-    Object.keys(inProgressGameConnections)
+    Object.keys(inProgressGameConnections),
+    'gameConnectionPins',
+    gameConnectionPins
   );
 };
