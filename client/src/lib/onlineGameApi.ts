@@ -37,10 +37,54 @@ export const onlineGameApi_globals: OnlineGameGlobals = {
   aborted: false,
 };
 
+// If receiving online game remote event, this is how much we wait until we
+// check again if we're ready processing incoming game event from the opponent:
+const waitOnBoardBusyDelay = 1000;
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
-//let socketBusy: boolean = false;
 let theUserId: number;
 let thePin: string;
+
+// Handles receiving game events from the opponent friend
+// If board is currently busy processing a previous event, waits first:
+function handleGameMessage(
+  currentGameSettings: CurrentGameSettings,
+  getCurrentBoardData: () => CurrentBoardData,
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
+  onGameAbortCallback: () => void,
+  msg: string,
+  data?: Record<string, any>
+): void {
+  if (board.busyWaiting) {
+    setTimeout(
+      () =>
+        handleGameMessage(
+          currentGameSettings,
+          getCurrentBoardData,
+          setNewCurrentBoardData,
+          onGameAbortCallback,
+          msg,
+          data
+        ),
+      waitOnBoardBusyDelay
+    );
+    return;
+  }
+  // Receiving a game event: a dice roll from the opponent friend:
+  if (msg === 'roll')
+    handleGameDiceRollMessage(
+      currentGameSettings,
+      getCurrentBoardData,
+      setNewCurrentBoardData,
+      data
+    );
+  // Receiving a game event: a move from the opponent friend:
+  else if (msg === 'move') handleGameMoveMessage(setNewCurrentBoardData, data);
+  // Receiving a game abort event from the opponent friend:
+  else if (msg === 'abort') handleGameAbortMessage(onGameAbortCallback);
+}
 
 // Handles receiving a game event: a dice roll from the opponent friend:
 function handleGameDiceRollMessage(
@@ -141,21 +185,15 @@ export function onlineGameApi_initialize(
           })
         );
       else if (msg === 'ready') onOnlineGameReadyCallback(data!.color);
-    } else if (type === 'game') {
-      // Receiving a game event: a dice roll from the opponent friend:
-      if (msg === 'roll')
-        handleGameDiceRollMessage(
-          currentGameSettings,
-          getCurrentBoardData,
-          setNewCurrentBoardData,
-          data
-        );
-      // Receiving a game event: a move from the opponent friend:
-      else if (msg === 'move')
-        handleGameMoveMessage(setNewCurrentBoardData, data);
-      // Receiving a game abort event from the opponent friend:
-      else if (msg === 'abort') handleGameAbortMessage(onGameAbortCallback);
-    }
+    } else if (type === 'game')
+      handleGameMessage(
+        currentGameSettings,
+        getCurrentBoardData,
+        setNewCurrentBoardData,
+        onGameAbortCallback,
+        msg,
+        data
+      );
   };
 
   onlineGameApi_socket.onclose = () => {

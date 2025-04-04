@@ -132,6 +132,7 @@ export type Board = {
   outcomeId?: number;
   outcome?: string;
   gameStartTime: number;
+  busyWaiting: boolean;
 };
 
 export type BasicMove = {
@@ -226,6 +227,7 @@ const initBoard: Board = {
   gameOver: false,
   isLoadedGame: false,
   gameStartTime: 0,
+  busyWaiting: false,
 };
 
 export const internalSettings: InternalSettings = {
@@ -602,6 +604,29 @@ export function makeMove(
   checkForGameOver(currentGameSettings, currentBoardData, user);
 }
 
+// Helper for function handleDiceRoll below (called when rolled a 0):
+function handleDiceRoll_runSwapTurn(
+  setNewCurrentBoardData: (
+    data: SetCurrentBoardData,
+    setState: boolean
+  ) => void,
+  roll: number
+) {
+  // player got 0 roll, so no moves in this turn...
+  // Swap turn, unless player is in check (in which case
+  // the player rolls again):
+  const playerInCheck = boardEngine.inCheck();
+  if (playerInCheck) {
+    // pop the last roll so player in check can re-roll dice:
+    board.diceRollHistory.pop();
+  } else {
+    swapTurn(setNewCurrentBoardData);
+    board.history.push([]);
+  }
+  roll = -1;
+  setNewCurrentBoardData({ diceRoll: roll, numMovesInTurn: roll }, true); //Need here????
+}
+
 // Handle a player's latest roll of dice:
 export function handleDiceRoll(
   currentGameSettings: CurrentGameSettings,
@@ -615,22 +640,10 @@ export function handleDiceRoll(
   roll2: number,
   isOnlineGameRemoteRoll: boolean = false
 ): void {
-  async function runSwapTurn() {
-    // player got 0 roll, so no moves in this turn...
-    // Swap turn, unless player is in check (in which case
-    // the player rolls again):
-    const playerInCheck = boardEngine.inCheck();
-    if (playerInCheck) {
-      // pop the last roll so player in check can re-roll dice:
-      board.diceRollHistory.pop();
-    } else {
-      swapTurn(setNewCurrentBoardData);
-      board.history.push([]);
-    }
-    roll = -1;
-    setNewCurrentBoardData({ diceRoll: roll, numMovesInTurn: roll }, true); //Need here????
-  }
-
+  // Mark game board busy as it processes the dice being rolled (this is being
+  // checked for incoming online game messages to make sure they wait until
+  // we can receive new game events):
+  board.busyWaiting = true;
   board.diceRollHistory.push(roll);
   setNewCurrentBoardData(
     {
@@ -648,15 +661,17 @@ export function handleDiceRoll(
     !isOpponentsTurn(currentGameSettings, currentBoardData)
   )
     onlineGameApi_sendDiceRoll(roll, roll1, roll2);
-
   if (roll == 0) {
     // In case of this fn being called as a result of a remote roll in an online game,
     // add a bit of delay if the roll was 0 and we're changing turn (so player can see
     // the 0 roll before getting the turn back):
     if (isOnlineGameRemoteRoll) {
       setNewCurrentBoardData({}, true);
-      setTimeout(runSwapTurn, internalSettings.pauseOnZeroRollDelay);
-    } else runSwapTurn();
+      setTimeout(
+        () => handleDiceRoll_runSwapTurn(setNewCurrentBoardData, roll),
+        internalSettings.pauseOnZeroRollDelay
+      );
+    } else handleDiceRoll_runSwapTurn(setNewCurrentBoardData, roll);
   } else {
     setNewCurrentBoardData({}, true); //Need here????
   }

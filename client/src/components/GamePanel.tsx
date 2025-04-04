@@ -60,13 +60,16 @@ export function GamePanel({
         isAITurn(currentGameSettings, currentBoardData),
         JSON.stringify(board),
         replayModeOn,
-        currReplayModeOn
+        currReplayModeOn,
+        board.busyWaiting
       );
     if (board.gameOver && !(board.isLoadedGame || currReplayModeOn))
       onGameOver();
     setGameId(currGameId);
     setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
+    board.busyWaiting = false;
+    if (DebugOn) console.log(board.busyWaiting);
   }, [
     currGameId,
     currReplayModeOn,
@@ -78,10 +81,10 @@ export function GamePanel({
   ]);
 
   const onMove = useCallback(() => {
+    if (DebugOn) console.log('onmove', JSON.stringify(currentBoardData));
     if (replayModeOn) {
       setReplayStepMove(0);
     } else {
-      if (DebugOn) console.log('onmove', JSON.stringify(currentBoardData));
       if (
         currentBoardData.numMovesInTurn === -1 &&
         isAITurn(currentGameSettings, currentBoardData)

@@ -44,6 +44,10 @@ export function DicePanel({
   const [dice2IconRotation, setDice2IconRotation] = useState<number>(0);
 
   const handleRollButtonClick = useCallback(() => {
+    // Mark game board busy as it processes the dice being rolled (this is being
+    // checked for incoming online game messages to make sure they wait until
+    // we can receive new game events):
+    board.busyWaiting = true;
     const roll1 = Math.floor(Math.random() * 6) + 1;
     const roll2 = Math.floor(Math.random() * 6) + 1;
     const roll = Math.abs(roll1 - roll2);

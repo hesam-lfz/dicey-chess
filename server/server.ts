@@ -594,7 +594,6 @@ const closeStaleGameConnectionAndRemoveData = (
 
 // Removes any cached data on a game that's ended:
 const removeStaleGameData = (userId: string): void => {
-  console.log('removeStaleGameData', userId);
   const friendId =
     inProgressFriendGameInvitedFrom[userId] ||
     pendingGameFriendInviteRequestsFrom[userId];
