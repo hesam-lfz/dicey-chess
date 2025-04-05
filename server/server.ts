@@ -45,9 +45,10 @@ const gameTimeout = 1800000;
 // Timeout for waiting for a graceful closing of connection before a hard close:
 const pendingGameConnectionCloseTimeout = 20000;
 
-// FIXME: These caches need to go to db!!:
+// FIXME: These caches need to go to db:
 const pendingGameFriendInviteRequestsFrom: Record<string, string> = {};
 const pendingGameFriendInviteRequestsTo: Record<string, string> = {};
+
 const pendingGameConnections: Record<string, WebSocket> = {};
 const pendingGameFriendInviteRequestsClearTimeoutIds: Record<
   string,
@@ -59,8 +60,10 @@ const pendingGameDataCleanupTimerIds: Record<string, NodeJS.Timeout | null> =
   {};
 const inProgressGameCloseTimeoutIds: Record<string, NodeJS.Timeout | null> = {};
 
+// FIXME: These caches need to go to db:
 const gameConnectionPins: Record<string, string> = {};
 const inProgressFriendGameInvitedFrom: Record<string, string> = {};
+
 const inProgressGameConnections: Record<string, WebSocket> = {};
 
 const db = new pg.Pool({
@@ -159,7 +162,7 @@ app.get('/api/games', authMiddleware, async (req, res, next) => {
   try {
     const sql = `
       select *
-      from "games"
+      from "savedGames"
       where "userId" = $1
       order by "at" desc
     `;
@@ -206,7 +209,7 @@ app.post('/api/games', authMiddleware, async (req, res, next) => {
         'Params userId does not match userId in authentication.'
       );
     const sql = `
-      insert into "games" ("userId", "at", "duration", "opponent", "outcome", "moveHistory", "diceRollHistory", "userPlaysWhite")
+      insert into "savedGames" ("userId", "at", "duration", "opponent", "outcome", "moveHistory", "diceRollHistory", "userPlaysWhite")
         values ($1, $2, $3, $4, $5, $6, $7, $8)
         returning *
     `;
@@ -243,7 +246,7 @@ app.delete('/api/games', authMiddleware, async (req, res, next) => {
         'Params userId does not match userId in authentication.'
       );
     const sql = `
-      delete from "games"
+      delete from "savedGames"
         where "userId" = $1 and "at" = $2
         returning *
     `;

@@ -16,7 +16,7 @@ create table "public"."users" (
   unique ("username")
 );
 
-create table "public"."games" (
+create table "public"."savedGames" (
   "userId"      integer        not null,
   "at"      integer        not null,
   "duration"      integer        not null,
@@ -28,4 +28,13 @@ create table "public"."games" (
   primary key ("userId", "at")
 );
 
-alter table "games" add constraint "user_games" foreign key ("userId") references "users" ("userId");
+create table "public"."onlineGames" (
+  "userId"      integer        not null,
+  "friendId"      integer        not null,
+  "pending"        boolean           not null,
+  "pin"       text not null,
+  primary key ("userId")
+);
+
+alter table "savedGames" add constraint "user_saved_games" foreign key ("userId") references "users" ("userId");
+alter table "onlineGames" add constraint "user_online_games" foreign key ("userId") references "users" ("userId");
