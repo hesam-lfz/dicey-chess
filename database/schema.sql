@@ -33,8 +33,11 @@ create table "public"."onlineGames" (
   "friendId"      integer        not null,
   "pending"        boolean           not null,
   "pin"       text not null,
+  "at"      timestamptz(6) not null default now(),
   primary key ("userId")
 );
+-- Set up Cron job to clear any old data:
+--   delete from "onlineGames" where "at" < now() - interval '1 day'
 
 alter table "savedGames" add constraint "user_saved_games" foreign key ("userId") references "users" ("userId");
 alter table "onlineGames" add constraint "user_online_games" foreign key ("userId") references "users" ("userId");

@@ -87,6 +87,11 @@ if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
 const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
 
+// Retrieve any existing online game data from the database:
+
+// Delete any expired online game data from the database:
+// -- delete from "onlineGames" where "at" < now() - interval '1 day'
+
 const app = express();
 
 app.use(express.static(reactStaticDir));
@@ -315,9 +320,7 @@ app.get(
       const isRecheck = isRecheckStr === 'true';
       const requestingPlayerId = String(req.user!.userId);
       const priorRequestedFriendId =
-        await getOnlineGamePendingGameFriendInviteRequestsFrom(
-          requestingPlayerId
-        );
+        pendingGameFriendInviteRequestsFrom[requestingPlayerId];
       // If any pending prior request from user, cancel and refuse invite:
       if (!isRecheck && priorRequestedFriendId) {
         console.log('recheck!');
@@ -357,26 +360,16 @@ app.get(
       // Record the request:
       pendingGameFriendInviteRequestsFrom[requestingPlayerId] =
         requestedPlayerId;
+      pendingGameFriendInviteRequestsTo[requestedPlayerId] = requestingPlayerId;
       await databaseInsertPendingOnlineGame(
         requestingPlayerId,
         requestedPlayerId
       );
-      pendingGameFriendInviteRequestsTo[requestedPlayerId] = requestingPlayerId;
-      await databaseInsertPendingOnlineGame(
-        requestedPlayerId,
-        requestingPlayerId
-      );
       // status = 0 means both players did mutual invite,
       // status = 1 means only 1 way so far:
       const status =
-        // pendingGameFriendInviteRequestsFrom[requestedPlayerId] &&
-        (await getOnlineGamePendingGameFriendInviteRequestsFrom(
-          requestedPlayerId
-        )) &&
-        // pendingGameFriendInviteRequestsTo[requestingPlayerId]
-        (await getOnlineGamePendingGameFriendInviteRequestsFrom(
-          requestingPlayerId
-        ))
+        pendingGameFriendInviteRequestsFrom[requestedPlayerId] &&
+        pendingGameFriendInviteRequestsTo[requestingPlayerId]
           ? 0
           : 1;
       // If handshake is complete (both players have invited each other),
@@ -732,6 +725,7 @@ const getOnlineGamePin = async (userId: string): Promise<string> => {
   return pin;
 };
 
+/*
 const getOnlineGamePendingGameFriendInviteRequestsFrom = async (
   userId: string
 ): Promise<string> => {
@@ -744,20 +738,36 @@ const getOnlineGamePendingGameFriendInviteRequestsFrom = async (
   }
   return friendId;
 };
+*/
 
+// If the online game data isn't already in database, it'll create entries
+// (one for each 2-way invite):
 const databaseInsertPendingOnlineGame = async (
   userId: string,
   friendId: string
 ): Promise<boolean> => {
   try {
-    const sql = `
+    const sql1 = `
+    select "userId", "friendId"
+      from "onlineGames"
+     where "userId" = $1 or "userId" = $2
+  `;
+    const params1 = [+userId];
+    const result1 = await db.query<OnlineGame>(sql1, params1);
+    const [entry] = result1.rows;
+    if (entry) {
+      console.log('blah');
+      return true;
+    } else {
+      const sql2 = `
       insert into "onlineGames" ("userId", "friendId", "pending", "pin")
         values ($1, $2, $3, $4)
         returning *
-    `;
-    const params = [+userId, +friendId, true, ''];
-    await db.query<OnlineGame>(sql, params);
-    return true;
+      `;
+      const params2 = [+userId, +friendId, true, ''];
+      await db.query<OnlineGame>(sql2, params2);
+      return true;
+    }
   } catch (err) {
     console.log('db error', err);
     return false;
