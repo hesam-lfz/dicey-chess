@@ -32,6 +32,13 @@ type SavedGame = {
   userPlaysWhite: boolean;
 };
 
+type OnlineGame = {
+  userId: number;
+  friendId: number;
+  pending: boolean;
+  pin: string;
+};
+
 type InviteRequestResponse = {
   status: number;
   pin?: string;
@@ -308,7 +315,9 @@ app.get(
       const isRecheck = isRecheckStr === 'true';
       const requestingPlayerId = String(req.user!.userId);
       const priorRequestedFriendId =
-        pendingGameFriendInviteRequestsFrom[requestingPlayerId];
+        await getOnlineGamePendingGameFriendInviteRequestsFrom(
+          requestingPlayerId
+        );
       // If any pending prior request from user, cancel and refuse invite:
       if (!isRecheck && priorRequestedFriendId) {
         console.log('recheck!');
@@ -348,12 +357,26 @@ app.get(
       // Record the request:
       pendingGameFriendInviteRequestsFrom[requestingPlayerId] =
         requestedPlayerId;
+      await databaseInsertPendingOnlineGame(
+        requestingPlayerId,
+        requestedPlayerId
+      );
       pendingGameFriendInviteRequestsTo[requestedPlayerId] = requestingPlayerId;
+      await databaseInsertPendingOnlineGame(
+        requestedPlayerId,
+        requestingPlayerId
+      );
       // status = 0 means both players did mutual invite,
       // status = 1 means only 1 way so far:
       const status =
-        pendingGameFriendInviteRequestsFrom[requestedPlayerId] &&
-        pendingGameFriendInviteRequestsTo[requestingPlayerId]
+        // pendingGameFriendInviteRequestsFrom[requestedPlayerId] &&
+        (await getOnlineGamePendingGameFriendInviteRequestsFrom(
+          requestedPlayerId
+        )) &&
+        // pendingGameFriendInviteRequestsTo[requestingPlayerId]
+        (await getOnlineGamePendingGameFriendInviteRequestsFrom(
+          requestingPlayerId
+        ))
           ? 0
           : 1;
       // If handshake is complete (both players have invited each other),
@@ -382,10 +405,15 @@ app.get(
       if (status === 0) {
         responseData.pin = generateConnectionPin();
         gameConnectionPins[requestingPlayerId] = responseData.pin!;
+        await databaseStoreOnlineGamePin(requestingPlayerId, responseData.pin!);
         // Timeout game after a while:
-        inProgressGameCloseTimeoutIds[requestingPlayerId] = setTimeout(() => {
-          delete gameConnectionPins[requestingPlayerId];
-        }, gameTimeout);
+        inProgressGameCloseTimeoutIds[requestingPlayerId] = setTimeout(
+          async () => {
+            delete gameConnectionPins[requestingPlayerId];
+            await databaseDeleteOnlineGame(requestingPlayerId);
+          },
+          gameTimeout
+        );
       }
       res.json(responseData);
     } catch (err) {
@@ -423,7 +451,7 @@ wsServer.on('connection', (ws) => {
     pendingGameCloseTimeoutId2s[theUserId] = closeStaleGameConnection(ws);
   }, pendingGameConnectionTimeout);
 
-  ws.on('message', (message) => {
+  ws.on('message', async (message) => {
     console.log(`Received: ${message}`);
     const { userId, pin, type, msg } = JSON.parse(message.toString());
     if (!userId) throw new ClientError(400, 'Websocket message missing userId');
@@ -434,7 +462,7 @@ wsServer.on('connection', (ws) => {
     )[userId];
     if (!friendId)
       throw new ClientError(400, 'There is no pending invite from userId');
-    if (!(pin && gameConnectionPins[userId] === pin))
+    if (!(pin && (await getOnlineGamePin(userId)) === pin))
       throw new ClientError(400, 'Websocket message with invalid pin');
     if (type === 'connection') {
       if (msg === 'open') {
@@ -596,7 +624,7 @@ const closeStaleGameConnectionAndRemoveData = (
 };
 
 // Removes any cached data on a game that's ended:
-const removeStaleGameData = (userId: string): void => {
+const removeStaleGameData = async (userId: string): Promise<void> => {
   const friendId =
     inProgressFriendGameInvitedFrom[userId] ||
     pendingGameFriendInviteRequestsFrom[userId];
@@ -608,6 +636,7 @@ const removeStaleGameData = (userId: string): void => {
   delete inProgressFriendGameInvitedFrom[userId];
   delete inProgressGameCloseTimeoutIds[userId];
   delete gameConnectionPins[userId];
+  await databaseDeleteOnlineGame(userId);
   if (friendId) {
     delete pendingGameFriendInviteRequestsTo[friendId];
     delete pendingGameFriendInviteRequestsFrom[friendId];
@@ -617,6 +646,7 @@ const removeStaleGameData = (userId: string): void => {
     delete inProgressGameConnections[friendId];
     delete inProgressGameCloseTimeoutIds[friendId];
     delete gameConnectionPins[friendId];
+    await databaseDeleteOnlineGame(friendId);
   }
   cancelFriendInviteRequest(userId, friendId);
 };
@@ -690,4 +720,99 @@ const cacheLog = (): void => {
     'gameConnectionPins',
     gameConnectionPins
   );
+};
+
+// Gets online game pin and caches retrieved pin:
+const getOnlineGamePin = async (userId: string): Promise<string> => {
+  let pin = gameConnectionPins[userId];
+  if (!pin) {
+    pin = await databaseGetOnlineGamePin(userId);
+    gameConnectionPins[userId] = pin;
+  }
+  return pin;
+};
+
+const getOnlineGamePendingGameFriendInviteRequestsFrom = async (
+  userId: string
+): Promise<string> => {
+  let friendId = pendingGameFriendInviteRequestsFrom[userId];
+  if (!friendId) {
+    friendId = await databaseGetOnlineGamePendingGameFriendInviteRequestsFrom(
+      userId
+    );
+    pendingGameFriendInviteRequestsFrom[userId] = friendId;
+  }
+  return friendId;
+};
+
+const databaseInsertPendingOnlineGame = async (
+  userId: string,
+  friendId: string
+): Promise<boolean> => {
+  try {
+    const sql = `
+      insert into "onlineGames" ("userId", "friendId", "pending", "pin")
+        values ($1, $2, $3, $4)
+        returning *
+    `;
+    const params = [+userId, +friendId, true, ''];
+    await db.query<OnlineGame>(sql, params);
+    return true;
+  } catch (err) {
+    console.log('db error', err);
+    return false;
+  }
+};
+
+const databaseDeleteOnlineGame = async (userId: string): Promise<boolean> => {
+  try {
+    const sql = `
+      delete from "onlineGames"
+        where "userId" = $1
+        returning *
+    `;
+    const params = [+userId];
+    await db.query<OnlineGame>(sql, params);
+    return true;
+  } catch (err) {
+    console.log('db error', err);
+    return false;
+  }
+};
+
+const databaseStoreOnlineGamePin = async (
+  userId: string,
+  pin: string
+): Promise<boolean> => {
+  try {
+    const sql = `
+      update "onlineGames"
+        set "pin" = $2
+        where "userId" = $1
+        returning *
+    `;
+    const params = [+userId, pin];
+    await db.query<OnlineGame>(sql, params);
+    return true;
+  } catch (err) {
+    console.log('db error', err);
+    return false;
+  }
+};
+
+const databaseGetOnlineGamePin = async (userId: string): Promise<string> => {
+  try {
+    const sql = `
+      select "pin"
+      from "onlineGames"
+      where "userId" = $1
+    `;
+    const params = [+userId];
+    const result = await db.query(sql, params);
+    const [pin] = result.rows;
+    return pin;
+  } catch (err) {
+    console.log('db error', err);
+    return '';
+  }
 };
