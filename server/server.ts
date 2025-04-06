@@ -52,7 +52,6 @@ const gameTimeout = 1800000;
 // Timeout for waiting for a graceful closing of connection before a hard close:
 const pendingGameConnectionCloseTimeout = 20000;
 
-// FIXME: These caches need to go to db:
 const pendingGameFriendInviteRequestsFrom: Record<string, string> = {};
 const pendingGameFriendInviteRequestsTo: Record<string, string> = {};
 
@@ -67,7 +66,6 @@ const pendingGameDataCleanupTimerIds: Record<string, NodeJS.Timeout | null> =
   {};
 const inProgressGameCloseTimeoutIds: Record<string, NodeJS.Timeout | null> = {};
 
-// FIXME: These caches need to go to db:
 const gameConnectionPins: Record<string, string> = {};
 const inProgressFriendGameInvitedFrom: Record<string, string> = {};
 
@@ -86,11 +84,6 @@ if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
 // Create paths for static directories
 const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
-
-// Retrieve any existing online game data from the database:
-
-// Delete any expired online game data from the database:
-// -- delete from "onlineGames" where "at" < now() - interval '1 day'
 
 const app = express();
 
@@ -323,8 +316,11 @@ app.get(
         pendingGameFriendInviteRequestsFrom[requestingPlayerId];
       // If any pending prior request from user, cancel and refuse invite:
       if (!isRecheck && priorRequestedFriendId) {
-        console.log('recheck!');
-        cancelFriendInviteRequest(requestingPlayerId, priorRequestedFriendId);
+        await cancelFriendInviteRequest(
+          requestingPlayerId,
+          priorRequestedFriendId,
+          true
+        );
         throw new ClientError(
           400,
           'There is already a pending friend invite request from the requester'
@@ -358,13 +354,16 @@ app.get(
           'There is already a pending friend invite request for the requested'
         );
       // Record the request:
-      pendingGameFriendInviteRequestsFrom[requestingPlayerId] =
-        requestedPlayerId;
-      pendingGameFriendInviteRequestsTo[requestedPlayerId] = requestingPlayerId;
-      await databaseInsertPendingOnlineGame(
-        requestingPlayerId,
-        requestedPlayerId
-      );
+      if (!isRecheck) {
+        pendingGameFriendInviteRequestsFrom[requestingPlayerId] =
+          requestedPlayerId;
+        await databaseInsertPendingOnlineGame(
+          requestingPlayerId,
+          requestedPlayerId
+        );
+        pendingGameFriendInviteRequestsTo[requestedPlayerId] =
+          requestingPlayerId;
+      }
       // status = 0 means both players did mutual invite,
       // status = 1 means only 1 way so far:
       const status =
@@ -388,8 +387,12 @@ app.get(
       // now add (or re-add) the timer:
       pendingGameFriendInviteRequestsClearTimeoutIds[requestingPlayerId] =
         setTimeout(
-          () =>
-            cancelFriendInviteRequest(requestingPlayerId, requestedPlayerId),
+          async () =>
+            await cancelFriendInviteRequest(
+              requestingPlayerId,
+              requestedPlayerId,
+              true
+            ),
           pendingGameConnectionTimeout
         );
       // return status of request:
@@ -455,7 +458,7 @@ wsServer.on('connection', (ws) => {
     )[userId];
     if (!friendId)
       throw new ClientError(400, 'There is no pending invite from userId');
-    if (!(pin && (await getOnlineGamePin(userId)) === pin))
+    if (!(pin && gameConnectionPins[userId] === pin))
       throw new ClientError(400, 'Websocket message with invalid pin');
     if (type === 'connection') {
       if (msg === 'open') {
@@ -515,13 +518,14 @@ wsServer.on('connection', (ws) => {
             clearTimeout(tid2Friend);
             delete pendingGameCloseTimeoutId2s[friendId];
           }
-          cancelFriendInviteRequest(userId, friendId);
+          await cancelFriendInviteRequest(userId, friendId, false);
           delete pendingGameConnections[userId];
           delete pendingGameConnections[friendId];
           delete pendingGameFriendInviteRequestsFrom[userId];
           delete pendingGameFriendInviteRequestsTo[friendId];
           inProgressFriendGameInvitedFrom[userId] = friendId;
           inProgressFriendGameInvitedFrom[friendId] = userId;
+          await databaseSetOnlineGameAsInProgress(userId, friendId);
           inProgressGameConnections[userId] = ws;
           inProgressGameConnections[friendId] = friendWs;
           // Timeout game after a while:
@@ -570,20 +574,29 @@ wsServer.on('connection', (ws) => {
 });
 
 // Removes friend invite request (called after connection established or invite timeouts):
-const cancelFriendInviteRequest = (
+const cancelFriendInviteRequest = async (
   requestingUserId: string,
-  requestedUserId: string | undefined
-): void => {
-  // console.log('cancelFriendInviteRequest', requestingUserId, requestedUserId);
+  requestedUserId: string | undefined,
+  deleteDatabaseEntry: boolean
+): Promise<void> => {
+  console.log(
+    'cancelFriendInviteRequest',
+    requestingUserId,
+    requestedUserId,
+    deleteDatabaseEntry
+  );
   const priorRequestedFriendId =
     pendingGameFriendInviteRequestsFrom[requestingUserId];
   if (priorRequestedFriendId) {
     delete pendingGameFriendInviteRequestsFrom[requestingUserId];
+    if (deleteDatabaseEntry) await databaseDeleteOnlineGame(requestingUserId);
     if (
       requestedUserId &&
       pendingGameFriendInviteRequestsTo[requestedUserId] === requestingUserId
-    )
+    ) {
       delete pendingGameFriendInviteRequestsTo[requestedUserId];
+      if (deleteDatabaseEntry) await databaseDeleteOnlineGame(requestedUserId);
+    }
   }
   let timeoutId =
     pendingGameFriendInviteRequestsClearTimeoutIds[requestingUserId];
@@ -641,7 +654,7 @@ const removeStaleGameData = async (userId: string): Promise<void> => {
     delete gameConnectionPins[friendId];
     await databaseDeleteOnlineGame(friendId);
   }
-  cancelFriendInviteRequest(userId, friendId);
+  await cancelFriendInviteRequest(userId, friendId, false);
 };
 
 // Starts the process of forcing a game connection to close, forcing a
@@ -715,33 +728,8 @@ const cacheLog = (): void => {
   );
 };
 
-// Gets online game pin and caches retrieved pin:
-const getOnlineGamePin = async (userId: string): Promise<string> => {
-  let pin = gameConnectionPins[userId];
-  if (!pin) {
-    pin = await databaseGetOnlineGamePin(userId);
-    gameConnectionPins[userId] = pin;
-  }
-  return pin;
-};
-
-/*
-const getOnlineGamePendingGameFriendInviteRequestsFrom = async (
-  userId: string
-): Promise<string> => {
-  let friendId = pendingGameFriendInviteRequestsFrom[userId];
-  if (!friendId) {
-    friendId = await databaseGetOnlineGamePendingGameFriendInviteRequestsFrom(
-      userId
-    );
-    pendingGameFriendInviteRequestsFrom[userId] = friendId;
-  }
-  return friendId;
-};
-*/
-
-// If the online game data isn't already in database, it'll create entries
-// (one for each 2-way invite):
+// If the online game data isn't already in database, it'll create entry
+// (one way invite):
 const databaseInsertPendingOnlineGame = async (
   userId: string,
   friendId: string
@@ -750,14 +738,14 @@ const databaseInsertPendingOnlineGame = async (
     const sql1 = `
     select "userId", "friendId"
       from "onlineGames"
-     where "userId" = $1 or "userId" = $2
+     where "userId" = $1
   `;
     const params1 = [+userId];
     const result1 = await db.query<OnlineGame>(sql1, params1);
     const [entry] = result1.rows;
     if (entry) {
-      console.log('blah');
-      return true;
+      console.log('pending online entry already exists');
+      return false;
     } else {
       const sql2 = `
       insert into "onlineGames" ("userId", "friendId", "pending", "pin")
@@ -774,6 +762,29 @@ const databaseInsertPendingOnlineGame = async (
   }
 };
 
+// Modifies pending column to false in an online game db entry
+// (called when game is starting and no longer pending):
+const databaseSetOnlineGameAsInProgress = async (
+  userId: string,
+  friendId: string
+): Promise<boolean> => {
+  try {
+    const sql = `
+      update "onlineGames"
+        set "pending" = $3
+        where "userId" = $1 or "userId" = $2
+        returning *
+    `;
+    const params = [+userId, +friendId, false];
+    await db.query<OnlineGame>(sql, params);
+    return true;
+  } catch (err) {
+    console.log('db error', err);
+    return false;
+  }
+};
+
+// Deletes online game entry from database:
 const databaseDeleteOnlineGame = async (userId: string): Promise<boolean> => {
   try {
     const sql = `
@@ -790,6 +801,7 @@ const databaseDeleteOnlineGame = async (userId: string): Promise<boolean> => {
   }
 };
 
+// Sets the pin column for online game entry:
 const databaseStoreOnlineGamePin = async (
   userId: string,
   pin: string
@@ -810,19 +822,59 @@ const databaseStoreOnlineGamePin = async (
   }
 };
 
-const databaseGetOnlineGamePin = async (userId: string): Promise<string> => {
+// Gets current entries for online games currently stored in the database:
+const databaseGetOnlineGames = async (): Promise<OnlineGame[]> => {
   try {
     const sql = `
-      select "pin"
+    select "userId", "friendId", "pending", "pin"
       from "onlineGames"
-      where "userId" = $1
-    `;
-    const params = [+userId];
-    const result = await db.query(sql, params);
-    const [pin] = result.rows;
-    return pin;
+  `;
+    const result = await db.query<OnlineGame>(sql);
+    console.log('databaseGetOnlineGames', result.rows);
+    return result.rows;
   } catch (err) {
     console.log('db error', err);
-    return '';
+    return [];
   }
 };
+
+// Delete any expired online game data from the database:
+const databaseDeleteExpiredOnlineGames = async (): Promise<OnlineGame[]> => {
+  try {
+    const sql = `
+    delete from "onlineGames"
+      where "at" < now() - interval '1 day'
+      returning *
+    `;
+    const result = await db.query<OnlineGame>(sql);
+    console.log('databaseDeleteExpiredOnlineGames', result.rows);
+    return result.rows;
+  } catch (err) {
+    console.log('db error', err);
+    return [];
+  }
+};
+
+// Database operations that we want run at the start of server process:
+setTimeout(async () => {
+  // Retrieve any existing online game data from the database:
+  const onlineGames: OnlineGame[] = await databaseGetOnlineGames();
+  console.log('retrieved onlineGames:', onlineGames);
+
+  onlineGames.forEach((g: OnlineGame) => {
+    const { userId, friendId, pending, pin } = g;
+    const theUserId = String(userId);
+    const theFriendId = String(friendId);
+    gameConnectionPins[theUserId] = pin;
+    if (pending) {
+      pendingGameFriendInviteRequestsFrom[theUserId] = theFriendId;
+      pendingGameFriendInviteRequestsTo[theFriendId] = theUserId;
+    } else inProgressFriendGameInvitedFrom[theUserId] = theFriendId;
+  });
+  cacheLog();
+
+  // Delete any expired online game data from the database:
+  const expiredOnlineGames: OnlineGame[] =
+    await databaseDeleteExpiredOnlineGames();
+  console.log('expired & deleted onlineGames:', expiredOnlineGames);
+}, 1000);
