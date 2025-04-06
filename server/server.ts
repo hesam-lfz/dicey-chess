@@ -373,12 +373,14 @@ app.get(
           : 1;
       // If handshake is complete (both players have invited each other),
       // establish a connection:
+      /*
       console.log(
         'current requests from',
         JSON.stringify(pendingGameFriendInviteRequestsFrom),
         'current requests to',
         JSON.stringify(pendingGameFriendInviteRequestsTo)
       );
+      */
       // timeout pending request after 5 min:
       // first clear if there's already a timer:
       const timeoutId =
@@ -448,7 +450,7 @@ wsServer.on('connection', (ws) => {
   }, pendingGameConnectionTimeout);
 
   ws.on('message', async (message) => {
-    console.log(`Received: ${message}`);
+    // console.log(`Received: ${message}`);
     const { userId, pin, type, msg } = JSON.parse(message.toString());
     if (!userId) throw new ClientError(400, 'Websocket message missing userId');
     const friendId = (
@@ -579,12 +581,6 @@ const cancelFriendInviteRequest = async (
   requestedUserId: string | undefined,
   deleteDatabaseEntry: boolean
 ): Promise<void> => {
-  console.log(
-    'cancelFriendInviteRequest',
-    requestingUserId,
-    requestedUserId,
-    deleteDatabaseEntry
-  );
   const priorRequestedFriendId =
     pendingGameFriendInviteRequestsFrom[requestingUserId];
   if (priorRequestedFriendId) {
@@ -744,7 +740,7 @@ const databaseInsertPendingOnlineGame = async (
     const result1 = await db.query<OnlineGame>(sql1, params1);
     const [entry] = result1.rows;
     if (entry) {
-      console.log('pending online entry already exists');
+      // console.log('pending online entry already exists');
       return false;
     } else {
       const sql2 = `
@@ -830,7 +826,7 @@ const databaseGetOnlineGames = async (): Promise<OnlineGame[]> => {
       from "onlineGames"
   `;
     const result = await db.query<OnlineGame>(sql);
-    console.log('databaseGetOnlineGames', result.rows);
+    // console.log('databaseGetOnlineGames', result.rows);
     return result.rows;
   } catch (err) {
     console.log('db error', err);
@@ -847,7 +843,7 @@ const databaseDeleteExpiredOnlineGames = async (): Promise<OnlineGame[]> => {
       returning *
     `;
     const result = await db.query<OnlineGame>(sql);
-    console.log('databaseDeleteExpiredOnlineGames', result.rows);
+    // console.log('databaseDeleteExpiredOnlineGames', result.rows);
     return result.rows;
   } catch (err) {
     console.log('db error', err);
@@ -859,7 +855,7 @@ const databaseDeleteExpiredOnlineGames = async (): Promise<OnlineGame[]> => {
 setTimeout(async () => {
   // Retrieve any existing online game data from the database:
   const onlineGames: OnlineGame[] = await databaseGetOnlineGames();
-  console.log('retrieved onlineGames:', onlineGames);
+  // console.log('retrieved onlineGames:', onlineGames);
 
   onlineGames.forEach((g: OnlineGame) => {
     const { userId, friendId, pending, pin } = g;
@@ -876,5 +872,5 @@ setTimeout(async () => {
   // Delete any expired online game data from the database:
   const expiredOnlineGames: OnlineGame[] =
     await databaseDeleteExpiredOnlineGames();
-  console.log('expired & deleted onlineGames:', expiredOnlineGames);
+  // console.log('expired & deleted onlineGames:', expiredOnlineGames);
 }, 1000);

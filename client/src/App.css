@@ -229,6 +229,12 @@ dialog button {
   font-size: 1em;
 }
 
+.modal-actions > .input-element-container > label {
+  margin: 0 auto;
+  display: inline-flex;
+  flex-direction: column;
+}
+
 .compact-p p {
   margin: 0;
 }
