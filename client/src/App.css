@@ -239,6 +239,13 @@ dialog button {
   margin: 0;
 }
 
+.app-version {
+  padding: 0 5px;
+  border-width: thin;
+  border-style: solid;
+  border-color: #80808070;
+}
+
 /* animate slide in zoom a bit */
 .shadow-grow-and-back {
   animation-name: shadow-grow-and-back;

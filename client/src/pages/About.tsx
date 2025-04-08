@@ -1,3 +1,4 @@
+import { AppVersion } from '../App';
 import { diceSVGs } from '../lib';
 
 export function About() {
@@ -6,6 +7,7 @@ export function About() {
       <div className="m-0 h-screen bg-center bg-no-repeat bg-[url('/hylian-emblem.svg')]">
         <div className="m-auto pt-20 w-1/2 text-center text-2xl rainbow-colored">
           <h3 className="header-logo-name">DICEY CHESS</h3>
+          <span className="app-version">V{AppVersion}</span>
         </div>
         <h2>Rules</h2>
         <div className="dotted-border">
