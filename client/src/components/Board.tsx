@@ -202,6 +202,10 @@ export function Board({
           currentBoardData.currMoveFromSq,
           'movingToSq',
           currentBoardData.currMoveToSq,
+          'currPrevMoveFromSq',
+          currPrevMoveFromSq,
+          'currPrevMoveToSq',
+          currPrevMoveToSq,
           'prevMoveFromSq',
           prevMoveFromSq,
           'prevMoveToSq',
@@ -282,9 +286,10 @@ export function Board({
       setGameId(currGameId);
       setReplayModeOn(currReplayModeOn);
       setReplayStepMove(currReplayStepMove);
-      if (replayModeOn || currPrevMoveFromSq)
-        setPrevMoveFromSq(currPrevMoveFromSq);
-      if (replayModeOn || currPrevMoveToSq) setPrevMoveToSq(currPrevMoveToSq);
+      //if (replayModeOn || currPrevMoveFromSq)
+      setPrevMoveFromSq(currPrevMoveFromSq);
+      //if (replayModeOn || currPrevMoveToSq)
+      setPrevMoveToSq(currPrevMoveToSq);
       setUserPlaysColor(currUserPlaysColor);
       setIsMovingDisabled(currIsMovingDisabled);
     };
