@@ -185,9 +185,7 @@ export function Board({
     const run = async () => {
       if (DebugOn) {
         const smh = board.flatSquareMoveHistory;
-        const fmh = board.flatBoardFenHistory;
         board.flatSquareMoveHistory = [];
-        board.flatBoardFenHistory = [];
         console.log(
           'rendered Board',
           'currentGameSettings',
@@ -227,7 +225,6 @@ export function Board({
           JSON.stringify(board)
         );
         board.flatSquareMoveHistory = smh;
-        board.flatBoardFenHistory = fmh;
       }
 
       // if the 'from' and 'to' of a move were just determined, ready to execute the move:

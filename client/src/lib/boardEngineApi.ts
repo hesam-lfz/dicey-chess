@@ -122,7 +122,6 @@ export type Board = {
   history: string[][];
   flatSanMoveHistory: string[];
   flatSquareMoveHistory: Move[];
-  flatBoardFenHistory: string[];
   diceRollHistory: number[];
   historyNumMoves: number;
   replayCurrentFlatIndex: number;
@@ -219,7 +218,6 @@ const initBoard: Board = {
   history: [[]],
   flatSanMoveHistory: [],
   flatSquareMoveHistory: [],
-  flatBoardFenHistory: [],
   diceRollHistory: [],
   historyNumMoves: 0,
   replayCurrentFlatIndex: -1,
@@ -339,7 +337,6 @@ export const resetBoard = (
   board = { ...initBoard };
   board.history = [[]];
   board.flatSanMoveHistory = [];
-  board.flatBoardFenHistory = [];
   board.flatSquareMoveHistory = [];
   board.diceRollHistory = [];
   board.gameStartTime = Math.floor(Date.now() / 1000);
@@ -358,7 +355,6 @@ export const resetBoard = (
     },
     false
   );
-  board.flatBoardFenHistory.push(boardEngine.fen());
   setNewCurrentGameSettings();
   // close the chess AI engine socket if we have one running currently:
   if (chessAiEngine_socket) chessAiEngineApi_closeChessAiEngine_socket();
@@ -406,7 +402,6 @@ export function initBoardForGameReplay(
   const flatSanMoveHistory = game.moveHistory.split(',');
   board.flatSanMoveHistory = flatSanMoveHistory;
   board.historyNumMoves = flatSanMoveHistory.length;
-  const flatBoardFenHistory = board.flatBoardFenHistory;
   const flatSquareMoveHistory: Move[] = [];
   board.flatSquareMoveHistory = flatSquareMoveHistory;
   const historyNumDiceRolls = diceRollHistory.length;
@@ -421,9 +416,7 @@ export function initBoardForGameReplay(
       board.history.push(currMoveSet);
       if (diceRoll === 0) {
         // roll was 0 and turn need to be given back to the other player:
-        flatBoardFenHistory.pop();
         swapTurn(setNewCurrentBoardData);
-        flatBoardFenHistory.push(boardEngine.fen());
       } else {
         while (currTurnMoveIdx < diceRoll) {
           // make the next move in the current turn move set:
@@ -433,14 +426,13 @@ export function initBoardForGameReplay(
           if (currTurnMoveIdx < diceRoll - 1) swapTurn(setNewCurrentBoardData);
           currMoveSet.push(move.san);
           flatSquareMoveHistory.push(move);
-          flatBoardFenHistory.push(boardEngine.fen());
           currTurnMoveIdx += 1;
         }
       }
       currDiceRollIdx += 1;
     }
     // Move the game back to beginning:
-    boardEngine = new Chess(board.flatBoardFenHistory[1]);
+    boardEngine = new Chess(board.flatSquareMoveHistory[0].after);
     setNewCurrentBoardData({ turn: boardEngine.turn() }, false);
     if (board.diceRollHistory[0] > 1) swapTurn(setNewCurrentBoardData);
     board.replayCurrentFlatIndex = 0;
@@ -596,7 +588,6 @@ export function makeMove(
     swapTurn(setNewCurrentBoardData);
   }
   board.replayCurrentFlatIndex += 1;
-  board.flatBoardFenHistory.push(boardEngine.fen());
   board.flatSquareMoveHistory.push(move);
 
   // After each move we need to check for game over because if player has moves left
@@ -812,10 +803,7 @@ export function promptUserIfPromotionMove(
   const piece = getSquarePiece(fromSquare)!;
   if (piece.type === PAWN) {
     const toSquareRank = getSquareRank(toSquare);
-    if (turn === WHITE ? toSquareRank === 8 : toSquareRank === 1) {
-      //piece.type = QUEEN;
-      return QUEEN;
-    }
+    if (turn === WHITE ? toSquareRank === 8 : toSquareRank === 1) return QUEEN;
   }
   return undefined;
 }
@@ -830,12 +818,9 @@ export function boardReplayStepMove(
 ): Move | null {
   const newReplayCurrentFlatIndex = board.replayCurrentFlatIndex + step;
   board.replayCurrentFlatIndex = newReplayCurrentFlatIndex;
-  setBoard(
-    setNewCurrentBoardData,
-    board.flatBoardFenHistory[newReplayCurrentFlatIndex]
-  );
   const move: Move | null =
     board.flatSquareMoveHistory[newReplayCurrentFlatIndex] || null;
+  setBoard(setNewCurrentBoardData, move.before);
   if (move) boardEngine.move(move);
   return move;
 }
