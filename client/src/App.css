@@ -304,7 +304,7 @@ dialog button {
 }
 
 /*
-	Portrait Screen
+	Small Device Portrait Screen
 */
 @media screen and (orientation: portrait) {
   #root {
@@ -339,5 +339,22 @@ dialog button {
 
   .mobile-line-separator {
     display: inline-block;
+  }
+}
+
+/*
+	Tablet Device Portrait Screen
+*/
+@media only screen and (width >= 768px) and (width <= 1024px) and (orientation: portrait) {
+  body {
+    font-size: x-large;
+  }
+
+  .side-panel span {
+    font-size: calc(1.5 * 1.2rem);
+  }
+
+  .small {
+    font-size: medium;
   }
 }

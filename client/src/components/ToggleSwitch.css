@@ -92,7 +92,7 @@
 }
 
 /*
-	Portrait Screen
+	Small Device Portrait Screen
 */
 @media screen and (orientation: portrait) {
   .toggle-switch-container {

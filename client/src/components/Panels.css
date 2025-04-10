@@ -126,7 +126,7 @@
 }
 
 /*
-	Portrait Screen
+	Small Device Portrait Screen
 */
 @media screen and (orientation: portrait) {
   .main-panel {
@@ -159,5 +159,14 @@
     font-size: smaller;
     margin-top: 50px;
     padding: 1px;
+  }
+}
+
+/*
+	Tablet Device Portrait Screen
+*/
+@media only screen and (width >= 768px) and (width <= 1024px) and (orientation: portrait) {
+  .dice-icon {
+    width: calc(2.5 * 5vw);
   }
 }

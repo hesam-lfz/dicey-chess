@@ -84,7 +84,7 @@
 }
 
 /*
-	Portrait Screen
+	Small Device Portrait Screen
 */
 @media screen and (orientation: portrait) {
   .dice-area {
@@ -94,5 +94,22 @@
   .dice-box-icon {
     width: calc(4vw * 2.5);
     margin: calc(1vw * 2.5);
+  }
+}
+
+/*
+	Tablet Device Portrait Screen
+*/
+@media only screen and (width >= 768px) and (width <= 1024px) and (orientation: portrait) {
+  .player-turn-title-box span {
+    font-size: calc(1.5 * 1.5rem) !important;
+  }
+
+  .roll-dice-button {
+    min-width: 205px;
+  }
+
+  .dice-area {
+    height: 240px;
   }
 }
