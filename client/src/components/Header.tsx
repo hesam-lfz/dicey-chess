@@ -69,7 +69,8 @@ export function Header() {
                   <span
                     onClick={() => {
                       handleSignOut();
-                      navigate(AppSubdomain);
+                      //navigate(AppSubdomain);
+                      navigateIfBoardNotBusy(AppSubdomain);
                     }}>
                     {'Sign out '}
                     <span className="small">
