@@ -631,10 +631,6 @@ export function handleDiceRoll(
   roll2: number,
   isOnlineGameRemoteRoll: boolean = false
 ): void {
-  // Mark game board busy as it processes the dice being rolled (this is being
-  // checked for incoming online game messages to make sure they wait until
-  // we can receive new game events):
-  //board.busyWaiting = true;
   board.diceRollHistory.push(roll);
   setNewCurrentBoardData(
     {

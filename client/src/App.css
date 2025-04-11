@@ -145,6 +145,10 @@ nav li {
   align-items: center;
 }
 
+nav li .link-span {
+  font-weight: 500;
+}
+
 .justify-self-start {
   justify-self: flex-start;
 }

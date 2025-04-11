@@ -6,8 +6,15 @@ import { AppSubdomain } from '../App';
 import { shorten } from '../lib';
 
 export function Header() {
-  const { user, handleSignOut } = useCurrentGameContext();
+  const { user, handleSignOut, currentBoardData } = useCurrentGameContext();
   const navigate = useNavigate();
+
+  // To prevent navigation to different pages mess up the board when it's
+  // busy making moves (by player or AI):
+  function navigateIfBoardNotBusy(to: string): void {
+    if (currentBoardData.busyWaiting) return;
+    navigate(to);
+  }
 
   return (
     <>
@@ -20,7 +27,18 @@ export function Header() {
               </li>
               <hr className="mobile-line-separator" />
               <li className="inline-block">
-                <Link to={AppSubdomain + 'about'}>About</Link>
+                {/*
+                <Link to={AppSubdomain + 'about'} className={linkClassName}>
+                  About
+                </Link>
+                */}
+                <span
+                  className="link-span"
+                  onClick={() =>
+                    navigateIfBoardNotBusy(AppSubdomain + 'about')
+                  }>
+                  About
+                </span>
               </li>
             </ul>
           </nav>
@@ -34,7 +52,16 @@ export function Header() {
           <nav>
             <ul>
               <li className="inline-block">
-                <Link to={AppSubdomain + 'settings'}>Settings</Link>
+                {
+                  //<Link to={AppSubdomain + 'settings'}>Settings</Link>
+                }
+                <span
+                  className="link-span"
+                  onClick={() =>
+                    navigateIfBoardNotBusy(AppSubdomain + 'settings')
+                  }>
+                  Settings
+                </span>
               </li>
               <hr className="mobile-line-separator" />
               <li className="inline-block">
@@ -50,7 +77,14 @@ export function Header() {
                     </span>
                   </span>
                 ) : (
-                  <Link to={AppSubdomain + 'signin'}>Sign in</Link>
+                  //<Link to={AppSubdomain + 'signin'}>Sign in</Link>
+                  <span
+                    className="link-span"
+                    onClick={() =>
+                      navigateIfBoardNotBusy(AppSubdomain + 'signin')
+                    }>
+                    Sign in
+                  </span>
                 )}
               </li>
             </ul>

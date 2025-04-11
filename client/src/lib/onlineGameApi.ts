@@ -57,6 +57,8 @@ function handleGameMessage(
   msg: string,
   data?: Record<string, any>
 ): void {
+  // If board was busy making moves while we received this message, delay
+  // processing it:
   if (getCurrentBoardData().busyWaiting) {
     setTimeout(
       () =>
