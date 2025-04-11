@@ -85,6 +85,7 @@ export type CurrentGameSettings = {
 // Settings specific for a given game:
 export type CurrentBoardData = {
   version: number;
+  busyWaiting: boolean;
   turn: Color;
   diceRoll: number;
   diceRoll1: number;
@@ -96,6 +97,7 @@ export type CurrentBoardData = {
 };
 
 export type SetCurrentBoardData = {
+  busyWaiting?: boolean;
   turn?: Color;
   diceRoll?: number;
   diceRoll1?: number;
@@ -131,7 +133,6 @@ export type Board = {
   outcomeId?: number;
   outcome?: string;
   gameStartTime: number;
-  busyWaiting: boolean;
 };
 
 export type BasicMove = {
@@ -225,7 +226,6 @@ const initBoard: Board = {
   gameOver: false,
   isLoadedGame: false,
   gameStartTime: 0,
-  busyWaiting: false,
 };
 
 export const internalSettings: InternalSettings = {
@@ -634,10 +634,14 @@ export function handleDiceRoll(
   // Mark game board busy as it processes the dice being rolled (this is being
   // checked for incoming online game messages to make sure they wait until
   // we can receive new game events):
-  board.busyWaiting = true;
+  //board.busyWaiting = true;
   board.diceRollHistory.push(roll);
   setNewCurrentBoardData(
     {
+      // Mark game board busy as it processes the dice being rolled (this is being
+      // checked for incoming online game messages to make sure they wait until
+      // we can receive new game events):
+      busyWaiting: true,
       diceRoll: roll,
       diceRoll1: roll1,
       diceRoll2: roll2,

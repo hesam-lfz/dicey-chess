@@ -97,7 +97,7 @@ export function Board({
     // Mark game board busy as it processes the move being made (this is being
     // checked for incoming online game messages to make sure they wait until
     // we can receive new game events):
-    board.busyWaiting = true;
+    currentBoardData.busyWaiting = true;
     if (replayModeOn) {
       setReplayStepMoveTriggered(false);
     } else {
@@ -118,11 +118,9 @@ export function Board({
     setPrevMoveToSq(currentBoardData.currMoveToSq);
     setNewCurrentBoardData({ currMoveFromSq: null, currMoveToSq: null }, true);
   }, [
+    currentBoardData,
     replayModeOn,
     containerOnMove,
-    currentBoardData.currMoveFromSq,
-    currentBoardData.currMoveToSq,
-    currentBoardData.currMovePromotion,
     setNewCurrentBoardData,
     currentGameSettings,
     getCurrentBoardData,

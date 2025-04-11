@@ -57,7 +57,7 @@ function handleGameMessage(
   msg: string,
   data?: Record<string, any>
 ): void {
-  if (board.busyWaiting) {
+  if (getCurrentBoardData().busyWaiting) {
     setTimeout(
       () =>
         handleGameMessage(

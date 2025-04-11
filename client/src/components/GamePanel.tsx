@@ -61,15 +61,26 @@ export function GamePanel({
         JSON.stringify(board),
         replayModeOn,
         currReplayModeOn,
-        board.busyWaiting
+        'busyWaiting',
+        currentBoardData.busyWaiting
       );
     if (board.gameOver && !(board.isLoadedGame || currReplayModeOn))
       onGameOver();
     setGameId(currGameId);
     setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
-    board.busyWaiting = false;
-    if (DebugOn) console.log(board.busyWaiting);
+
+    currentBoardData.busyWaiting = isAITurn(
+      currentGameSettings,
+      currentBoardData
+    ); //false;
+    if (DebugOn)
+      console.log(
+        'AITurn',
+        isAITurn(currentGameSettings, currentBoardData),
+        'currentBoardData.busyWaiting',
+        currentBoardData.busyWaiting
+      );
   }, [
     currGameId,
     currReplayModeOn,

@@ -47,7 +47,7 @@ export function DicePanel({
     // Mark game board busy as it processes the dice being rolled (this is being
     // checked for incoming online game messages to make sure they wait until
     // we can receive new game events):
-    board.busyWaiting = true;
+    currentBoardData.busyWaiting = true;
     const roll1 = Math.floor(Math.random() * 6) + 1;
     const roll2 = Math.floor(Math.random() * 6) + 1;
     const roll = Math.abs(roll1 - roll2);
@@ -66,7 +66,12 @@ export function DicePanel({
     setDice1IconRotation(Math.floor(Math.random() * 50) - 25);
     setDice2IconRotation(Math.floor(Math.random() * 50) - 25);
     containerOnDiceRoll(roll, roll1, roll2);
-  }, [alreadyTriggeredAIRoll, containerOnDiceRoll, setNewCurrentBoardData]);
+  }, [
+    alreadyTriggeredAIRoll,
+    containerOnDiceRoll,
+    currentBoardData,
+    setNewCurrentBoardData,
+  ]);
 
   useEffect(() => {
     if (DebugOn)
