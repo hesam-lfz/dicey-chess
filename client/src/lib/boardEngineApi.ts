@@ -120,6 +120,7 @@ export type SavedGame = {
 };
 
 export type Board = {
+  busyWaiting: boolean;
   initPositionFen?: string;
   history: string[][];
   flatSanMoveHistory: string[];
@@ -215,6 +216,7 @@ export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
 
 const initBoard: Board = {
+  busyWaiting: false,
   initPositionFen: undefined, //'rnbqkbnr/pppp1ppp/8/8/8/8/PPP1QPPP/RNB1KBNR b KQkq - 0 1', //undefined
   history: [[]],
   flatSanMoveHistory: [],
@@ -632,6 +634,10 @@ export function handleDiceRoll(
   isOnlineGameRemoteRoll: boolean = false
 ): void {
   board.diceRollHistory.push(roll);
+  // Mark game board busy as it processes the dice being rolled (this is being
+  // checked for incoming online game messages to make sure they wait until
+  // we can receive new game events):
+  board.busyWaiting = true;
   setNewCurrentBoardData(
     {
       // Mark game board busy as it processes the dice being rolled (this is being

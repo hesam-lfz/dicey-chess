@@ -48,6 +48,7 @@ export function DicePanel({
     // checked for incoming online game messages to make sure they wait until
     // we can receive new game events):
     currentBoardData.busyWaiting = true;
+    board.busyWaiting = true;
     const roll1 = Math.floor(Math.random() * 6) + 1;
     const roll2 = Math.floor(Math.random() * 6) + 1;
     const roll = Math.abs(roll1 - roll2);

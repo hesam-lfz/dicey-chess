@@ -458,12 +458,6 @@ export function Settings() {
           <p>Waiting to receive your friend's invite back...</p>
           <p>
             <em className="smaller pink">
-              Once 2-way invites are sent, a connection will be established to
-              start the game.
-            </em>
-          </p>
-          <p>
-            <em className="smaller pink">
               Invites will expire in 2 minutes...
             </em>
           </p>

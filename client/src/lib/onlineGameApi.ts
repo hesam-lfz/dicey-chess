@@ -12,6 +12,8 @@ import { User } from './auth';
 
 export type OnlineGameGlobals = {
   aborted: boolean;
+  busyWaitMaxReattempts: number;
+  busyWaitReattempts: number;
 };
 
 type SocketResponseMessage = {
@@ -35,6 +37,8 @@ type RemoteMoveData = {
 // Some globals accessed by various components/pages:
 export const onlineGameApi_globals: OnlineGameGlobals = {
   aborted: false,
+  busyWaitMaxReattempts: 10,
+  busyWaitReattempts: 0,
 };
 
 // If receiving online game remote event, this is how much we wait until we
@@ -59,21 +63,38 @@ function handleGameMessage(
 ): void {
   // If board was busy making moves while we received this message, delay
   // processing it:
-  if (getCurrentBoardData().busyWaiting) {
-    setTimeout(
-      () =>
-        handleGameMessage(
-          currentGameSettings,
-          getCurrentBoardData,
-          setNewCurrentBoardData,
-          onGameAbortCallback,
-          msg,
-          data
-        ),
-      waitOnBoardBusyDelay
+  if (DebugOn)
+    console.log(
+      'handleGameMessage',
+      msg,
+      data,
+      'busyWaiting',
+      board.busyWaiting
     );
+  if (board.busyWaiting) {
+    if (
+      onlineGameApi_globals.busyWaitReattempts <
+      onlineGameApi_globals.busyWaitMaxReattempts
+    ) {
+      onlineGameApi_globals.busyWaitReattempts += 1;
+      setTimeout(
+        () =>
+          handleGameMessage(
+            currentGameSettings,
+            getCurrentBoardData,
+            setNewCurrentBoardData,
+            onGameAbortCallback,
+            msg,
+            data
+          ),
+        waitOnBoardBusyDelay
+      );
+    } else {
+      console.log('timed out busy waiting. Aborting game...');
+      handleGameAbortMessage(onGameAbortCallback);
+    }
     return;
-  }
+  } else onlineGameApi_globals.busyWaitReattempts = 0;
   // Receiving a game event: a dice roll from the opponent friend:
   if (msg === 'roll')
     handleGameDiceRollMessage(
@@ -186,7 +207,10 @@ export function onlineGameApi_initialize(
             msg: 'shake',
           })
         );
-      else if (msg === 'ready') onOnlineGameReadyCallback(data!.color);
+      else if (msg === 'ready') {
+        onlineGameApi_globals.busyWaitReattempts = 0;
+        onOnlineGameReadyCallback(data!.color);
+      }
     } else if (type === 'game')
       handleGameMessage(
         currentGameSettings,

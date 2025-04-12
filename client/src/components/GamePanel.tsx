@@ -74,6 +74,7 @@ export function GamePanel({
     // if It remains AI turn, keep busy flag on, else turn it off here since we're done
     // making the move:
     currentBoardData.busyWaiting = itIsAITurn;
+    board.busyWaiting = itIsAITurn;
     if (DebugOn)
       console.log(
         'AITurn',

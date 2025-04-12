@@ -98,6 +98,7 @@ export function Board({
     // checked for incoming online game messages to make sure they wait until
     // we can receive new game events):
     currentBoardData.busyWaiting = true;
+    board.busyWaiting = true;
     if (replayModeOn) {
       setReplayStepMoveTriggered(false);
     } else {
