@@ -62,7 +62,7 @@ export function GamePanel({
         replayModeOn,
         currReplayModeOn,
         'busyWaiting',
-        currentBoardData.busyWaiting
+        board.busyWaiting
       );
     if (board.gameOver && !(board.isLoadedGame || currReplayModeOn))
       onGameOver();
@@ -73,14 +73,13 @@ export function GamePanel({
     const itIsAITurn = isAITurn(currentGameSettings, currentBoardData);
     // if It remains AI turn, keep busy flag on, else turn it off here since we're done
     // making the move:
-    currentBoardData.busyWaiting = itIsAITurn;
     board.busyWaiting = itIsAITurn;
     if (DebugOn)
       console.log(
         'AITurn',
         isAITurn(currentGameSettings, currentBoardData),
-        'currentBoardData.busyWaiting',
-        currentBoardData.busyWaiting
+        'busyWaiting',
+        board.busyWaiting
       );
   }, [
     currGameId,

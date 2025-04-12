@@ -88,6 +88,7 @@ nav span {
 
 nav.waiting span {
   cursor: progress;
+  opacity: 0.2;
 }
 
 form p {

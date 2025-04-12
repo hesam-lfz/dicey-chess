@@ -48,7 +48,6 @@ const defaultCurrentGameSettings: CurrentGameSettings = {
 
 const defaultCurrentBoardData: CurrentBoardData = {
   version: 0,
-  busyWaiting: false,
   turn: WHITE,
   diceRoll: -1,
   diceRoll1: -1,

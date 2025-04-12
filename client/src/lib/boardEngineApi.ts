@@ -85,7 +85,6 @@ export type CurrentGameSettings = {
 // Settings specific for a given game:
 export type CurrentBoardData = {
   version: number;
-  busyWaiting: boolean;
   turn: Color;
   diceRoll: number;
   diceRoll1: number;
@@ -97,7 +96,6 @@ export type CurrentBoardData = {
 };
 
 export type SetCurrentBoardData = {
-  busyWaiting?: boolean;
   turn?: Color;
   diceRoll?: number;
   diceRoll1?: number;
@@ -640,10 +638,6 @@ export function handleDiceRoll(
   board.busyWaiting = true;
   setNewCurrentBoardData(
     {
-      // Mark game board busy as it processes the dice being rolled (this is being
-      // checked for incoming online game messages to make sure they wait until
-      // we can receive new game events):
-      busyWaiting: true,
       diceRoll: roll,
       diceRoll1: roll1,
       diceRoll2: roll2,
