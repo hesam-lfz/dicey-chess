@@ -66,12 +66,7 @@ export function DicePanel({
     setDice1IconRotation(Math.floor(Math.random() * 50) - 25);
     setDice2IconRotation(Math.floor(Math.random() * 50) - 25);
     containerOnDiceRoll(roll, roll1, roll2);
-  }, [
-    alreadyTriggeredAIRoll,
-    containerOnDiceRoll,
-    currentBoardData,
-    setNewCurrentBoardData,
-  ]);
+  }, [alreadyTriggeredAIRoll, containerOnDiceRoll, setNewCurrentBoardData]);
 
   useEffect(() => {
     if (DebugOn)
