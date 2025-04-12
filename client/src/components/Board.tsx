@@ -332,29 +332,34 @@ export function Board({
         $clickedSq = $clickedSq!.closest('.square') ?? $clickedSq;
       const square = $clickedSq.id as Square;
       const clickedPiece = getSquarePiece(square);
-      const promotion = currentBoardData.currMoveFromSq
-        ? promptUserIfPromotionMove(
-            currentBoardData.currMoveFromSq,
-            square,
-            currentBoardData.turn
-          )
-        : undefined;
-
       if (clickedPiece && clickedPiece.color === currentBoardData.turn)
         setNewCurrentBoardData({ currMoveFromSq: square }, true);
-      else if (
-        currentBoardData.currMoveFromSq &&
-        validateMove(
-          currentBoardData.currMoveFromSq,
-          square,
-          currentBoardData.numMovesInTurn === 1,
-          promotion
-        )
-      ) {
-        setNewCurrentBoardData(
-          { currMoveToSq: square, currMovePromotion: promotion },
-          true
-        );
+      else {
+        const promotion = currentBoardData.currMoveFromSq
+          ? promptUserIfPromotionMove(
+              currentBoardData.currMoveFromSq,
+              square,
+              currentBoardData.turn
+            )
+          : undefined;
+        if (currentBoardData.currMoveFromSq) {
+          //if (promotion) {
+          //  prompt('What promotion?');
+          //} else
+          if (
+            validateMove(
+              currentBoardData.currMoveFromSq,
+              square,
+              currentBoardData.numMovesInTurn === 1,
+              promotion
+            )
+          ) {
+            setNewCurrentBoardData(
+              { currMoveToSq: square, currMovePromotion: promotion },
+              true
+            );
+          }
+        }
       }
     },
     [
