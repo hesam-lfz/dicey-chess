@@ -33,7 +33,7 @@ export function Signin() {
       };
       const res = await fetch('/api/auth/signin', req);
       if (!res.ok) {
-        console.log(res);
+        console.error('Sign in failed', res);
         infoMessageModalMessage =
           res.status === 401
             ? infoMessageModalMessageDefault

@@ -14,7 +14,10 @@ export function Header() {
 
   // To prevent navigation to different pages mess up the board when it's
   // busy making moves (by player or AI):
-  function navigateIfBoardNotBusy(to: string): void {
+  function navigateIfBoardNotBusy(
+    to: string,
+    preNavigateCallback?: () => void
+  ): void {
     if (board.busyWaiting) {
       // Change the pointer look for a bit while to show its not allowed yet:
       [nav1ElementRef, nav2ElementRef].forEach((e) =>
@@ -28,6 +31,7 @@ export function Header() {
       }, 1000);
       return;
     }
+    if (preNavigateCallback) preNavigateCallback();
     navigate(to);
   }
 
@@ -83,9 +87,8 @@ export function Header() {
                 {user ? (
                   <span
                     onClick={() => {
-                      handleSignOut();
                       //navigate(AppSubdomain);
-                      navigateIfBoardNotBusy(AppSubdomain);
+                      navigateIfBoardNotBusy(AppSubdomain, handleSignOut);
                     }}>
                     {'Sign out '}
                     <span className="small">
