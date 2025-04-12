@@ -4,23 +4,38 @@ import { useCurrentGameContext } from './useCurrentGameContext';
 
 import { AppSubdomain } from '../App';
 import { shorten } from '../lib';
+import { useRef } from 'react';
 
 export function Header() {
   const { user, handleSignOut, currentBoardData } = useCurrentGameContext();
   const navigate = useNavigate();
+  const nav1ElementRef = useRef<null | HTMLElement>(null);
+  const nav2ElementRef = useRef<null | HTMLElement>(null);
 
   // To prevent navigation to different pages mess up the board when it's
   // busy making moves (by player or AI):
   function navigateIfBoardNotBusy(to: string): void {
-    if (currentBoardData.busyWaiting) return;
+    if (currentBoardData.busyWaiting) {
+      // Change the pointer look for a bit while to show its not allowed yet:
+      [nav1ElementRef, nav2ElementRef].forEach((e) =>
+        e?.current?.classList.add('waiting')
+      );
+      nav2ElementRef?.current?.classList.add('waiting');
+      setInterval(() => {
+        [nav1ElementRef, nav2ElementRef].forEach((e) =>
+          e?.current?.classList.remove('waiting')
+        );
+      }, 1000);
+      return;
+    }
     navigate(to);
   }
 
   return (
     <>
-      <div className="header rainbow-colored">
+      <div className="header rainbow-colored waiting">
         <div className="header-side header-left-side nav-bar">
-          <nav>
+          <nav ref={nav1ElementRef}>
             <ul>
               <li className="inline-block header-logo-name">
                 <Link to={AppSubdomain}>DICEY CHESS</Link>
@@ -49,7 +64,7 @@ export function Header() {
           </Link>
         </div>
         <div className="header-side header-right-side">
-          <nav>
+          <nav ref={nav2ElementRef}>
             <ul>
               <li className="inline-block">
                 {

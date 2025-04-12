@@ -86,6 +86,10 @@ nav span {
   cursor: pointer;
 }
 
+nav.waiting span {
+  cursor: progress;
+}
+
 form p {
   font-size: 1.25em;
 }
