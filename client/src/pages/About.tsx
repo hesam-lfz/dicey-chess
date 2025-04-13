@@ -55,9 +55,7 @@ export function About() {
         <h2>About Creators</h2>
         <div className="">
           This chess variation game and{' '}
-          <a href="https://github.com/hesam-lfz/dicey-chess-web/">
-            open-source
-          </a>{' '}
+          <a href="https://github.com/hesam-lfz/dicey-chess/">open-source</a>{' '}
           full-stack TypeScript ReactJS website is designed &amp; developed by:{' '}
           <a href="https://hesam.us">Hesam (Sam) Samimi</a>
         </div>
