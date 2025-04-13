@@ -23,7 +23,6 @@ import {
   WHITE,
   BLACK,
   PAWN,
-  QUEEN,
   KING,
   type Square,
   type PieceSymbol,
@@ -464,10 +463,11 @@ export const getSquarePiece = (square: Square) => boardEngine.get(square);
 
 // Returns whether or not making move from to square is a valid move based on current board:
 // Note: A check move is not valid unless it's the last move in the current dice roll's move-set.
-export function validateMove(
+export function isValidMove(
   fromSquare: Square,
   toSquare: Square,
   isLastMoveInTurn: boolean,
+  anyPromotionOnly: boolean,
   promotion?: PieceSymbol
 ): boolean {
   // boardEngine accepts a move in which a king is taken! Take care of it manually here:
@@ -475,9 +475,29 @@ export function validateMove(
   if (toPiece && toPiece.type === KING) return false;
   const possibleMoves = getPossibleMoves(isLastMoveInTurn, fromSquare);
   return (
-    possibleMoves.filter((m) => m.to === toSquare && m.promotion === promotion)
-      .length > 0
+    (anyPromotionOnly
+      ? possibleMoves.filter((m) => m.to === toSquare && m.promotion)
+      : possibleMoves.filter(
+          (m) => m.to === toSquare && m.promotion === promotion
+        )
+    ).length > 0
   );
+}
+
+// Returns whether this a promotion move and a valid one?
+export function isPromotionMove(
+  fromSquare: Square,
+  toSquare: Square,
+  turn: Color,
+  isLastMoveInTurn: boolean
+): boolean {
+  const piece = getSquarePiece(fromSquare)!;
+  if (piece.type === PAWN) {
+    const toSquareRank = getSquareRank(toSquare);
+    if (turn === WHITE ? toSquareRank === 8 : toSquareRank === 1)
+      return isValidMove(fromSquare, toSquare, isLastMoveInTurn, true);
+  }
+  return false;
 }
 
 // Returns list of all valid moves (optionally only from the specified fromSquare):
@@ -489,12 +509,32 @@ export function getPossibleMoves(
     square: fromSquare,
     verbose: true,
   };
-  if (fromSquare) params.square = fromSquare;
+  //if (fromSquare) params.square = fromSquare;
   let possibleMoves = boardEngine.moves(params) as Move[];
   // A check move is not valid unless it's the last move in the current roll's move-set:
   if (!isLastMoveInTurn)
     possibleMoves = possibleMoves.filter((m) => !inCheck(m.after));
   return possibleMoves;
+}
+
+// Returns list of all valid promotion piece types (only from the specified fromSquare):
+export function getPossiblePromotions(
+  isLastMoveInTurn: boolean,
+  toSquare: Square,
+  fromSquare?: Square
+): PieceSymbol[] {
+  const params = {
+    square: fromSquare,
+    verbose: true,
+  };
+  //if (fromSquare) params.square = fromSquare;
+  let possibleMoves = (boardEngine.moves(params) as Move[]).filter(
+    (m) => m.to === toSquare && m.promotion
+  );
+  // A check move is not valid unless it's the last move in the current roll's move-set:
+  if (!isLastMoveInTurn)
+    possibleMoves = possibleMoves.filter((m) => !inCheck(m.after));
+  return possibleMoves.map((m) => m.promotion!);
 }
 
 // Returns list of all valid moves (optionally only from the specified fromSquare),
@@ -793,20 +833,6 @@ const gameAffectsPlayerRank: (
 // Is this a draw situation for Dicey chess, since player still hasn't played all
 // moves in the current turn (based on the dice roll), but has no valid move to make:
 const isDiceyChessDraw: () => boolean = () => boardEngine.moves().length === 0;
-
-// Prompt user when promoting a pawn which type of piece they want to promote to:
-export function promptUserIfPromotionMove(
-  fromSquare: Square,
-  toSquare: Square,
-  turn: Color
-): PieceSymbol | undefined {
-  const piece = getSquarePiece(fromSquare)!;
-  if (piece.type === PAWN) {
-    const toSquareRank = getSquareRank(toSquare);
-    if (turn === WHITE ? toSquareRank === 8 : toSquareRank === 1) return QUEEN;
-  }
-  return undefined;
-}
 
 // Move board fwd or bkwd in replay mode:
 export function boardReplayStepMove(

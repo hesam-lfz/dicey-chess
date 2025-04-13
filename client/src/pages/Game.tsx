@@ -23,6 +23,7 @@ import {
   storageApi_loadGames,
   storageApi_saveGame,
 } from '../lib/storageApi';
+import { PieceSymbol } from 'chess.js';
 
 const infoMessageModalMessageDefault: string = 'Game saved.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
@@ -45,12 +46,16 @@ export function Game() {
     useState<boolean>(false);
   const [isGameDeleteModalOpen, setIsGameDeleteModalOpen] =
     useState<boolean>(false);
+  const [isPromotionChoiceModalOpen, setIsPromotionChoiceModalOpen] =
+    useState<boolean>(false);
   const [isInfoMessageModalOpen, setIsInfoMessageModalOpen] =
     useState<boolean>(false);
   const [gameId, setGameId] = useState<number>(currentGameSettings.gameId);
   const [gameIdToDelete, setGameIdToDelete] = useState<number>(0);
   const [replayModeOn, setReplayModeOn] = useState<boolean>(board.gameOver);
-
+  const [validPromotionPieceTypes, setValidPromotionPieceTypes] = useState<
+    PieceSymbol[] | undefined
+  >(undefined);
   async function handleSaveGame(): Promise<void> {
     handleGameOverModalClose();
     onSaveGame();
@@ -159,6 +164,18 @@ export function Game() {
     handleGameDeleteModalClose();
   }
 
+  function onPromotionPromptRequested(pieceTypes: PieceSymbol[]): void {
+    setValidPromotionPieceTypes(pieceTypes);
+    setIsPromotionChoiceModalOpen(true);
+  }
+
+  async function handleChoosePromotion(type: PieceSymbol): Promise<void> {
+    console.log('choosing promotion', type);
+    setValidPromotionPieceTypes(undefined);
+    setIsPromotionChoiceModalOpen(false);
+    setNewCurrentBoardData({ currMovePromotion: type }, true);
+  }
+
   // A saved game is clicked either to load or delete:
   function onGameToLoadOrDeleteClicked(
     e: React.MouseEvent<HTMLDivElement>
@@ -228,6 +245,7 @@ export function Game() {
       <GamePanel
         currGameId={gameId}
         currReplayModeOn={replayModeOn}
+        onPromotionPromptRequested={onPromotionPromptRequested}
         onGameOver={onGameOver}
         onNewGame={onResetGame}
         onLoadGame={onLoadGame}
@@ -326,6 +344,23 @@ export function Game() {
                 Yes
               </button>
             </span>
+          </div>
+        </div>
+      </Modal>
+      <Modal isOpen={isPromotionChoiceModalOpen} onClose={() => {}}>
+        <div className="modal-box">
+          <p>Choose your promotion:</p>
+          <div className="modal-actions">
+            {validPromotionPieceTypes?.map((t) => (
+              <span className="rainbow-colored-border">
+                <button
+                  onClick={() => handleChoosePromotion(t)}
+                  key={'promotion-type' + t}
+                  autoFocus>
+                  {t}
+                </button>
+              </span>
+            ))}
           </div>
         </div>
       </Modal>

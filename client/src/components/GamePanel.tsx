@@ -14,12 +14,13 @@ import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Board } from './Board';
 import { BoardLabels } from './BoardLabels';
-import { type Square } from 'chess.js';
+import { PieceSymbol, type Square } from 'chess.js';
 import './Panels.css';
 
 type Props = {
   currGameId: number;
   currReplayModeOn: boolean;
+  onPromotionPromptRequested: (pieceTypes: PieceSymbol[]) => void;
   onGameOver: () => void;
   onNewGame: () => void;
   onLoadGame: () => void;
@@ -28,6 +29,7 @@ type Props = {
 export function GamePanel({
   currGameId,
   currReplayModeOn,
+  onPromotionPromptRequested,
   onGameOver,
   onNewGame,
   onLoadGame,
@@ -211,6 +213,7 @@ export function GamePanel({
               currIsMovingDisabled={isMovingDisabled}
               containerOnMove={onMove}
               containerOnAlertDiceRoll={onAlertDiceRoll}
+              containerOnPromotionPromptRequested={onPromotionPromptRequested}
             />
           </div>
 

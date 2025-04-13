@@ -9,8 +9,7 @@ import {
   allRanksReversed,
   getSquarePiece,
   makeMove,
-  validateMove,
-  promptUserIfPromotionMove,
+  isValidMove,
   board,
   isAITurn,
   chessAiEngineApi_getAIMove,
@@ -20,8 +19,17 @@ import {
   internalSettings,
   isOpponentsTurn,
   setNewMoveOnBoard,
+  isPromotionMove,
+  getPossiblePromotions,
 } from '../lib';
-import { Color, WHITE, type Piece, type Square } from 'chess.js';
+import {
+  Color,
+  PAWN,
+  PieceSymbol,
+  WHITE,
+  type Piece,
+  type Square,
+} from 'chess.js';
 
 function renderOccupyingPiece(piece?: Piece) {
   if (!piece) return null;
@@ -49,6 +57,7 @@ type Props = {
   currIsMovingDisabled: boolean;
   containerOnMove: () => void;
   containerOnAlertDiceRoll: () => void;
+  containerOnPromotionPromptRequested: (pieceTypes: PieceSymbol[]) => void;
 };
 
 let makeMoveDelayTimeoutId: NodeJS.Timeout | undefined = undefined;
@@ -65,6 +74,7 @@ export function Board({
   currIsMovingDisabled,
   containerOnMove,
   containerOnAlertDiceRoll,
+  containerOnPromotionPromptRequested,
 }: Props) {
   const {
     currentGameSettings,
@@ -198,6 +208,8 @@ export function Board({
           currentBoardData.currMoveFromSq,
           'movingToSq',
           currentBoardData.currMoveToSq,
+          'currMovePromotion',
+          currentBoardData.currMovePromotion,
           'currPrevMoveFromSq',
           currPrevMoveFromSq,
           'currPrevMoveToSq',
@@ -228,11 +240,17 @@ export function Board({
       // if the 'from' and 'to' of a move were just determined, ready to execute the move:
       if (currentBoardData.currMoveFromSq && currentBoardData.currMoveToSq) {
         if (replayModeOn) handleMove();
-        else
+        else if (
+          !(
+            currentBoardData.currMovePromotion &&
+            currentBoardData.currMovePromotion === PAWN
+          )
+        ) {
           makeMoveDelayTimeoutId = setTimeout(
             handleMove,
             internalSettings.makeMoveDelay
           );
+        }
         return;
       }
 
@@ -334,31 +352,42 @@ export function Board({
       const clickedPiece = getSquarePiece(square);
       if (clickedPiece && clickedPiece.color === currentBoardData.turn)
         setNewCurrentBoardData({ currMoveFromSq: square }, true);
-      else {
-        const promotion = currentBoardData.currMoveFromSq
-          ? promptUserIfPromotionMove(
+      else if (currentBoardData.currMoveFromSq) {
+        const isLastMoveInTurn = currentBoardData.numMovesInTurn === 1;
+        const isPromotion = currentBoardData.currMoveFromSq
+          ? isPromotionMove(
               currentBoardData.currMoveFromSq,
               square,
-              currentBoardData.turn
+              currentBoardData.turn,
+              isLastMoveInTurn
             )
           : undefined;
-        if (currentBoardData.currMoveFromSq) {
-          //if (promotion) {
-          //  prompt('What promotion?');
-          //} else
-          if (
-            validateMove(
-              currentBoardData.currMoveFromSq,
-              square,
-              currentBoardData.numMovesInTurn === 1,
-              promotion
-            )
-          ) {
-            setNewCurrentBoardData(
-              { currMoveToSq: square, currMovePromotion: promotion },
-              true
-            );
-          }
+        if (isPromotion) {
+          const possiblePromotions = getPossiblePromotions(
+            isLastMoveInTurn,
+            square,
+            currentBoardData.currMoveFromSq
+          );
+          containerOnPromotionPromptRequested(possiblePromotions);
+          setNewCurrentBoardData(
+            // "p" piece as promotion is just a flag that we will be waiting to prompt
+            // user for the choice for promotion:
+            { currMoveToSq: square, currMovePromotion: PAWN },
+            true
+          );
+        } else if (
+          isValidMove(
+            currentBoardData.currMoveFromSq,
+            square,
+            isLastMoveInTurn,
+            false,
+            undefined
+          )
+        ) {
+          setNewCurrentBoardData(
+            { currMoveToSq: square, currMovePromotion: undefined },
+            true
+          );
         }
       }
     },
@@ -368,6 +397,7 @@ export function Board({
       currentGameSettings,
       setNewCurrentBoardData,
       containerOnAlertDiceRoll,
+      containerOnPromotionPromptRequested,
     ]
   );
 
