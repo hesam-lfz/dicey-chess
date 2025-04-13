@@ -13,6 +13,7 @@ import {
   isGameAgainstOnlineFriend,
   onlineGameApi_close,
   outcomes,
+  pieceSVGs,
   resetBoard,
   resetSettings,
   type SavedGame,
@@ -23,15 +24,35 @@ import {
   storageApi_loadGames,
   storageApi_saveGame,
 } from '../lib/storageApi';
-import { PieceSymbol } from 'chess.js';
+import { Color, PieceSymbol } from 'chess.js';
 
 const infoMessageModalMessageDefault: string = 'Game saved.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
+
+function renderPiece(
+  color: Color,
+  type: PieceSymbol,
+  key: string,
+  onClick: () => void
+) {
+  const pieceName = 'Icon_' + (color + type);
+  return (
+    <img
+      src={pieceSVGs[pieceName]}
+      className="piece off-board-piece"
+      alt={pieceName}
+      draggable="false"
+      key={key}
+      onClick={onClick}
+    />
+  );
+}
 
 export function Game() {
   const {
     currentGameSettings,
     setNewCurrentGameSettings,
+    currentBoardData,
     setNewCurrentBoardData,
     user,
   } = useCurrentGameContext();
@@ -56,6 +77,7 @@ export function Game() {
   const [validPromotionPieceTypes, setValidPromotionPieceTypes] = useState<
     PieceSymbol[] | undefined
   >(undefined);
+
   async function handleSaveGame(): Promise<void> {
     handleGameOverModalClose();
     onSaveGame();
@@ -170,7 +192,6 @@ export function Game() {
   }
 
   async function handleChoosePromotion(type: PieceSymbol): Promise<void> {
-    console.log('choosing promotion', type);
     setValidPromotionPieceTypes(undefined);
     setIsPromotionChoiceModalOpen(false);
     setNewCurrentBoardData({ currMovePromotion: type }, true);
@@ -352,13 +373,15 @@ export function Game() {
           <p>Choose your promotion:</p>
           <div className="modal-actions">
             {validPromotionPieceTypes?.map((t) => (
-              <span className="rainbow-colored-border">
-                <button
-                  onClick={() => handleChoosePromotion(t)}
-                  key={'promotion-type' + t}
-                  autoFocus>
-                  {t}
-                </button>
+              <span
+                className="rainbow-colored-border"
+                key={'promotion-choice-span-' + t}>
+                {renderPiece(
+                  currentBoardData.turn,
+                  t,
+                  'promotion-choice-img-' + t,
+                  () => handleChoosePromotion(t)
+                )}
               </span>
             ))}
           </div>

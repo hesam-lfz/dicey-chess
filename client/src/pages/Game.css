@@ -102,6 +102,10 @@
   filter: drop-shadow(4px 1px 4px rgba(0, 0, 0, 0.5));
 }
 
+.off-board-piece {
+  position: unset;
+}
+
 .play-icon {
   display: inline-block;
   position: unset;

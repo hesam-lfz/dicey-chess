@@ -241,6 +241,7 @@ export function Board({
       if (currentBoardData.currMoveFromSq && currentBoardData.currMoveToSq) {
         if (replayModeOn) handleMove();
         else if (
+          // we're only ready to do the move if not a promotion or it is and user already chosen:
           !(
             currentBoardData.currMovePromotion &&
             currentBoardData.currMovePromotion === PAWN
@@ -383,12 +384,11 @@ export function Board({
             false,
             undefined
           )
-        ) {
+        )
           setNewCurrentBoardData(
             { currMoveToSq: square, currMovePromotion: undefined },
             true
           );
-        }
       }
     },
     [

@@ -509,7 +509,6 @@ export function getPossibleMoves(
     square: fromSquare,
     verbose: true,
   };
-  //if (fromSquare) params.square = fromSquare;
   let possibleMoves = boardEngine.moves(params) as Move[];
   // A check move is not valid unless it's the last move in the current roll's move-set:
   if (!isLastMoveInTurn)
@@ -527,7 +526,6 @@ export function getPossiblePromotions(
     square: fromSquare,
     verbose: true,
   };
-  //if (fromSquare) params.square = fromSquare;
   let possibleMoves = (boardEngine.moves(params) as Move[]).filter(
     (m) => m.to === toSquare && m.promotion
   );
