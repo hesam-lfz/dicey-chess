@@ -34,10 +34,6 @@ export type CurrentGameContextValues = {
   handleSignOut: () => void;
 };
 
-// FIXME: Put this (latest... vars) here because online game looks at stale currentBoardData after 2nd move?!:
-let latestCurrentBoardDataVersion = 0;
-let latestCurrentBoardData: CurrentBoardData;
-
 // Settings specific for a given game:
 const defaultCurrentGameSettings: CurrentGameSettings = {
   gameId: 0,
@@ -98,45 +94,38 @@ export function CurrentGameContextProvider({ children }: Props) {
     data: SetCurrentBoardData,
     setState: boolean = true
   ): void {
-    const isOnlineGame = isGameAgainstOnlineFriend(currentGameSettings);
-    if (DebugOn)
-      console.log(
-        'isOnlineGame',
-        isOnlineGame,
-        'setNewCurrentBoardData current',
-        JSON.stringify(currentBoardData),
-        'data',
-        data
-      );
-    let theCurrentBoardData = currentBoardData;
-    // FIXME: Put this (latest... vars) here because online game looks at stale currentBoardData after 2nd move?!:
-    if (
-      isOnlineGame &&
-      latestCurrentBoardDataVersion > currentBoardData.version
-    )
-      theCurrentBoardData = latestCurrentBoardData;
-    if (data.turn !== undefined) theCurrentBoardData.turn = data.turn;
-    if (data.diceRoll !== undefined)
-      theCurrentBoardData.diceRoll = data.diceRoll;
-    if (data.diceRoll1 !== undefined)
-      theCurrentBoardData.diceRoll1 = data.diceRoll1;
-    if (data.diceRoll2 !== undefined)
-      theCurrentBoardData.diceRoll2 = data.diceRoll2;
-    if (data.numMovesInTurn !== undefined)
-      theCurrentBoardData.numMovesInTurn = data.numMovesInTurn;
-    if (data.currMoveFromSq !== undefined)
-      theCurrentBoardData.currMoveFromSq = data.currMoveFromSq;
-    if (data.currMoveToSq !== undefined)
-      theCurrentBoardData.currMoveToSq = data.currMoveToSq;
-    //if (data.currMovePromotion !== undefined)
-    theCurrentBoardData.currMovePromotion = data.currMovePromotion;
-    theCurrentBoardData.version += 1;
-    // FIXME: Put this (latest... vars) here because online game looks at stale currentBoardData after 2nd move?!:
-    if (isOnlineGame)
-      latestCurrentBoardDataVersion = theCurrentBoardData.version;
-    if (setState || isOnlineGame)
-      latestCurrentBoardData = { ...theCurrentBoardData };
-    if (setState) setCurrentBoardData(latestCurrentBoardData);
+    const setCurrentBoardDataFromPrev = (
+      prevCurrentBoardData: CurrentBoardData
+    ) => {
+      const isOnlineGame = isGameAgainstOnlineFriend(currentGameSettings);
+      if (DebugOn)
+        console.log(
+          'isOnlineGame',
+          isOnlineGame,
+          'setNewCurrentBoardData current',
+          JSON.stringify(prevCurrentBoardData),
+          'data',
+          data
+        );
+      if (data.turn !== undefined) prevCurrentBoardData.turn = data.turn;
+      if (data.diceRoll !== undefined)
+        prevCurrentBoardData.diceRoll = data.diceRoll;
+      if (data.diceRoll1 !== undefined)
+        prevCurrentBoardData.diceRoll1 = data.diceRoll1;
+      if (data.diceRoll2 !== undefined)
+        prevCurrentBoardData.diceRoll2 = data.diceRoll2;
+      if (data.numMovesInTurn !== undefined)
+        prevCurrentBoardData.numMovesInTurn = data.numMovesInTurn;
+      if (data.currMoveFromSq !== undefined)
+        prevCurrentBoardData.currMoveFromSq = data.currMoveFromSq;
+      if (data.currMoveToSq !== undefined)
+        prevCurrentBoardData.currMoveToSq = data.currMoveToSq;
+      //if (data.currMovePromotion !== undefined)
+      prevCurrentBoardData.currMovePromotion = data.currMovePromotion;
+      prevCurrentBoardData.version += 1;
+      return setState ? { ...prevCurrentBoardData } : prevCurrentBoardData;
+    };
+    setCurrentBoardData(setCurrentBoardDataFromPrev);
   }
 
   function setNewOnlineGameAbortedCallback(fn: () => void): void {
