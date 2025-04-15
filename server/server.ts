@@ -14,6 +14,7 @@ type User = {
   username: string;
   hashedPassword: string;
   rank: number;
+  plus: boolean;
 };
 
 type Auth = {
@@ -123,11 +124,11 @@ app.post('/api/auth/register', async (req, res, next) => {
       throw new ClientError(400, 'Username is not allowed');
     const hashedPassword = await argon2.hash(password);
     const sql = `
-      insert into "users" ("username", "hashedPassword", "rank")
-      values ($1, $2, $3)
+      insert into "users" ("username", "hashedPassword", "rank", "plus")
+      values ($1, $2, $3, $4)
       returning "userId", "username", "createdAt"
     `;
-    const params = [username, hashedPassword, rank];
+    const params = [username, hashedPassword, rank, false];
     const result = await db.query<User>(sql, params);
     const [user] = result.rows;
     res.status(201).json(user);
@@ -143,7 +144,8 @@ app.post('/api/auth/signin', async (req, res, next) => {
     const sql = `
     select "userId",
            "hashedPassword",
-           "rank"
+           "rank",
+           "plus"
       from "users"
      where "username" = $1
   `;
@@ -151,10 +153,10 @@ app.post('/api/auth/signin', async (req, res, next) => {
     const result = await db.query<User>(sql, params);
     const [user] = result.rows;
     if (!user) throw new ClientError(401, 'invalid login -- User not found!');
-    const { userId, hashedPassword, rank } = user;
+    const { userId, hashedPassword, rank, plus } = user;
     if (!(await argon2.verify(hashedPassword, password)))
       throw new ClientError(401, 'invalid login -- Wrong password!');
-    const payload = { userId, username, rank };
+    const payload = { userId, username, rank, plus };
     const token = jwt.sign(payload, hashKey);
     res.json({ token, user: payload });
   } catch (err) {
@@ -265,7 +267,7 @@ app.delete('/api/games', authMiddleware, async (req, res, next) => {
 });
 
 // Update a user's stored rank in the database:
-app.put('/api/users/:userId', authMiddleware, async (req, res, next) => {
+app.put('/api/users/rank/:userId', authMiddleware, async (req, res, next) => {
   try {
     const userId = Number(req.params.userId);
     if (!Number.isInteger(userId) || userId < 0)
@@ -290,6 +292,37 @@ app.put('/api/users/:userId', authMiddleware, async (req, res, next) => {
     if (!user)
       throw new ClientError(404, `Cannot find user with userId ${userId}`);
     res.json({ userId: user.userId, rank: user.rank });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Update a user's stored plus account status in the database:
+app.put('/api/users/plus/:userId', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = Number(req.params.userId);
+    if (!Number.isInteger(userId) || userId < 0)
+      throw new ClientError(400, 'userId must be a natural number');
+    const { plus } = req.body;
+    if (typeof plus !== 'boolean')
+      throw new ClientError(400, 'plus (boolean) is required');
+    if (req.user?.userId !== userId)
+      throw new ClientError(
+        400,
+        'Params userId does not match userId in authentication.'
+      );
+    const sql = `
+      update "users"
+        set "plus" = $1
+        where "userId" = $2
+        returning *
+    `;
+    const params = [plus, req.user?.userId];
+    const result = await db.query(sql, params);
+    const [user] = result.rows;
+    if (!user)
+      throw new ClientError(404, `Cannot find user with userId ${userId}`);
+    res.json({ userId: user.userId, plus: user.plus });
   } catch (err) {
     next(err);
   }

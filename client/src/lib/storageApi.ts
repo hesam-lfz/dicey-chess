@@ -311,7 +311,7 @@ export async function storageApi_updatePlayerRank(
         },
         body: JSON.stringify({ rank: user.rank }),
       };
-      const res = await fetch(`/api/users/${user.userId}`, req);
+      const res = await fetch(`/api/users/rank/${user.userId}`, req);
       if (!res.ok) throw new Error(`fetch Error ${res.status}`);
       return true;
     };

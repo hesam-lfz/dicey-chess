@@ -11,6 +11,7 @@ create table "public"."users" (
   "username"       text not null,
   "hashedPassword" text not null,
   "rank"      integer        not null,
+  "plus"        boolean           not null,
   "createdAt"      timestamptz(6) not null default now(),
   primary key ("userId"),
   unique ("username")
