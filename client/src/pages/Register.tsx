@@ -34,7 +34,7 @@ export function Register() {
       if (!/^[a-z0-9_.@]+$/.test(username)) {
         formCheckError = 1;
         infoMessageModalMessage =
-          'Username should only contain alphanumeric characters!';
+          'Username should only contain lowercase alphanumeric characters!';
         throw new Error(infoMessageModalMessage);
       } else if (usernameLength < 5 || usernameLength > 15) {
         formCheckError = 2;
@@ -96,10 +96,6 @@ export function Register() {
   return (
     <div className="main-panel padded-main-panel flex flex-col flex-align-center">
       <h2>Register</h2>
-      {/*<h2 className="red">
-        Warning: USE FAKE USERNAMES AND PASSWORDS ONLY. DON'T USE YOUR REAL
-        USERNAMES AND PASSWORDS AS THIS CONNECTION IS NOT SECURE.
-      </h2>*/}
       <form onSubmit={handleSubmit}>
         <div className="dotted-border">
           <div className="input-element-container">
