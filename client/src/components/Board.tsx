@@ -107,7 +107,7 @@ export function Board({
     // Mark game board busy as it processes the move being made (this is being
     // checked for incoming online game messages to make sure they wait until
     // we can receive new game events):
-    board.busyWaiting = true;
+    setNewCurrentBoardData({ busyWaiting: true }, false);
     if (replayModeOn) {
       setReplayStepMoveTriggered(false);
     } else {
@@ -118,7 +118,7 @@ export function Board({
         user,
         currentBoardData.currMoveFromSq!,
         currentBoardData.currMoveToSq!,
-        currentBoardData.currMovePromotion,
+        currentBoardData.currMovePromotion || undefined,
         false
       );
       setShouldTriggerAITurn(false);
@@ -166,7 +166,7 @@ export function Board({
             {
               currMoveFromSq: move.from,
               currMoveToSq: move.to,
-              currMovePromotion: move.promotion,
+              currMovePromotion: move.promotion || null,
             },
             true
           );
@@ -177,7 +177,7 @@ export function Board({
             {
               currMoveFromSq: null,
               currMoveToSq: null,
-              currMovePromotion: undefined,
+              currMovePromotion: null,
             },
             true
           );
@@ -386,7 +386,7 @@ export function Board({
           )
         )
           setNewCurrentBoardData(
-            { currMoveToSq: square, currMovePromotion: undefined },
+            { currMoveToSq: square, currMovePromotion: null },
             true
           );
       }

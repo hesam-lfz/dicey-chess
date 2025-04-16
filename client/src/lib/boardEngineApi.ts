@@ -84,6 +84,7 @@ export type CurrentGameSettings = {
 // Settings specific for a given game:
 export type CurrentBoardData = {
   version: number;
+  busyWaiting: boolean;
   turn: Color;
   diceRoll: number;
   diceRoll1: number;
@@ -91,10 +92,11 @@ export type CurrentBoardData = {
   numMovesInTurn: number;
   currMoveFromSq: Square | null;
   currMoveToSq: Square | null;
-  currMovePromotion: PieceSymbol | undefined;
+  currMovePromotion: PieceSymbol | null;
 };
 
 export type SetCurrentBoardData = {
+  busyWaiting?: boolean;
   turn?: Color;
   diceRoll?: number;
   diceRoll1?: number;
@@ -102,7 +104,7 @@ export type SetCurrentBoardData = {
   numMovesInTurn?: number;
   currMoveFromSq?: Square | null;
   currMoveToSq?: Square | null;
-  currMovePromotion?: PieceSymbol | undefined;
+  currMovePromotion?: PieceSymbol | null;
 };
 
 export type SavedGame = {
@@ -117,7 +119,6 @@ export type SavedGame = {
 };
 
 export type Board = {
-  busyWaiting: boolean;
   initPositionFen?: string;
   history: string[][];
   flatSanMoveHistory: string[];
@@ -213,7 +214,6 @@ export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
 
 const initBoard: Board = {
-  busyWaiting: false,
   initPositionFen: undefined, //'rnbqkbnr/pppp1ppp/8/8/8/8/PPP1QPPP/RNB1KBNR b KQkq - 0 1', //undefined
   history: [[]],
   flatSanMoveHistory: [],
@@ -349,7 +349,7 @@ export const resetBoard = (
       diceRoll2: -1,
       currMoveFromSq: null,
       currMoveToSq: null,
-      currMovePromotion: undefined,
+      currMovePromotion: null,
       turn: boardEngine.turn(),
     },
     false
@@ -560,7 +560,7 @@ export function setNewMoveOnBoard(
     {
       currMoveFromSq: fromSquare,
       currMoveToSq: toSquare,
-      currMovePromotion: promotion,
+      currMovePromotion: promotion || null,
     },
     true
   );
@@ -589,48 +589,73 @@ export function makeMove(
       'currentBoardData',
       JSON.stringify(currentBoardData)
     );
-  const move: Move = boardEngine.move({
-    from: fromSquare,
-    to: toSquare,
-    promotion: promotion,
-  });
-  // if this is an online game with a friend, send the roll data:
-  if (
-    isGameAgainstOnlineFriend(currentGameSettings) &&
-    !isOnlineGameRemoteMove &&
-    !isOpponentsTurn(currentGameSettings, currentBoardData)
-  )
-    onlineGameApi_sendMove(fromSquare, toSquare, promotion);
+  try {
+    const move: Move = boardEngine.move({
+      from: fromSquare,
+      to: toSquare,
+      promotion: promotion,
+    });
+    // if this is an online game with a friend, send the roll data:
+    if (
+      isGameAgainstOnlineFriend(currentGameSettings) &&
+      !isOnlineGameRemoteMove &&
+      !isOpponentsTurn(currentGameSettings, currentBoardData)
+    )
+      onlineGameApi_sendMove(fromSquare, toSquare, promotion);
 
-  // if it's a promotion, update the the type of promoted piece:
-  if (promotion) getSquarePiece(toSquare)!.type = promotion;
-  const currentBoardDataUpdates: SetCurrentBoardData = {};
-  currentBoardDataUpdates.turn = boardEngine.turn();
-  board.history[board.history.length - 1].push(move.san);
-  board.flatSanMoveHistory.push(move.san);
-  board.historyNumMoves += 1;
-  currentBoardDataUpdates.numMovesInTurn = currentBoardData.numMovesInTurn - 1;
-  setNewCurrentBoardData(currentBoardDataUpdates, false);
-  //board.replayCurrentMoveInTurnIndex += 1;
-  if (currentBoardData.numMovesInTurn === 0) {
-    // The player has played current turn's all the number of moves according to the dice roll:
-    currentBoardDataUpdates.diceRoll = -1;
-    currentBoardDataUpdates.numMovesInTurn = -1;
+    // if it's a promotion, update the the type of promoted piece:
+    if (promotion) getSquarePiece(toSquare)!.type = promotion;
+    const currentBoardDataUpdates: SetCurrentBoardData = {};
+    currentBoardDataUpdates.turn = boardEngine.turn();
+    board.history[board.history.length - 1].push(move.san);
+    board.flatSanMoveHistory.push(move.san);
+    board.historyNumMoves += 1;
+    currentBoardDataUpdates.numMovesInTurn =
+      currentBoardData.numMovesInTurn - 1;
     setNewCurrentBoardData(currentBoardDataUpdates, false);
-    board.firstMoveInTurn = true;
-    board.history.push([]);
-  } else {
-    // The player still has moves left in the current turn, according to the dice roll:
-    board.firstMoveInTurn = false;
-    // swap turn back to the player who just moved since there's still more to make:
-    swapTurn(setNewCurrentBoardData);
-  }
-  board.replayCurrentFlatIndex += 1;
-  board.flatSquareMoveHistory.push(move);
+    //board.replayCurrentMoveInTurnIndex += 1;
+    if (currentBoardData.numMovesInTurn === 0) {
+      // The player has played current turn's all the number of moves according to the dice roll:
+      currentBoardDataUpdates.diceRoll = -1;
+      currentBoardDataUpdates.numMovesInTurn = -1;
+      setNewCurrentBoardData(currentBoardDataUpdates, false);
+      board.firstMoveInTurn = true;
+      board.history.push([]);
+    } else {
+      // The player still has moves left in the current turn, according to the dice roll:
+      board.firstMoveInTurn = false;
+      // swap turn back to the player who just moved since there's still more to make:
+      swapTurn(setNewCurrentBoardData);
+    }
+    board.replayCurrentFlatIndex += 1;
+    board.flatSquareMoveHistory.push(move);
 
-  // After each move we need to check for game over because if player has moves left
-  // in the turn but has no valid moves then it's a draw:
-  checkForGameOver(currentGameSettings, currentBoardData, user);
+    // After each move we need to check for game over because if player has moves left
+    // in the turn but has no valid moves then it's a draw:
+    checkForGameOver(currentGameSettings, currentBoardData, user);
+  } catch (error) {
+    console.error(
+      'Error making move',
+      'from',
+      fromSquare,
+      'to',
+      toSquare,
+      'promotion',
+      promotion,
+      'error:',
+      error
+    );
+    console.log(
+      'turn',
+      boardEngine.turn(),
+      'fen',
+      boardEngine.fen(),
+      'currentBoardData',
+      JSON.stringify(currentBoardData),
+      'board',
+      JSON.stringify(board)
+    );
+  }
 }
 
 // Helper for function handleDiceRoll below (called when rolled a 0):
@@ -670,12 +695,12 @@ export function handleDiceRoll(
   isOnlineGameRemoteRoll: boolean = false
 ): void {
   board.diceRollHistory.push(roll);
-  // Mark game board busy as it processes the dice being rolled (this is being
-  // checked for incoming online game messages to make sure they wait until
-  // we can receive new game events):
-  board.busyWaiting = true;
   setNewCurrentBoardData(
     {
+      // Mark game board busy as it processes the dice being rolled (this is being
+      // checked for incoming online game messages to make sure they wait until
+      // we can receive new game events):
+      busyWaiting: true,
       diceRoll: roll,
       diceRoll1: roll1,
       diceRoll2: roll2,
