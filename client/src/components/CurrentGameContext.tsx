@@ -16,6 +16,8 @@ import {
   DebugOn,
   SetCurrentBoardData,
   isGameAgainstOnlineFriend,
+  onlineGameApi_close,
+  resetSettings,
 } from '../lib';
 import { WHITE } from 'chess.js';
 
@@ -160,6 +162,17 @@ export function CurrentGameContextProvider({ children }: Props) {
   }
 
   function handleSignOut() {
+    // If we're currently in a game with an online friend, close the web socket
+    // connection:
+    if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
+    // Reset settings/board:
+    resetSettings(currentGameSettings, setNewCurrentGameSettings, false, false);
+    resetBoard(
+      currentGameSettings,
+      setNewCurrentGameSettings,
+      setNewCurrentBoardData
+    );
+    // Sign out:
     setUser(undefined);
     setToken(undefined);
     removeAuth();
