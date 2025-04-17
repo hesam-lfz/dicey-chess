@@ -83,7 +83,7 @@ export type CurrentGameSettings = {
 
 // Settings specific for a given game:
 export type CurrentBoardData = {
-  busyWaiting: boolean;
+  version: number;
   turn: Color;
   diceRoll: number;
   diceRoll1: number;
@@ -95,7 +95,8 @@ export type CurrentBoardData = {
 };
 
 export type SetCurrentBoardData = {
-  busyWaiting?: boolean;
+  busyBoardWaiting?: boolean;
+  busyOpponentWaiting?: boolean;
   turn?: Color;
   diceRoll?: number;
   diceRoll1?: number;
@@ -118,6 +119,8 @@ export type SavedGame = {
 };
 
 export type Board = {
+  busyBoardWaiting: boolean;
+  busyOpponentWaiting: boolean;
   initPositionFen?: string;
   history: string[][];
   flatSanMoveHistory: string[];
@@ -213,6 +216,8 @@ export const getSquareRank: (square: Square) => number = (square: Square) =>
   +square[1];
 
 const initBoard: Board = {
+  busyBoardWaiting: false,
+  busyOpponentWaiting: false,
   initPositionFen: undefined, //'rnbqkbnr/pppp1ppp/8/8/8/8/PPP1QPPP/RNB1KBNR b KQkq - 0 1', //undefined
   history: [[]],
   flatSanMoveHistory: [],
@@ -694,12 +699,12 @@ export function handleDiceRoll(
   isOnlineGameRemoteRoll: boolean = false
 ): void {
   board.diceRollHistory.push(roll);
+  // Mark game board busy as it processes the dice being rolled (this is being
+  // checked for incoming online game messages to make sure they wait until
+  // we can receive new game events):
+  board.busyBoardWaiting = true;
   setNewCurrentBoardData(
     {
-      // Mark game board busy as it processes the dice being rolled (this is being
-      // checked for incoming online game messages to make sure they wait until
-      // we can receive new game events):
-      busyWaiting: true,
       diceRoll: roll,
       diceRoll1: roll1,
       diceRoll2: roll2,

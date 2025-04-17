@@ -107,7 +107,7 @@ export function Board({
     // Mark game board busy as it processes the move being made (this is being
     // checked for incoming online game messages to make sure they wait until
     // we can receive new game events):
-    setNewCurrentBoardData({ busyWaiting: true }, false);
+    board.busyBoardWaiting = true;
     if (replayModeOn) {
       setReplayStepMoveTriggered(false);
     } else {

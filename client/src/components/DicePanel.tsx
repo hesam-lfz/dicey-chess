@@ -50,12 +50,12 @@ export function DicePanel({
     // If we re-rolled due to an AI 0 roll on check, and again we got a 0,
     // then force another re-roll:
     if (roll === 0 && alreadyTriggeredAIRoll) setAlreadyTriggeredAIRoll(false);
+    // Mark game board busy as it processes the dice being rolled (this is being
+    // checked for incoming online game messages to make sure they wait until
+    // we can receive new game events):
+    board.busyBoardWaiting = true;
     setNewCurrentBoardData(
       {
-        // Mark game board busy as it processes the dice being rolled (this is being
-        // checked for incoming online game messages to make sure they wait until
-        // we can receive new game events):
-        busyWaiting: true,
         numMovesInTurn: roll,
         diceRoll: roll,
         diceRoll1: roll1,

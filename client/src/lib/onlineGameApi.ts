@@ -71,10 +71,16 @@ function handleGameMessage(
 ): void {
   // If board was busy making moves while we received this message, delay
   // processing it:
-  const busyWaiting = getCurrentBoardData().busyWaiting;
+  const busyWaiting = board.busyBoardWaiting;
   if (DebugOn)
-    console.log('handleGameMessage', msg, data, 'busyWaiting', busyWaiting);
-  if (busyWaiting) {
+    console.log(
+      'handleGameMessage',
+      msg,
+      data,
+      'busyBoardWaiting',
+      busyWaiting
+    );
+  if (busyWaiting && msg !== 'abort') {
     if (
       internalGlobals.busyWaitReattempts < internalGlobals.busyWaitMaxReattempts
     ) {

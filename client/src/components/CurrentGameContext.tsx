@@ -45,7 +45,7 @@ const defaultCurrentGameSettings: CurrentGameSettings = {
 };
 
 const defaultCurrentBoardData: CurrentBoardData = {
-  busyWaiting: false,
+  version: 0,
   turn: WHITE,
   diceRoll: -1,
   diceRoll1: -1,
@@ -109,8 +109,6 @@ export function CurrentGameContextProvider({ children }: Props) {
           'data',
           data
         );
-      if (data.busyWaiting !== undefined)
-        prevCurrentBoardData.busyWaiting = data.busyWaiting;
       if (data.turn !== undefined) prevCurrentBoardData.turn = data.turn;
       if (data.diceRoll !== undefined)
         prevCurrentBoardData.diceRoll = data.diceRoll;
@@ -126,6 +124,12 @@ export function CurrentGameContextProvider({ children }: Props) {
         prevCurrentBoardData.currMoveToSq = data.currMoveToSq;
       if (data.currMovePromotion !== undefined)
         prevCurrentBoardData.currMovePromotion = data.currMovePromotion;
+      prevCurrentBoardData.version += 1;
+      if (DebugOn)
+        console.log(
+          'setNewCurrentBoardData result',
+          JSON.stringify(prevCurrentBoardData)
+        );
       return setState ? { ...prevCurrentBoardData } : prevCurrentBoardData;
     };
     setCurrentBoardData(setCurrentBoardDataFromPrev);

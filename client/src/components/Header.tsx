@@ -3,11 +3,11 @@ import LogoIcon from '../assets/dicey-chess-logo-c.png';
 import { useCurrentGameContext } from './useCurrentGameContext';
 
 import { AppSubdomain } from '../App';
-import { shorten } from '../lib';
+import { board, shorten } from '../lib';
 import { useRef } from 'react';
 
 export function Header() {
-  const { user, handleSignOut, currentBoardData } = useCurrentGameContext();
+  const { user, handleSignOut } = useCurrentGameContext();
   const navigate = useNavigate();
   const nav1ElementRef = useRef<null | HTMLElement>(null);
   const nav2ElementRef = useRef<null | HTMLElement>(null);
@@ -18,7 +18,7 @@ export function Header() {
     to: string,
     preNavigateCallback?: () => void
   ): void {
-    if (currentBoardData.busyWaiting) {
+    if (board.busyBoardWaiting || board.busyOpponentWaiting) {
       // Change the pointer look for a bit while to show its not allowed yet:
       [nav1ElementRef, nav2ElementRef].forEach((e) =>
         e?.current?.classList.add('waiting')
