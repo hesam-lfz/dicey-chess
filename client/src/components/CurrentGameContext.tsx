@@ -109,6 +109,8 @@ export function CurrentGameContextProvider({ children }: Props) {
           'data',
           data
         );
+      if (data.busyWaiting !== undefined)
+        prevCurrentBoardData.busyWaiting = data.busyWaiting;
       if (data.turn !== undefined) prevCurrentBoardData.turn = data.turn;
       if (data.diceRoll !== undefined)
         prevCurrentBoardData.diceRoll = data.diceRoll;
