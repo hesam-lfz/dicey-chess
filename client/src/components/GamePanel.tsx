@@ -71,11 +71,12 @@ export function GamePanel({
     setGameId(currGameId);
     setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
-
-    const itIsAITurn = isAITurn(currentGameSettings, currentBoardData);
     // if It remains AI turn, keep busy flag on, else turn it off here since we're done
     // making the move:
-    setNewCurrentBoardData({ busyWaiting: itIsAITurn }, false);
+    setNewCurrentBoardData(
+      { busyWaiting: isOpponentsTurn(currentGameSettings, currentBoardData) },
+      false
+    );
     if (DebugOn)
       console.log(
         'AITurn',

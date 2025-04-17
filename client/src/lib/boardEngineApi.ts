@@ -83,7 +83,6 @@ export type CurrentGameSettings = {
 
 // Settings specific for a given game:
 export type CurrentBoardData = {
-  version: number;
   busyWaiting: boolean;
   turn: Color;
   diceRoll: number;

@@ -12,8 +12,12 @@ import { User } from './auth';
 
 export type OnlineGameGlobals = {
   aborted: boolean;
+};
+
+type InternalGlobals = {
   busyWaitMaxReattempts: number;
   busyWaitReattempts: number;
+  waitOnBoardBusyDelay: number;
 };
 
 type SocketResponseMessage = {
@@ -37,13 +41,17 @@ type RemoteMoveData = {
 // Some globals accessed by various components/pages:
 export const onlineGameApi_globals: OnlineGameGlobals = {
   aborted: false,
-  busyWaitMaxReattempts: 10,
-  busyWaitReattempts: 0,
 };
 
-// If receiving online game remote event, this is how much we wait until we
-// check again if we're ready processing incoming game event from the opponent:
-const waitOnBoardBusyDelay = 1000;
+// Some globals accessed by various components/pages:
+const internalGlobals: InternalGlobals = {
+  busyWaitMaxReattempts: 30,
+  busyWaitReattempts: 0,
+  // If receiving online game remote event, this is how much we wait until we
+  // check again if we're ready processing incoming game event from the opponent:
+  waitOnBoardBusyDelay: 1000,
+};
+
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
 let theUserId: number;
 let thePin: string;
@@ -68,10 +76,9 @@ function handleGameMessage(
     console.log('handleGameMessage', msg, data, 'busyWaiting', busyWaiting);
   if (busyWaiting) {
     if (
-      onlineGameApi_globals.busyWaitReattempts <
-      onlineGameApi_globals.busyWaitMaxReattempts
+      internalGlobals.busyWaitReattempts < internalGlobals.busyWaitMaxReattempts
     ) {
-      onlineGameApi_globals.busyWaitReattempts += 1;
+      internalGlobals.busyWaitReattempts += 1;
       setTimeout(
         () =>
           handleGameMessage(
@@ -82,14 +89,14 @@ function handleGameMessage(
             msg,
             data
           ),
-        waitOnBoardBusyDelay
+        internalGlobals.waitOnBoardBusyDelay
       );
     } else {
       console.log('timed out busy waiting. Aborting game...');
       handleGameAbortMessage(onGameAbortCallback);
     }
     return;
-  } else onlineGameApi_globals.busyWaitReattempts = 0;
+  } else internalGlobals.busyWaitReattempts = 0;
   // Receiving a game event: a dice roll from the opponent friend:
   if (msg === 'roll')
     handleGameDiceRollMessage(
@@ -203,7 +210,7 @@ export function onlineGameApi_initialize(
           })
         );
       else if (msg === 'ready') {
-        onlineGameApi_globals.busyWaitReattempts = 0;
+        internalGlobals.busyWaitReattempts = 0;
         onOnlineGameReadyCallback(data!.color);
       }
     } else if (type === 'game')

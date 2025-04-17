@@ -900,7 +900,6 @@ setTimeout(async () => {
       pendingGameFriendInviteRequestsTo[theFriendId] = theUserId;
     } else inProgressFriendGameInvitedFrom[theUserId] = theFriendId;
   });
-  cacheLog();
 
   // Delete any expired online game data from the database:
   const expiredOnlineGames: OnlineGame[] =
