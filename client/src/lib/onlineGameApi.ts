@@ -80,7 +80,7 @@ function handleGameMessage(
       'busyBoardWaiting',
       busyWaiting
     );
-  if (busyWaiting && msg !== 'abort') {
+  if (busyWaiting) {
     if (
       internalGlobals.busyWaitReattempts < internalGlobals.busyWaitMaxReattempts
     ) {
@@ -113,8 +113,6 @@ function handleGameMessage(
     );
   // Receiving a game event: a move from the opponent friend:
   else if (msg === 'move') handleGameMoveMessage(setNewCurrentBoardData, data);
-  // Receiving a game abort event from the opponent friend:
-  else if (msg === 'abort') handleGameAbortMessage(onGameAbortCallback);
 }
 
 // Handles receiving a game event: a dice roll from the opponent friend:
@@ -219,15 +217,19 @@ export function onlineGameApi_initialize(
         internalGlobals.busyWaitReattempts = 0;
         onOnlineGameReadyCallback(data!.color);
       }
-    } else if (type === 'game')
-      handleGameMessage(
-        currentGameSettings,
-        getCurrentBoardData,
-        setNewCurrentBoardData,
-        onGameAbortCallback,
-        msg,
-        data
-      );
+    } else if (type === 'game') {
+      // Receiving a game abort event from the opponent friend:
+      if (msg === 'abort') handleGameAbortMessage(onGameAbortCallback);
+      else
+        handleGameMessage(
+          currentGameSettings,
+          getCurrentBoardData,
+          setNewCurrentBoardData,
+          onGameAbortCallback,
+          msg,
+          data
+        );
+    }
   };
 
   onlineGameApi_socket.onclose = () => {
