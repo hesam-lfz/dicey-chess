@@ -45,11 +45,11 @@ export const onlineGameApi_globals: OnlineGameGlobals = {
 
 // Some globals accessed by various components/pages:
 const internalGlobals: InternalGlobals = {
-  busyWaitMaxReattempts: 30,
+  busyWaitMaxReattempts: 10,
   busyWaitReattempts: 0,
   // If receiving online game remote event, this is how much we wait until we
   // check again if we're ready processing incoming game event from the opponent:
-  waitOnBoardBusyDelay: 1000,
+  waitOnBoardBusyDelay: 2000,
 };
 
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)

@@ -73,9 +73,10 @@ export function GamePanel({
     setGameId(currGameId);
     setReplayModeOn(currReplayModeOn);
     setShouldAlertDiceRoll(false);
-    // if It remains AI turn, keep busy flag on, else turn it off here since we're done
-    // making the move:
+    // Set board busy flag off since we're done making the move:
     board.busyBoardWaiting = false;
+    // if It remains opponents turn, keep busy flag on, else turn it off here since we're done
+    // making opponents moves:
     board.busyOpponentWaiting =
       !board.gameOver && isOpponentsTurn(currentGameSettings, currentBoardData);
     if (DebugOn)
