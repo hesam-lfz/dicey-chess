@@ -216,11 +216,12 @@ export function Settings() {
     currentGameSettings.opponent = friendUsername;
     currentGameSettings.userPlaysColor = userPlaysColor;
     setNewCurrentGameSettings();
-    console.log(
-      'online game ready',
-      'currentGameSettings',
-      currentGameSettings
-    );
+    if (DebugOn)
+      console.log(
+        'online game ready',
+        'currentGameSettings',
+        currentGameSettings
+      );
     navigate(AppSubdomain);
   }
 

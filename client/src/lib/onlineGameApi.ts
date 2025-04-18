@@ -19,6 +19,7 @@ type InternalGlobals = {
   busyWaitReattempts: number;
   waitOnBoardBusyDelay: number;
   gameMessagePipeline: RemoteGameEventMessage[];
+  gameAbortHandled: boolean;
 };
 
 type SocketResponseMessage = {
@@ -59,6 +60,7 @@ const internalGlobals: InternalGlobals = {
   // Pipeline of incoming game event messages received from the remote opponent, to be
   // processed in order one at a time:
   gameMessagePipeline: [],
+  gameAbortHandled: false,
 };
 
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
@@ -175,6 +177,7 @@ function handleGameMoveMessage(
 // This will also happen if reached gameover:
 function handleGameAbortMessage(onGameAbortCallback: () => void): void {
   if (!board.gameOver) {
+    internalGlobals.gameAbortHandled = true;
     onlineGameApi_socket.close();
     onGameAbortCallback();
   }
@@ -232,6 +235,7 @@ export function onlineGameApi_initialize(
         // Reset the game event pipeline:
         internalGlobals.busyWaitReattempts = 0;
         internalGlobals.gameMessagePipeline = [];
+        internalGlobals.gameAbortHandled = false;
         onOnlineGameReadyCallback(data!.color);
       }
     } else if (type === 'game') {
@@ -251,6 +255,8 @@ export function onlineGameApi_initialize(
 
   onlineGameApi_socket.onclose = () => {
     console.log('Disconnected from server');
+    if (!(internalGlobals.gameAbortHandled || board.gameOver))
+      onGameAbortCallback();
   };
 
   onlineGameApi_socket.onerror = (error: Event) => {
