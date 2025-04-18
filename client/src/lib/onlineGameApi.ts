@@ -18,6 +18,7 @@ type InternalGlobals = {
   busyWaitMaxReattempts: number;
   busyWaitReattempts: number;
   waitOnBoardBusyDelay: number;
+  gameMessagePipeline: RemoteGameEventMessage[];
 };
 
 type SocketResponseMessage = {
@@ -38,6 +39,11 @@ type RemoteMoveData = {
   promotion?: string;
 };
 
+type RemoteGameEventMessage = {
+  msg: string;
+  data?: Record<string, any>;
+};
+
 // Some globals accessed by various components/pages:
 export const onlineGameApi_globals: OnlineGameGlobals = {
   aborted: false,
@@ -50,6 +56,9 @@ const internalGlobals: InternalGlobals = {
   // If receiving online game remote event, this is how much we wait until we
   // check again if we're ready processing incoming game event from the opponent:
   waitOnBoardBusyDelay: 2000,
+  // Pipeline of incoming game event messages received from the remote opponent, to be
+  // processed in order one at a time:
+  gameMessagePipeline: [],
 };
 
 let onlineGameApi_socket: WebSocket; // <-- chess AI player engine (socket ver.)
@@ -58,25 +67,25 @@ let thePin: string;
 
 // Handles receiving game events from the opponent friend
 // If board is currently busy processing a previous event, waits first:
-function handleGameMessage(
+function handleNextGameMessage(
   currentGameSettings: CurrentGameSettings,
   getCurrentBoardData: () => CurrentBoardData,
   setNewCurrentBoardData: (
     data: SetCurrentBoardData,
     setState: boolean
   ) => void,
-  onGameAbortCallback: () => void,
-  msg: string,
-  data?: Record<string, any>
+  onGameAbortCallback: () => void
 ): void {
+  // Message pipeline should not be empty at this point. If it is, we have a bug!:
+  if (internalGlobals.gameMessagePipeline.length === 0) return;
   // If board was busy making moves while we received this message, delay
   // processing it:
   const busyWaiting = board.busyBoardWaiting;
   if (DebugOn)
     console.log(
-      'handleGameMessage',
-      msg,
-      data,
+      'handleNextGameMessage',
+      'next message in the pipeline:',
+      JSON.stringify(internalGlobals.gameMessagePipeline[0]),
       'busyBoardWaiting',
       busyWaiting
     );
@@ -87,13 +96,11 @@ function handleGameMessage(
       internalGlobals.busyWaitReattempts += 1;
       setTimeout(
         () =>
-          handleGameMessage(
+          handleNextGameMessage(
             currentGameSettings,
             getCurrentBoardData,
             setNewCurrentBoardData,
-            onGameAbortCallback,
-            msg,
-            data
+            onGameAbortCallback
           ),
         internalGlobals.waitOnBoardBusyDelay
       );
@@ -102,7 +109,15 @@ function handleGameMessage(
       handleGameAbortMessage(onGameAbortCallback);
     }
     return;
-  } else internalGlobals.busyWaitReattempts = 0;
+  }
+  internalGlobals.busyWaitReattempts = 0;
+  // Mark game board busy as it processes the dice being rolled (this is being
+  // checked for incoming online game messages to make sure they wait until
+  // we can receive new game events):
+  board.busyBoardWaiting = true;
+  // Get the next incoming message in the pipeline to process:
+  const { msg, data } =
+    internalGlobals.gameMessagePipeline.shift() as RemoteGameEventMessage;
   // Receiving a game event: a dice roll from the opponent friend:
   if (msg === 'roll')
     handleGameDiceRollMessage(
@@ -214,21 +229,23 @@ export function onlineGameApi_initialize(
           })
         );
       else if (msg === 'ready') {
+        // Reset the game event pipeline:
         internalGlobals.busyWaitReattempts = 0;
+        internalGlobals.gameMessagePipeline = [];
         onOnlineGameReadyCallback(data!.color);
       }
     } else if (type === 'game') {
       // Receiving a game abort event from the opponent friend:
       if (msg === 'abort') handleGameAbortMessage(onGameAbortCallback);
-      else
-        handleGameMessage(
+      else {
+        internalGlobals.gameMessagePipeline.push({ msg: msg, data: data });
+        handleNextGameMessage(
           currentGameSettings,
           getCurrentBoardData,
           setNewCurrentBoardData,
-          onGameAbortCallback,
-          msg,
-          data
+          onGameAbortCallback
         );
+      }
     }
   };
 
