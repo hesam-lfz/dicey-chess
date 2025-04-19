@@ -196,6 +196,7 @@ export async function chessAiEngineApi_initChessAiEngine(): Promise<void> {
           error
         );
         console.error(chessAiEngine_fallbackMessage);
+        alert(chessAiEngine_fallbackMessage);
         chessAiEngine_fallbackActivated = true;
         settings.AIPlayerIsSmart = false;
       }
