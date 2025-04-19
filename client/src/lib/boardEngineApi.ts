@@ -48,6 +48,10 @@ import {
   onlineGameApi_sendMove,
 } from './onlineGameApi';
 
+export type GameGlobals = {
+  dialogMessagesToShow: string[];
+};
+
 // General internal game settings:
 export type InternalSettings = {
   initPlayerRank: number;
@@ -98,8 +102,6 @@ export type CurrentBoardData = {
 };
 
 export type SetCurrentBoardData = {
-  busyBoardWaiting?: boolean;
-  busyOpponentWaiting?: boolean;
   turn?: Color;
   diceRoll?: number;
   diceRoll1?: number;
@@ -143,6 +145,11 @@ export type BasicMove = {
   from: Square;
   to: Square;
   promotion?: PieceSymbol;
+};
+
+// Some globals accessed by various components/pages:
+export const gameGlobals: GameGlobals = {
+  dialogMessagesToShow: [],
 };
 
 export const pieceSVGs: { [key: string]: any } = {

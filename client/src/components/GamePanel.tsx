@@ -3,6 +3,7 @@ import {
   board,
   boardEngine,
   DebugOn,
+  gameGlobals,
   handleDiceRoll,
   internalSettings,
   isAITurn,
@@ -24,6 +25,7 @@ type Props = {
   onGameOver: () => void;
   onNewGame: () => void;
   onLoadGame: () => void;
+  onGameMessageToShow: (delay: boolean, msg?: string) => void;
 };
 
 export function GamePanel({
@@ -33,6 +35,7 @@ export function GamePanel({
   onGameOver,
   onNewGame,
   onLoadGame,
+  onGameMessageToShow,
 }: Props) {
   const { currentGameSettings, currentBoardData, setNewCurrentBoardData } =
     useCurrentGameContext();
@@ -79,6 +82,10 @@ export function GamePanel({
     // making opponents moves:
     board.busyOpponentWaiting =
       !board.gameOver && isOpponentsTurn(currentGameSettings, currentBoardData);
+    // Show any messages that might have been set globally (currently, falling back
+    // to stupid ai when ai engine API is blocked):
+    if (gameGlobals.dialogMessagesToShow.length > 0)
+      onGameMessageToShow(true, gameGlobals.dialogMessagesToShow.shift());
     if (DebugOn)
       console.log(
         'AITurn',
@@ -93,6 +100,7 @@ export function GamePanel({
     currReplayModeOn,
     currentBoardData,
     currentGameSettings,
+    onGameMessageToShow,
     onGameOver,
     replayModeOn,
     setNewCurrentBoardData,

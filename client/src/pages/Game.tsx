@@ -78,6 +78,15 @@ export function Game() {
     PieceSymbol[] | undefined
   >(undefined);
 
+  const openInfoMessageModal = useCallback((delay: boolean, msg?: string) => {
+    if (msg) infoMessageModalMessage = msg;
+    if (delay)
+      setTimeout(async () => {
+        setIsInfoMessageModalOpen(true);
+      }, internalSettings.dialogOpenDelay);
+    else setIsInfoMessageModalOpen(true);
+  }, []);
+
   async function handleSaveGame(): Promise<void> {
     handleGameOverModalClose();
     onSaveGame();
@@ -88,17 +97,15 @@ export function Game() {
         board
       );
       setIsInfoMessageModalOpen(false);
-      infoMessageModalMessage =
+      openInfoMessageModal(
+        true,
         'Game saved.' +
-        (savedOnDatabase
-          ? ''
-          : ' Sign in to save your games across all your devices.');
-      setTimeout(async () => {
-        setIsInfoMessageModalOpen(true);
-      }, internalSettings.dialogOpenDelay);
+          (savedOnDatabase
+            ? ''
+            : ' Sign in to save your games across all your devices.')
+      );
     }, internalSettings.dialogOpenDelay);
-    infoMessageModalMessage = 'Saving game...';
-    setIsInfoMessageModalOpen(true);
+    openInfoMessageModal(false, 'Saving game...');
   }
 
   function handleGameOverModalClose(): void {
@@ -154,8 +161,7 @@ export function Game() {
       const allSavedGames = await storageApi_loadGames(user);
       //console.log('saved games', allSavedGames);
       if (allSavedGames.length === 0) {
-        infoMessageModalMessage = 'No saved games found!';
-        setIsInfoMessageModalOpen(true);
+        openInfoMessageModal(false, 'No saved games found!');
       } else {
         setSavedGames(allSavedGames);
         setIsChooseGameToLoadModalOpen(true);
@@ -179,10 +185,7 @@ export function Game() {
   async function handleDeleteGame(): Promise<void> {
     if (DebugOn) console.log('deleting game...');
     await storageApi_deleteGame(user, gameIdToDelete);
-    infoMessageModalMessage = 'Game deleted.';
-    setTimeout(async () => {
-      setIsInfoMessageModalOpen(true);
-    }, internalSettings.dialogOpenDelay);
+    openInfoMessageModal(true, 'Game deleted.');
     handleGameDeleteModalClose();
   }
 
@@ -263,6 +266,7 @@ export function Game() {
         onGameOver={onGameOver}
         onNewGame={onResetGame}
         onLoadGame={onLoadGame}
+        onGameMessageToShow={openInfoMessageModal}
       />
       <FooterPanel />
       <Modal isOpen={isGameSaveModalOpen} onClose={() => {}}>

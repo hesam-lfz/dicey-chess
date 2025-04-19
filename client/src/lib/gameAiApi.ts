@@ -6,6 +6,7 @@ import {
   settings,
   DebugOn,
   internalSettings,
+  gameGlobals,
 } from './boardEngineApi';
 
 interface AIEngineParams {
@@ -196,7 +197,7 @@ export async function chessAiEngineApi_initChessAiEngine(): Promise<void> {
           error
         );
         console.error(chessAiEngine_fallbackMessage);
-        alert(chessAiEngine_fallbackMessage);
+        gameGlobals.dialogMessagesToShow.push(chessAiEngine_fallbackMessage);
         chessAiEngine_fallbackActivated = true;
         settings.AIPlayerIsSmart = false;
       }

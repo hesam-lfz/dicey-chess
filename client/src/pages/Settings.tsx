@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useCurrentGameContext } from '../components/useCurrentGameContext';
 import { Modal } from '../components/Modal';
@@ -6,6 +6,7 @@ import {
   type InviteRequestResponse,
   database_sendInviteFriendRequestByUsername,
   DebugOn,
+  gameGlobals,
   internalSettings,
   onlineGameApi_globals,
   onlineGameApi_initialize,
@@ -70,6 +71,15 @@ export function Settings() {
   const inviteFormUsernameRef = useRef<null | HTMLInputElement>(null);
   const inviteFormFriendUsernameRef = useRef<null | HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  // Show any messages that might have been set globally (currently, falling back
+  // to stupid ai when ai engine API is blocked):
+  useEffect(() => {
+    if (gameGlobals.dialogMessagesToShow.length > 0) {
+      infoMessageModalMessage = gameGlobals.dialogMessagesToShow.shift()!;
+      setIsInfoMessageModalOpen(true);
+    }
+  });
 
   const resetBoardAndSaveSettings = useCallback(() => {
     resetBoard(
