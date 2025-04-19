@@ -36,6 +36,7 @@ import {
   storageApi_updatePlayerRank,
 } from './storageApi';
 import {
+  chessAiEngine_fallbackActivated,
   chessAiEngine_socket,
   chessAiEngineApi_closeChessAiEngine_socket,
   chessAiEngineApi_initChessAiEngine,
@@ -75,6 +76,8 @@ export type Settings = {
 
 // Settings specific for a given game:
 export type CurrentGameSettings = {
+  // Will set to true when AI engine API cannot be used due to network failures/restrictions:
+  chessAiEngine_fallbackActivated: boolean;
   gameId: number;
   userPlaysColor: Color;
   opponentIsAI: boolean;
@@ -311,6 +314,8 @@ export const setCurrentGameSettingsBasedOnSettings = (
   currentGameSettings: CurrentGameSettings,
   setNewCurrentGameSettings: () => void
 ) => {
+  currentGameSettings.chessAiEngine_fallbackActivated =
+    chessAiEngine_fallbackActivated;
   // set one player mode against AI:
   currentGameSettings.opponentIsAI = settings.opponentIsAI;
   // set opponent
@@ -362,9 +367,8 @@ export const resetBoard = (
   // close the chess AI engine socket if we have one running currently:
   if (chessAiEngine_socket) chessAiEngineApi_closeChessAiEngine_socket();
   // If we need the chess aI engine (1-player game) set it up:
-  if (isGameAgainstAI(currentGameSettings) && settings.AIPlayerIsSmart) {
+  if (isGameAgainstAI(currentGameSettings) && settings.AIPlayerIsSmart)
     chessAiEngineApi_initChessAiEngine();
-  }
 };
 
 // Pre-populate all properties of board object properly based on a previously

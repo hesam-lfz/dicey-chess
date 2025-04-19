@@ -71,20 +71,28 @@ export function Settings() {
   const inviteFormFriendUsernameRef = useRef<null | HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  const onResetSettings = useCallback(() => {
-    resetSettings(currentGameSettings, setNewCurrentGameSettings, true, true);
+  const resetBoardAndSaveSettings = useCallback(() => {
     resetBoard(
       currentGameSettings,
       setNewCurrentGameSettings,
       setNewCurrentBoardData
     );
     saveSettings(currentGameSettings, setNewCurrentGameSettings);
+  }, [currentGameSettings, setNewCurrentBoardData, setNewCurrentGameSettings]);
+
+  const onResetSettings = useCallback(() => {
+    resetSettings(currentGameSettings, setNewCurrentGameSettings, true, true);
+    resetBoardAndSaveSettings();
     setOnePlayer(settings.onePlayerMode);
     setOpponentIsAI(settings.opponentIsAI);
     setUserPlaysColor(settings.userPlaysColor);
     setUserPlaysColorRandomly(settings.userPlaysColorRandomly);
     setAIPlayerIsSmart(settings.AIPlayerIsSmart);
-  }, [currentGameSettings, setNewCurrentBoardData, setNewCurrentGameSettings]);
+  }, [
+    currentGameSettings,
+    resetBoardAndSaveSettings,
+    setNewCurrentGameSettings,
+  ]);
 
   const onPlayerModeChange = useCallback(
     (onePlayer: boolean, isOpponentAI: boolean) => {
@@ -100,19 +108,9 @@ export function Settings() {
       setOpponentIsAI(isOpponentAI);
       settings.onePlayerMode = onePlayer;
       settings.opponentIsAI = isOpponentAI;
-      resetBoard(
-        currentGameSettings,
-        setNewCurrentGameSettings,
-        setNewCurrentBoardData
-      );
-      saveSettings(currentGameSettings, setNewCurrentGameSettings);
+      resetBoardAndSaveSettings();
     },
-    [
-      currentGameSettings,
-      setNewCurrentBoardData,
-      setNewCurrentGameSettings,
-      user,
-    ]
+    [resetBoardAndSaveSettings, user]
   );
 
   const onUserPlaysColorChange = useCallback(
@@ -135,28 +133,18 @@ export function Settings() {
       setUserPlaysColorRandomly(randomOn);
       settings.userPlaysColor = colorToSet;
       settings.userPlaysColorRandomly = randomOn;
-      resetBoard(
-        currentGameSettings,
-        setNewCurrentGameSettings,
-        setNewCurrentBoardData
-      );
-      saveSettings(currentGameSettings, setNewCurrentGameSettings);
+      resetBoardAndSaveSettings();
     },
-    [currentGameSettings, setNewCurrentBoardData, setNewCurrentGameSettings]
+    [resetBoardAndSaveSettings]
   );
 
   const onAISmartChange = useCallback(
     (checked: boolean) => {
       setAIPlayerIsSmart(checked);
       settings.AIPlayerIsSmart = checked;
-      resetBoard(
-        currentGameSettings,
-        setNewCurrentGameSettings,
-        setNewCurrentBoardData
-      );
-      saveSettings(currentGameSettings, setNewCurrentGameSettings);
+      resetBoardAndSaveSettings();
     },
-    [currentGameSettings, setNewCurrentBoardData, setNewCurrentGameSettings]
+    [resetBoardAndSaveSettings]
   );
 
   function handleSigninToPlayFriendOnlineModalClose(): void {

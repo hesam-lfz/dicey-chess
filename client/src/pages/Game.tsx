@@ -254,13 +254,6 @@ export function Game() {
     }
   }
 
-  /*
-  if (!onlineGameAbortedCallbackSet) {
-    onlineGameAbortedCallbackSet = true;
-    onlineGameApi_globals.onlineGameAbortedCallback = handleOnlineGameAborted;
-  }
-    */
-
   return (
     <>
       <GamePanel

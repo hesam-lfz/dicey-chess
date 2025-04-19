@@ -38,6 +38,7 @@ export type CurrentGameContextValues = {
 
 // Settings specific for a given game:
 const defaultCurrentGameSettings: CurrentGameSettings = {
+  chessAiEngine_fallbackActivated: false,
   gameId: 0,
   userPlaysColor: WHITE,
   opponentIsAI: true,

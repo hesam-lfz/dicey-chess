@@ -15,7 +15,13 @@ interface AIEngineParams {
   searchmoves?: string;
 }
 
-export let chessAiEngine_socket: WebSocket; // <-- chess AI player engine (socket ver.)
+// chess AI player engine (socket version):
+export let chessAiEngine_socket: WebSocket;
+// Will set to true when AI engine API cannot be used due to network failures/restrictions:
+export let chessAiEngine_fallbackActivated = false;
+export const chessAiEngine_fallbackMessage =
+  'Network disallowed calling the game AI engine API. Falling back to random/stupid move AI...';
+
 let chessAiEngineUrl: string;
 let chessAiEngineBusy_socket: boolean = false;
 let chessAiEngineResponseMove: BasicMove | null = null;
@@ -139,6 +145,7 @@ async function awaitChessAiEngineMove_socket(
 
 // Sets up proper URLs and preparations for AI engine API communication:
 export async function chessAiEngineApi_initChessAiEngine(): Promise<void> {
+  chessAiEngine_fallbackActivated = false;
   if (internalSettings.AIEngineUsesSocket) {
     // AI Engine API uses: socket
     chessAiEngineUrl = 'wss:' + import.meta.env.VITE_APP_CHESS_ENGINE_API_URL;
@@ -167,7 +174,6 @@ export async function chessAiEngineApi_initChessAiEngine(): Promise<void> {
       if (DebugOn) console.log('Test of AI engine API fetch succeeded', move);
     } catch (error) {
       console.error('Test of AI engine API fetch encountered error):', error);
-
       if (await reattemptInitChessAiEngine()) {
         if (DebugOn)
           console.log(
@@ -189,7 +195,8 @@ export async function chessAiEngineApi_initChessAiEngine(): Promise<void> {
           'Test of AI engine API with proxy CORS fetch encountered error:',
           error
         );
-        console.log('Falling back to stupid random move AI...');
+        console.error(chessAiEngine_fallbackMessage);
+        chessAiEngine_fallbackActivated = true;
         settings.AIPlayerIsSmart = false;
       }
     }
