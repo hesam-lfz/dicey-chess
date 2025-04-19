@@ -5,11 +5,10 @@
 #root {
   display: flex;
   flex-direction: column;
-
-  /* justify-content: space-evenly; */
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
+  padding-bottom: 50px;
   text-align: center;
   background-color: #222;
   color: white;
@@ -315,10 +314,6 @@ dialog button {
 	Small Device Portrait Screen
 */
 @media screen and (orientation: portrait) {
-  #root {
-    padding: 0;
-  }
-
   .header {
     justify-content: space-between;
   }
