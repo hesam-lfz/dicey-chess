@@ -247,6 +247,7 @@ dialog button {
 }
 
 .app-version {
+  font-weight: 200;
   padding: 0 5px;
   border-width: thin;
   border-style: solid;
