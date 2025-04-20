@@ -44,6 +44,7 @@ import {
 import { readToken, saveAuth, User } from './auth';
 import {
   onlineGameApi_close,
+  onlineGameApi_globals,
   onlineGameApi_sendDiceRoll,
   onlineGameApi_sendMove,
 } from './onlineGameApi';
@@ -55,7 +56,8 @@ export type GameGlobals = {
 // General internal game settings:
 export type InternalSettings = {
   initPlayerRank: number;
-  rankPerGameUpdateIncrement: number;
+  smartAIPlayerRank: number;
+  stupidAIPlayerRank: number;
   makeMoveDelay: number;
   AIMoveDelay: number;
   pauseOnZeroRollDelay: number;
@@ -111,6 +113,9 @@ export type SetCurrentBoardData = {
   currMoveToSq?: Square | null;
   currMovePromotion?: PieceSymbol | null;
 };
+
+// outcome number for a game (1 = win, 0.5 = draw, 0 = loss):
+export type GameOutcomeNumber = 0 | 0.5 | 1;
 
 export type SavedGame = {
   userId: number;
@@ -243,7 +248,8 @@ const initBoard: Board = {
 
 export const internalSettings: InternalSettings = {
   initPlayerRank: 400,
-  rankPerGameUpdateIncrement: 12,
+  smartAIPlayerRank: 1000,
+  stupidAIPlayerRank: 400,
   AIMoveDelay: 500,
   makeMoveDelay: 50,
   pauseOnZeroRollDelay: 2000,
@@ -825,8 +831,12 @@ export const checkForGameOver: (
       currentGameSettings.opponent
     );
     // if user in session update player rank:
-    if (user && gameAffectsPlayerRank(currentGameSettings))
-      calculateAndStorePlayerNewRank(user, !isOpponentWinner);
+    if (user && gameAffectsPlayerRank())
+      calculateAndStorePlayerNewRank(
+        user,
+        getOpponentRank(currentGameSettings, user),
+        getOutcomeNumberFromOutcomeId(outcomeId)
+      );
   } else if (boardEngine.isDraw() || isDiceyChessDraw()) {
     board.gameOver = true;
     board.outcomeId = 0;
@@ -834,21 +844,58 @@ export const checkForGameOver: (
   }
 };
 
+/*
+A simple and widely used system for updating player rankings is the Elo rating system. It's easy to implement and works well for 1v1 games like chess.
+
+Here's a basic breakdown of the Elo formula:
+Expected Score for Player A:
+
+Where:
+
+R_A is Player A's current rating.
+R_B is Player B's current rating.
+S_A is the actual outcome for Player A (1 = win, 0.5 = draw, 0 = loss).
+K is the adjustment factor (typically 32 for casual players, 16 for pros).
+*/
+function calculatePlayerNewRank(
+  playerRank: number,
+  opponentRank: number,
+  outcomeNumber: GameOutcomeNumber,
+  kFactor: number = 32
+) {
+  // Calculate expected score
+  const expectedScore =
+    1 /
+    (1 +
+      Math.pow(
+        10,
+        (opponentRank - playerRank) / internalSettings.initPlayerRank
+      ));
+  // Update rank
+  const newRank = Math.round(
+    playerRank + kFactor * (outcomeNumber - expectedScore)
+  );
+  return newRank;
+}
+
 // When the game is over and user in session, if this was a game which
 // affects player rank (currently: if played against another player/AI) update
 // the rank in memory and in db storage:
+// actual outcome for Player A (1 = win, 0.5 = draw, 0 = loss).
 export async function calculateAndStorePlayerNewRank(
   user: User,
-  playerWon: boolean
+  opponentRank: number,
+  outcomeNumber: GameOutcomeNumber
 ): Promise<boolean> {
-  const newRank = Math.max(
-    internalSettings.initPlayerRank,
-    user.rank +
-      (playerWon ? 1 : -1) * internalSettings.rankPerGameUpdateIncrement
+  const newRank = calculatePlayerNewRank(
+    user.rank,
+    opponentRank,
+    outcomeNumber
   );
+  if (DebugOn) console.log('current player rank:', user.rank);
   if (newRank === user.rank) return true;
   user.rank = newRank;
-  if (DebugOn) console.log('updating player rank to', user.rank);
+  if (DebugOn) console.log('updating player rank to:', user.rank);
   try {
     if (await storageApi_updatePlayerRank(user)) {
       saveAuth(user, readToken()!);
@@ -860,13 +907,26 @@ export async function calculateAndStorePlayerNewRank(
   return false;
 }
 
+// outcome number for Player: (1 = win, 0.5 = draw, 0 = loss)
+const getOutcomeNumberFromOutcomeId = (outcomeId: number) =>
+  outcomeId === 0 ? 0.5 : outcomeId <= 2 ? 1 : 0;
+
+// Gets current opponents rank:
+const getOpponentRank = (
+  currentGameSettings: CurrentGameSettings,
+  user: User
+) =>
+  settings.onePlayerMode
+    ? currentGameSettings.opponentIsAI
+      ? settings.AIPlayerIsSmart
+        ? internalSettings.smartAIPlayerRank
+        : internalSettings.stupidAIPlayerRank
+      : onlineGameApi_globals.opponentRank
+    : user.rank;
+
 // Returns whether based on the recent game settings the player rank
 // should be updated (currently: if played against another player or smart AI):
-const gameAffectsPlayerRank: (
-  currentGameSettings: CurrentGameSettings
-) => boolean = (currentGameSettings: CurrentGameSettings) =>
-  settings.onePlayerMode &&
-  (!currentGameSettings.opponentIsAI || settings.AIPlayerIsSmart);
+const gameAffectsPlayerRank: () => boolean = () => settings.onePlayerMode;
 
 // Is this a draw situation for Dicey chess, since player still hasn't played all
 // moves in the current turn (based on the dice roll), but has no valid move to make:

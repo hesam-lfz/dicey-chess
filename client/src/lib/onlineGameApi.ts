@@ -12,6 +12,7 @@ import { User } from './auth';
 
 export type OnlineGameGlobals = {
   aborted: boolean;
+  opponentRank: number;
 };
 
 type InternalGlobals = {
@@ -48,6 +49,7 @@ type RemoteGameEventMessage = {
 // Some globals accessed by various components/pages:
 export const onlineGameApi_globals: OnlineGameGlobals = {
   aborted: false,
+  opponentRank: 400,
 };
 
 // Some globals accessed by various components/pages:
@@ -236,6 +238,7 @@ export function onlineGameApi_initialize(
         internalGlobals.busyWaitReattempts = 0;
         internalGlobals.gameMessagePipeline = [];
         internalGlobals.gameAbortHandled = false;
+        onlineGameApi_globals.opponentRank = data!.opponentRank;
         onOnlineGameReadyCallback(data!.color);
       }
     } else if (type === 'game') {

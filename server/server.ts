@@ -66,11 +66,12 @@ const pendingGameCloseTimeoutId2s: Record<string, NodeJS.Timeout | null> = {};
 const pendingGameDataCleanupTimerIds: Record<string, NodeJS.Timeout | null> =
   {};
 const inProgressGameCloseTimeoutIds: Record<string, NodeJS.Timeout | null> = {};
-
 const gameConnectionPins: Record<string, string> = {};
 const inProgressFriendGameInvitedFrom: Record<string, string> = {};
-
 const inProgressGameConnections: Record<string, WebSocket> = {};
+// To send each online game player the opponent's rank for the purpose of
+// calculating the new player rank after game is done:
+const onlineGamePlayerRanks: Record<string, number> = {};
 
 const db = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
@@ -365,7 +366,8 @@ app.get(
       }
       const sql = `
       select "userId",
-             "username"
+             "username",
+             "rank"
       from "users"
       where "username" = $1
     `;
@@ -380,6 +382,7 @@ app.get(
       if (user.userId === req.user?.userId)
         throw new ClientError(400, 'Cannot send invitation to self');
       const requestedPlayerId = String(user.userId);
+      const requestedPlayerRank = user.rank;
       // Check if invite request possible:
       if (!isRecheck && pendingGameFriendInviteRequestsTo[requestedPlayerId])
         throw new ClientError(
@@ -396,6 +399,7 @@ app.get(
         );
         pendingGameFriendInviteRequestsTo[requestedPlayerId] =
           requestingPlayerId;
+        onlineGamePlayerRanks[requestedPlayerId] = requestedPlayerRank;
       }
       // status = 0 means both players did mutual invite,
       // status = 1 means only 1 way so far:
@@ -513,14 +517,23 @@ wsServer.on('connection', (ws) => {
           const msg = {
             type: 'connection',
             msg: 'ready',
-            data: { color: 'w' },
+            data: {
+              color: 'w',
+              opponentRank: onlineGamePlayerRanks[friendId],
+            },
           };
           // Randomize player colors and send both players game ready message:
           const connections = [ws, friendWs];
           const randomIndex = Math.floor(Math.random() * 2);
+          msg.data.opponentRank =
+            onlineGamePlayerRanks[randomIndex === 0 ? friendId : userId];
           connections[randomIndex].send(JSON.stringify(msg));
           msg.data.color = 'b';
+          msg.data.opponentRank =
+            onlineGamePlayerRanks[randomIndex === 0 ? userId : friendId];
           connections[randomIndex === 0 ? 1 : 0].send(JSON.stringify(msg));
+          delete onlineGamePlayerRanks[userId];
+          delete onlineGamePlayerRanks[friendId];
           // Move game from pending to in-progress:
           // Clear timeouts set out to clear unsuccessful connection attempts:
           const tidUser = pendingGameDataCleanupTimerIds[userId];
@@ -671,6 +684,7 @@ const removeStaleGameData = async (userId: string): Promise<void> => {
   delete inProgressFriendGameInvitedFrom[userId];
   delete inProgressGameCloseTimeoutIds[userId];
   delete gameConnectionPins[userId];
+  delete onlineGamePlayerRanks[userId];
   await databaseDeleteOnlineGame(userId);
   if (friendId) {
     delete pendingGameFriendInviteRequestsTo[friendId];
@@ -681,6 +695,7 @@ const removeStaleGameData = async (userId: string): Promise<void> => {
     delete inProgressGameConnections[friendId];
     delete inProgressGameCloseTimeoutIds[friendId];
     delete gameConnectionPins[friendId];
+    delete onlineGamePlayerRanks[friendId];
     await databaseDeleteOnlineGame(friendId);
   }
   await cancelFriendInviteRequest(userId, friendId, false);
@@ -753,7 +768,9 @@ const cacheLog = (): void => {
     'inProgressGameConnections',
     Object.keys(inProgressGameConnections),
     'gameConnectionPins',
-    gameConnectionPins
+    gameConnectionPins,
+    'onlineGamePlayerRanks',
+    JSON.stringify(onlineGamePlayerRanks)
   );
 };
 
