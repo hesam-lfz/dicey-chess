@@ -228,7 +228,7 @@ dialog .modal-box {
   display: flex;
   flex-direction: column;
   min-height: 30vh;
-  max-height: 75vh;
+  max-height: 85vh;
   justify-content: space-between;
 }
 

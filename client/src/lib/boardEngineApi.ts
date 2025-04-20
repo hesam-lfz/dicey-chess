@@ -78,6 +78,7 @@ export type Settings = {
   AIPlayerIsSmart: boolean;
   userPlaysColor: Color | null;
   userPlaysColorRandomly: boolean;
+  AIGameAffectsPlayerRank: boolean;
 };
 
 // Settings specific for a given game:
@@ -115,7 +116,7 @@ export type SetCurrentBoardData = {
 };
 
 // outcome number for a game (1 = win, 0.5 = draw, 0 = loss):
-export type GameOutcomeNumber = 0 | 0.5 | 1;
+export type GameOutcomeScore = 0 | 0.5 | 1;
 
 export type SavedGame = {
   userId: number;
@@ -266,6 +267,7 @@ const defaultInitSettings: Settings = {
   AIPlayerIsSmart: true,
   userPlaysColor: WHITE,
   userPlaysColorRandomly: false,
+  AIGameAffectsPlayerRank: true,
 };
 
 let initSettings: Settings;
@@ -830,18 +832,18 @@ export const checkForGameOver: (
       '$OPPONENT',
       currentGameSettings.opponent
     );
-    // if user in session update player rank:
-    if (user && gameAffectsPlayerRank())
-      calculateAndStorePlayerNewRank(
-        user,
-        getOpponentRank(currentGameSettings, user),
-        getOutcomeNumberFromOutcomeId(outcomeId)
-      );
   } else if (boardEngine.isDraw() || isDiceyChessDraw()) {
     board.gameOver = true;
     board.outcomeId = 0;
     board.outcome = outcomes[0];
   }
+  // if game is over and user in session, update player rank:
+  if (
+    board.gameOver &&
+    user &&
+    gameAffectsPlayerRank(currentGameSettings, true)
+  )
+    calculateAndStorePlayerNewRank(currentGameSettings, user);
 };
 
 /*
@@ -860,7 +862,7 @@ K is the adjustment factor (typically 32 for casual players, 16 for pros).
 function calculatePlayerNewRank(
   playerRank: number,
   opponentRank: number,
-  outcomeNumber: GameOutcomeNumber,
+  outcomeScore: GameOutcomeScore,
   kFactor: number = 32
 ) {
   // Calculate expected score
@@ -873,7 +875,7 @@ function calculatePlayerNewRank(
       ));
   // Update rank
   const newRank = Math.round(
-    playerRank + kFactor * (outcomeNumber - expectedScore)
+    playerRank + kFactor * (outcomeScore - expectedScore)
   );
   return newRank;
 }
@@ -883,15 +885,12 @@ function calculatePlayerNewRank(
 // the rank in memory and in db storage:
 // actual outcome for Player A (1 = win, 0.5 = draw, 0 = loss).
 export async function calculateAndStorePlayerNewRank(
-  user: User,
-  opponentRank: number,
-  outcomeNumber: GameOutcomeNumber
+  currentGameSettings: CurrentGameSettings,
+  user: User
 ): Promise<boolean> {
-  const newRank = calculatePlayerNewRank(
-    user.rank,
-    opponentRank,
-    outcomeNumber
-  );
+  const outcomeScore = getOutcomeScoreFromOutcomeId(board.outcomeId!);
+  const opponentRank = getOpponentRank(currentGameSettings, user);
+  const newRank = calculatePlayerNewRank(user.rank, opponentRank, outcomeScore);
   if (DebugOn) console.log('current player rank:', user.rank);
   if (newRank === user.rank) return true;
   user.rank = newRank;
@@ -908,7 +907,7 @@ export async function calculateAndStorePlayerNewRank(
 }
 
 // outcome number for Player: (1 = win, 0.5 = draw, 0 = loss)
-const getOutcomeNumberFromOutcomeId = (outcomeId: number) =>
+const getOutcomeScoreFromOutcomeId = (outcomeId: number) =>
   outcomeId === 0 ? 0.5 : outcomeId <= 2 ? 1 : 0;
 
 // Gets current opponents rank:
@@ -925,8 +924,19 @@ const getOpponentRank = (
     : user.rank;
 
 // Returns whether based on the recent game settings the player rank
-// should be updated (currently: if played against another player or smart AI):
-const gameAffectsPlayerRank: () => boolean = () => settings.onePlayerMode;
+// should be updated (currently: if played against another player or AI):
+export const gameAffectsPlayerRank: (
+  currentGameSettings: CurrentGameSettings,
+  onGameOver: boolean
+) => boolean = (
+  currentGameSettings: CurrentGameSettings,
+  onGameOver: boolean
+) =>
+  !board.isLoadedGame &&
+  (onGameOver || !board.gameOver) &&
+  board.replayCurrentFlatIndex > 1 &&
+  settings.onePlayerMode &&
+  (settings.AIGameAffectsPlayerRank || !currentGameSettings.opponentIsAI);
 
 // Is this a draw situation for Dicey chess, since player still hasn't played all
 // moves in the current turn (based on the dice roll), but has no valid move to make:

@@ -6,8 +6,10 @@ import { FooterPanel } from '../components/FooterPanel';
 import { Modal } from '../components/Modal';
 import {
   board,
+  calculateAndStorePlayerNewRank,
   DebugOn,
   displayGameDuration,
+  gameAffectsPlayerRank,
   initBoardForGameReplay,
   internalSettings,
   isGameAgainstOnlineFriend,
@@ -26,8 +28,15 @@ import {
 } from '../lib/storageApi';
 import { Color, PieceSymbol } from 'chess.js';
 
-const infoMessageModalMessageDefault: string = 'Game saved.';
+const infoMessageModalMessageDefault = 'Game saved.';
 let infoMessageModalMessage: string = infoMessageModalMessageDefault;
+const resetGameModalMessageDefault = 'Start a new game?';
+const resetGameModalMessageGameAffectsRank =
+  'Resign from current game & start a new game?';
+let resetGameModalMessage: string = resetGameModalMessageDefault;
+const chooseGameToLoadModalMessageGameAffectsRank =
+  'Resign from current game & load a saved game?';
+let chooseGameToLoadModalMessageIncludesResignWarning = false;
 
 function renderPiece(
   color: Color,
@@ -126,6 +135,9 @@ export function Game() {
   }
 
   function onResetGame(): void {
+    resetGameModalMessage = gameAffectsPlayerRank(currentGameSettings, false)
+      ? resetGameModalMessageGameAffectsRank
+      : resetGameModalMessageDefault;
     setIsResetGameModalOpen(true);
   }
 
@@ -136,6 +148,9 @@ export function Game() {
 
   const resetGame = useCallback(() => {
     if (DebugOn) console.log('Resetting game!');
+    // if user in session, update player rank due to resign:
+    if (user && gameAffectsPlayerRank(currentGameSettings, false))
+      calculateAndStorePlayerNewRank(currentGameSettings, user);
     resetSettings(currentGameSettings, setNewCurrentGameSettings, false, false);
     resetBoard(
       currentGameSettings,
@@ -144,7 +159,12 @@ export function Game() {
     );
     setGameId(currentGameSettings.gameId);
     setReplayModeOn(false);
-  }, [currentGameSettings, setNewCurrentBoardData, setNewCurrentGameSettings]);
+  }, [
+    currentGameSettings,
+    setNewCurrentBoardData,
+    setNewCurrentGameSettings,
+    user,
+  ]);
 
   function handleInfoMessageDone() {
     infoMessageModalMessage = infoMessageModalMessageDefault;
@@ -164,6 +184,8 @@ export function Game() {
         openInfoMessageModal(false, 'No saved games found!');
       } else {
         setSavedGames(allSavedGames);
+        chooseGameToLoadModalMessageIncludesResignWarning =
+          gameAffectsPlayerRank(currentGameSettings, false);
         setIsChooseGameToLoadModalOpen(true);
       }
       handleLoadGameModalClose();
@@ -291,7 +313,7 @@ export function Game() {
           setIsResetGameModalOpen(false);
         }}>
         <div className="modal-box">
-          <p>Start a new game?</p>
+          <p>{resetGameModalMessage}</p>
           <div className="modal-actions">
             <span className="rainbow-colored-border">
               <button onClick={handleResetGameModalClose}>No</button>
@@ -315,7 +337,10 @@ export function Game() {
         </div>
       </Modal>
       <Modal isOpen={isChooseGameToLoadModalOpen} onClose={() => {}}>
-        <div className="modal-box">
+        <div className="modal-box compact-p">
+          {chooseGameToLoadModalMessageIncludesResignWarning ? (
+            <p>{chooseGameToLoadModalMessageGameAffectsRank}</p>
+          ) : null}
           <p>Click on a saved game to load:</p>
           <div
             className="loaded-games-box"

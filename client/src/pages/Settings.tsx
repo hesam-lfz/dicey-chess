@@ -66,6 +66,8 @@ export function Settings() {
   const [AIPlayerIsSmart, setAIPlayerIsSmart] = useState<boolean>(
     settings.AIPlayerIsSmart
   );
+  const [AIGameAffectsPlayerRank, setAIGameAffectsPlayerRank] =
+    useState<boolean>(settings.AIGameAffectsPlayerRank);
 
   const playVsFriendOnlineToggleSwitchRef = useRef<null | any>(null);
   const inviteFormUsernameRef = useRef<null | HTMLInputElement>(null);
@@ -153,6 +155,15 @@ export function Settings() {
     (checked: boolean) => {
       setAIPlayerIsSmart(checked);
       settings.AIPlayerIsSmart = checked;
+      resetBoardAndSaveSettings();
+    },
+    [resetBoardAndSaveSettings]
+  );
+
+  const onAIGameAffectsRankChange = useCallback(
+    (checked: boolean) => {
+      setAIGameAffectsPlayerRank(checked);
+      settings.AIGameAffectsPlayerRank = checked;
       resetBoardAndSaveSettings();
     },
     [resetBoardAndSaveSettings]
@@ -384,6 +395,16 @@ export function Settings() {
             containerOnChange={(checked: boolean) => onAISmartChange(!checked)}
           />
         </div>
+        <div className="dotted-border">
+          <ToggleSwitch
+            label="Game vs. AI affects player rank"
+            initChecked={AIGameAffectsPlayerRank}
+            containerOnChange={(checked: boolean) =>
+              onAIGameAffectsRankChange(checked)
+            }
+          />
+        </div>
+
         <div className="flex flex-align-center">
           <span className="rainbow-colored-border">
             <button onClick={onResetSettings}>Reset Settings</button>
