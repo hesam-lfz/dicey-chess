@@ -74,6 +74,7 @@ export function Settings() {
 
   // Show any messages that might have been set globally (currently, falling back
   // to stupid ai when ai engine API is blocked):
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (gameGlobals.dialogMessagesToShow.length > 0) {
       infoMessageModalMessage = gameGlobals.dialogMessagesToShow.shift()!;
