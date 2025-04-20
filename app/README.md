@@ -1,6 +1,6 @@
 # dicey-chess-app
 
-A React Native mobile app featuring a variation of the game of chess called "Dicey Chess"
+An Expo React Native mobile app (iOS/Android) featuring a variation of the game of chess called "Dicey Chess"
 
 ## Dicey Chess
 
@@ -12,4 +12,8 @@ For example, _4_ moves if the dice roll was 5 & 1, and _0_ moves if the dice rol
 
 ## Live Website
 
-Play at: [Dicey Chess](https://www.diceychess.com/)
+Play the web app at: [Dicey Chess](https://www.diceychess.com/)
+
+## Download
+
+App download links will be available soon...
