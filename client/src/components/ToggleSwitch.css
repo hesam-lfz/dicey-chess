@@ -13,12 +13,11 @@
   width: 75px;
   display: inline-block;
   text-align: left;
-
-  /* top: 8px; */
 }
 
 .toggle-switch-container > span {
   text-align: start;
+  flex-basis: 75%;
 }
 
 .toggle-switch-checkbox {
