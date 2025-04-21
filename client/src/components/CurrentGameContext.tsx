@@ -171,7 +171,7 @@ export function CurrentGameContextProvider({ children }: Props) {
           event.preventDefault();
           calculateAndStorePlayerNewRank(currentGameSettings, u!);
           // Chrome requires the following line to trigger the dialog.
-          event.returnValue = '';
+          event.returnValue = true;
           return '';
         }
       };
