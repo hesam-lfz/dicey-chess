@@ -18,6 +18,8 @@ import {
   isGameAgainstOnlineFriend,
   onlineGameApi_close,
   resetSettings,
+  gameAffectsPlayerRank,
+  calculateAndStorePlayerNewRank,
 } from '../lib';
 import { WHITE } from 'chess.js';
 
@@ -171,6 +173,9 @@ export function CurrentGameContextProvider({ children }: Props) {
     // If we're currently in a game with an online friend, close the web socket
     // connection:
     if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
+    // if in the middle of a game, update player rank due to resign:
+    if (gameAffectsPlayerRank(currentGameSettings, user, false))
+      calculateAndStorePlayerNewRank(currentGameSettings, user!);
     // Reset settings/board:
     resetSettings(currentGameSettings, setNewCurrentGameSettings, false, false);
     resetBoard(

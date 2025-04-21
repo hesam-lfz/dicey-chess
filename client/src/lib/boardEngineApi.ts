@@ -838,12 +838,8 @@ export const checkForGameOver: (
     board.outcome = outcomes[0];
   }
   // if game is over and user in session, update player rank:
-  if (
-    board.gameOver &&
-    user &&
-    gameAffectsPlayerRank(currentGameSettings, true)
-  )
-    calculateAndStorePlayerNewRank(currentGameSettings, user);
+  if (board.gameOver && gameAffectsPlayerRank(currentGameSettings, user, true))
+    calculateAndStorePlayerNewRank(currentGameSettings, user!);
 };
 
 /*
@@ -925,16 +921,20 @@ const getOpponentRank = (
 
 // Returns whether based on the recent game settings the player rank
 // should be updated (currently: if played against another player or AI):
+// Game past first couple of moves is considered affecting rank...
 export const gameAffectsPlayerRank: (
   currentGameSettings: CurrentGameSettings,
+  user: User | undefined,
   onGameOver: boolean
 ) => boolean = (
   currentGameSettings: CurrentGameSettings,
+  user: User | undefined,
   onGameOver: boolean
 ) =>
+  user !== undefined &&
   !board.isLoadedGame &&
   (onGameOver || !board.gameOver) &&
-  board.replayCurrentFlatIndex > 1 &&
+  board.replayCurrentFlatIndex > 1 && // Game past first couple of moves is considered affecting rank...
   settings.onePlayerMode &&
   (settings.AIGameAffectsPlayerRank || !currentGameSettings.opponentIsAI);
 

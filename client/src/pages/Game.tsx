@@ -135,7 +135,11 @@ export function Game() {
   }
 
   function onResetGame(): void {
-    resetGameModalMessage = gameAffectsPlayerRank(currentGameSettings, false)
+    resetGameModalMessage = gameAffectsPlayerRank(
+      currentGameSettings,
+      user,
+      false
+    )
       ? resetGameModalMessageGameAffectsRank
       : resetGameModalMessageDefault;
     setIsResetGameModalOpen(true);
@@ -149,8 +153,8 @@ export function Game() {
   const resetGame = useCallback(() => {
     if (DebugOn) console.log('Resetting game!');
     // if user in session, update player rank due to resign:
-    if (user && gameAffectsPlayerRank(currentGameSettings, false))
-      calculateAndStorePlayerNewRank(currentGameSettings, user);
+    if (gameAffectsPlayerRank(currentGameSettings, user, false))
+      calculateAndStorePlayerNewRank(currentGameSettings, user!);
     resetSettings(currentGameSettings, setNewCurrentGameSettings, false, false);
     resetBoard(
       currentGameSettings,
@@ -185,7 +189,7 @@ export function Game() {
       } else {
         setSavedGames(allSavedGames);
         chooseGameToLoadModalMessageIncludesResignWarning =
-          gameAffectsPlayerRank(currentGameSettings, false);
+          gameAffectsPlayerRank(currentGameSettings, user, false);
         setIsChooseGameToLoadModalOpen(true);
       }
       handleLoadGameModalClose();
@@ -238,6 +242,9 @@ export function Game() {
       // Find the id of the saved game to load:
       for (const g of savedGames!) {
         if (gameId === g.at) {
+          // if user in session, update player rank due to resign:
+          if (gameAffectsPlayerRank(currentGameSettings, user, false))
+            calculateAndStorePlayerNewRank(currentGameSettings, user!);
           // Prepare the board for replay of this saved game:
           loadSuccess = initBoardForGameReplay(
             currentGameSettings,
