@@ -158,9 +158,29 @@ export function CurrentGameContextProvider({ children }: Props) {
 
   // Read any pre-existing user session stored in local storage:
   useEffect(() => {
-    setUser(readUser());
+    const u = readUser();
+    setUser(u);
     setToken(readToken());
-  }, []);
+    // if user in session, update player rank in case of page refresh or tab close
+    // since it would be considered a resign:
+    if (u) {
+      const handlePageRefresh = (event: Event) => {
+        // if in the middle of a game, update player rank due to resign:
+        if (gameAffectsPlayerRank(currentGameSettings, u, false)) {
+          // Standard-compliant method to prevent the prompt
+          event.preventDefault();
+          calculateAndStorePlayerNewRank(currentGameSettings, u!);
+          // Chrome requires the following line to trigger the dialog.
+          event.returnValue = '';
+          return '';
+        }
+      };
+      window.addEventListener('beforeunload', handlePageRefresh);
+      return () => {
+        window.removeEventListener('beforeunload', handlePageRefresh);
+      };
+    }
+  }, [currentGameSettings]);
 
   function handleSignIn(user: User, token: string) {
     setUser(user);
