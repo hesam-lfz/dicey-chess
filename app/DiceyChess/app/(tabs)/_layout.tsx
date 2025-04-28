@@ -3,7 +3,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import LogoIcon from '@/components/ui/LogoIcon';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -30,9 +30,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
-          ),
+          tabBarIcon: ({ focused }) => <LogoIcon size={32} focused={focused} />,
         }}
       />
       <Tabs.Screen
