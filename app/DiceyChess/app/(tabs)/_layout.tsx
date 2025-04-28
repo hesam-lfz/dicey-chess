@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-
 import { HapticTab } from '@/components/HapticTab';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
@@ -36,11 +36,33 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="about"
         options={{
-          title: 'Explore',
+          title: 'About',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <Ionicons
+              size={32}
+              name="information-circle-outline"
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color }) => (
+            <Ionicons size={28} name="settings-sharp" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="signin"
+        options={{
+          title: 'Sign in',
+          tabBarIcon: ({ color }) => (
+            <Ionicons size={28} name="log-in" color={color} />
           ),
         }}
       />
