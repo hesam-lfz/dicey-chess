@@ -24,7 +24,6 @@ export default function TabTwoScreen() {
           ...styles.flexCol,
           ...styles.flexAlignCenter,
         }}>
-        <ThemedText style={styles.text}>Blah</ThemedText>
         <ToggleSwitch
           label="Play vs. AI"
           initChecked={false}

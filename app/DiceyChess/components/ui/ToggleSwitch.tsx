@@ -1,3 +1,8 @@
+import { Switch, StyleSheet } from 'react-native';
+import { vw } from 'react-native-css-vh-vw';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+
 import React, {
   forwardRef,
   useCallback,
@@ -5,6 +10,7 @@ import React, {
   useImperativeHandle,
   useState,
 } from 'react';
+
 // import './ToggleSwitch.css';
 
 type Props = {
@@ -41,27 +47,66 @@ export const ToggleSwitch = forwardRef(
     );
 
     return (
-      <div className="input-element-container toggle-switch-container">
-        <span>{label}</span>
-        <div
-          className={
-            'toggle-switch-toggle-switch' + (disabled ? ' disabled' : '')
-          }>
-          <input
-            type="checkbox"
-            className="toggle-switch-checkbox"
-            name={label}
-            id={label}
-            checked={checked}
-            onChange={onChange}
+      <ThemedView
+        style={{
+          ...styles.inputElementContainer,
+          ...styles.toggleSwitchContainer,
+          ...styles.flex,
+        }}>
+        <ThemedText type="default" style={styles.text}>
+          {label}
+        </ThemedText>
+        <ThemedView
+          style={{
+            ...styles.toggleSwitchToggleSwitch,
+            // ...(disabled ? styles.disabled : {}),
+          }}>
+          <Switch
             disabled={!!disabled}
+            value={checked}
+            onValueChange={onChange}
+            style={styles.ToggleSwitchCheckbox}
           />
+
           <label className="toggle-switch-label" htmlFor={label}>
             <span className="toggle-switch-inner" />
             <span className="toggle-switch-switch" />
           </label>
-        </div>
-      </div>
+        </ThemedView>
+      </ThemedView>
     );
   }
 );
+
+const styles = StyleSheet.create({
+  inputElementContainer: {
+    padding: vw(1),
+  },
+  toggleSwitchContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    textAlign: 'center',
+    fontSize: 25,
+    width: vw(50),
+    padding: vw(1),
+  },
+  toggleSwitchToggleSwitch: {
+    position: 'relative',
+    width: 75,
+    // display: 'inline-block',
+    textAlign: 'left',
+  },
+  flex: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  disabled: {
+    opacity: 0.1,
+    cursor: 'none',
+  },
+  ToggleSwitchCheckbox: {},
+  text: {
+    fontFamily: 'Sono',
+  },
+});
