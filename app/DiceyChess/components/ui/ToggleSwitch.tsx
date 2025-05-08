@@ -2,6 +2,7 @@ import { Switch, StyleSheet } from 'react-native';
 import { vw } from 'react-native-css-vh-vw';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Styles } from '@/styles/Styles';
 
 import React, {
   forwardRef,
@@ -10,8 +11,6 @@ import React, {
   useImperativeHandle,
   useState,
 } from 'react';
-
-// import './ToggleSwitch.css';
 
 type Props = {
   label: string;
@@ -51,9 +50,9 @@ export const ToggleSwitch = forwardRef(
         style={{
           ...styles.inputElementContainer,
           ...styles.toggleSwitchContainer,
-          ...styles.flex,
+          ...Styles.flex,
         }}>
-        <ThemedText type="default" style={styles.text}>
+        <ThemedText type="default" style={Styles.text}>
           {label}
         </ThemedText>
         <ThemedView
@@ -97,16 +96,5 @@ const styles = StyleSheet.create({
     // display: 'inline-block',
     textAlign: 'left',
   },
-  flex: {
-    display: 'flex',
-    flexDirection: 'row',
-  },
-  disabled: {
-    opacity: 0.1,
-    cursor: 'none',
-  },
   ToggleSwitchCheckbox: {},
-  text: {
-    fontFamily: 'Sono',
-  },
 });

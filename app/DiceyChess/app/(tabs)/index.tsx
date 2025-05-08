@@ -1,38 +1,33 @@
-import { StyleSheet } from 'react-native';
-
+import { ScrollView } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Styles } from '@/styles/Styles';
 
-export default function HomeScreen() {
+export default function GameTabScreen() {
   return (
-    <>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={styles.text}>
-          Game
-        </ThemedText>
+    <ScrollView>
+      <ThemedView
+        style={{
+          ...Styles.tabPage,
+        }}>
+        <ThemedView
+          style={{
+            ...Styles.mainPanel,
+            ...Styles.paddedMainPanel,
+            ...Styles.flex,
+            ...Styles.flexCol,
+            ...Styles.flexAlignCenter,
+          }}>
+          <ThemedText
+            type="title"
+            style={{ ...Styles.headerText, ...Styles.text }}>
+            Game
+          </ThemedText>
+        </ThemedView>
       </ThemedView>
-    </>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-  text: {
-    fontFamily: 'Sono',
-  },
-});
+// const styles = StyleSheet.create({
+// });

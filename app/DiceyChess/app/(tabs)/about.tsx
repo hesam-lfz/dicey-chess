@@ -1,32 +1,33 @@
-import { StyleSheet } from 'react-native';
-
+import { ScrollView } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Styles } from '@/styles/Styles';
 
-export default function TabTwoScreen() {
+export default function AboutTabScreen() {
   return (
-    <>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={styles.text}>
-          About
-        </ThemedText>
+    <ScrollView>
+      <ThemedView
+        style={{
+          ...Styles.tabPage,
+        }}>
+        <ThemedView
+          style={{
+            ...Styles.mainPanel,
+            ...Styles.paddedMainPanel,
+            ...Styles.flex,
+            ...Styles.flexCol,
+            ...Styles.flexAlignCenter,
+          }}>
+          <ThemedText
+            type="title"
+            style={{ ...Styles.headerText, ...Styles.text }}>
+            About
+          </ThemedText>
+        </ThemedView>
       </ThemedView>
-    </>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  text: {
-    fontFamily: 'Sono',
-  },
-});
+// const styles = StyleSheet.create({
+// });
