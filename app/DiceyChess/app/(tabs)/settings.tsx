@@ -2,8 +2,34 @@ import { ScrollView } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+// import { useCurrentGameContext } from '../hooks/useCurrentGameContext';
 import { Styles } from '@/styles/Styles';
 import { useState } from 'react';
+/*
+import {
+
+  type InviteRequestResponse,
+  database_sendInviteFriendRequestByUsername,
+  DebugOn,
+  gameGlobals,
+  internalSettings,
+  onlineGameApi_globals,
+  onlineGameApi_initialize,
+  resetBoard,
+  resetSettings,
+  saveSettings,
+
+  settings,
+} from '../lib';
+
+import {
+  // Color,
+  WHITE,
+  // BLACK
+} from 'chess.js';
+ */
+// import { useNavigate } from 'react-router-dom';
+// import { AppSubdomain } from '../App';
 
 /*
 const infoMessageModalMessageDefault =
