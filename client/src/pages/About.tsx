@@ -58,14 +58,32 @@ export function About() {
           </p>
         </div>
         <h2>About Creators</h2>
+
         <div className="">
+          <div>
+            <a
+              href="https://www.linkedin.com/company/semi-games/"
+              target="_blank">
+              <img
+                className="header-logo"
+                src="https://hesam.us/cs/semigames/semi-games-tr-logo.png"
+              />
+            </a>
+          </div>
           This chess variation game and{' '}
           <a href="https://github.com/hesam-lfz/dicey-chess/" target="_blank">
             open-source
           </a>{' '}
-          full-stack TypeScript ReactJS website is designed &amp; developed by:{' '}
+          full-stack TypeScript ReactJS website is designed &amp; developed by:
+          <br />
           <a href="https://hesam.us" target="_blank">
             Hesam (Sam) Samimi
+          </a>{' '}
+          at{' '}
+          <a
+            href="https://www.linkedin.com/company/semi-games/"
+            target="_blank">
+            Semi Games
           </a>
         </div>
         <h2>Credits</h2>
