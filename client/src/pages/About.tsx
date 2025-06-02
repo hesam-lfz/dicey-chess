@@ -61,12 +61,10 @@ export function About() {
 
         <div className="">
           <div>
-            <a
-              href="https://www.linkedin.com/company/semi-games/"
-              target="_blank">
+            <a href="https://www.semigames.us/" target="_blank">
               <img
                 className="header-logo"
-                src="https://hesam.us/cs/semigames/semi-games-tr-logo.png"
+                src="https://www.semigames.us/images/semi-games-logo.png"
               />
             </a>
           </div>
@@ -80,9 +78,7 @@ export function About() {
             Hesam (Sam) Samimi
           </a>{' '}
           at{' '}
-          <a
-            href="https://www.linkedin.com/company/semi-games/"
-            target="_blank">
+          <a href="https://www.semigames.us/" target="_blank">
             Semi Games
           </a>
         </div>
