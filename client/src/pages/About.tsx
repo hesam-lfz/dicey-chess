@@ -63,7 +63,7 @@ export function About() {
           <div>
             <a href="https://www.semigames.us/" target="_blank">
               <img
-                className="header-logo"
+                className="header-logo circle"
                 src="https://www.semigames.us/images/semi-games-logo.png"
               />
             </a>

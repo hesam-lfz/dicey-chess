@@ -99,6 +99,10 @@ dialog .rainbow-colored-border {
   width: 10vw;
 }
 
+.circle {
+  border-radius: 50%;
+}
+
 .header-side {
   display: flex;
   align-items: center;
