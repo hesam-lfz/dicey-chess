@@ -273,7 +273,7 @@ let initSettings: Settings;
 
 export const DebugOn = true; // window.location.search.includes('debugOn=true');
 
-export let settings: Settings;
+export let settings: Settings = { ...defaultInitSettings };
 
 export let board: Board;
 export let boardEngine: Chess; // <-- board rules engine
