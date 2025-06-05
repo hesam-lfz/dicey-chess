@@ -1,8 +1,8 @@
 import { ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { AButton } from '@/components/ui/AButton';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { useCurrentGameContext } from '@/hooks/useCurrentGameContext';
 import { Styles } from '@/styles/Styles';
@@ -464,21 +464,8 @@ export default function SettingsTabScreen() {
               }
             />
           </ThemedView>
-          <ThemedView
-            style={{
-              ...Styles.flex,
-              ...Styles.flexCol,
-              ...Styles.flexAlignCenter,
-              ...Styles.rainbowColoredBorder,
-            }}>
-            <LinearGradient
-              colors={['#00c0ff', '#ffcf00', '#fc4f4f']}
-              style={{ flex: 1 }}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}>
-              <button onClick={onResetSettings}>Reset Settings</button>
-            </LinearGradient>
-          </ThemedView>
+
+          <AButton title={'Reset Settings'} onPress={onResetSettings} />
         </ThemedView>
       </ThemedView>
     </ScrollView>

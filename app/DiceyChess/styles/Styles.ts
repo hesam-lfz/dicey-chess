@@ -33,7 +33,7 @@ export const Styles = StyleSheet.create({
   },
   rainbowColoredBorder: {
     padding: 5,
-    borderRadius: 15,
+
     marginTop: 15,
     marginBottom: 15,
     marginLeft: 0,
@@ -58,6 +58,26 @@ export const Styles = StyleSheet.create({
     marginBottom: 20,
   },
   text: {
+    fontFamily: 'Sono',
+  },
+  button: {
+    color: 'white',
+    borderRadius: 10,
+    borderWidth: 5,
+    borderStyle: 'solid',
+    borderColor: 'transparent',
+    margin: 5,
+    padding: 12,
+    fontSize: 19,
+    fontWeight: 500,
+    backgroundColor: 'black',
+    cursor: 'pointer',
+    minWidth: 100,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 19,
+    fontWeight: 500,
     fontFamily: 'Sono',
   },
 });
