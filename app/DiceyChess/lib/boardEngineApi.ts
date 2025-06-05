@@ -1,21 +1,21 @@
-import Icon_wk from '../assets/images/king_b.svg';
-import Icon_bk from '../assets/king_b.svg';
-import Icon_wq from '../assets/queen_w.svg';
-import Icon_bq from '../assets/queen_b.svg';
-import Icon_wb from '../assets/bishop_w.svg';
-import Icon_bb from '../assets/bishop_b.svg';
-import Icon_wn from '../assets/knight_w.svg';
-import Icon_bn from '../assets/knight_b.svg';
-import Icon_wr from '../assets/rook_w.svg';
-import Icon_br from '../assets/rook_b.svg';
-import Icon_wp from '../assets/pawn_w.svg';
-import Icon_bp from '../assets/pawn_b.svg';
-import Icon_Dice1 from '../assets/dice-1.svg';
-import Icon_Dice2 from '../assets/dice-2.svg';
-import Icon_Dice3 from '../assets/dice-3.svg';
-import Icon_Dice4 from '../assets/dice-4.svg';
-import Icon_Dice5 from '../assets/dice-5.svg';
-import Icon_Dice6 from '../assets/dice-6.svg';
+import Icon_wk from '@/assets/images/king_w.svg';
+import Icon_bk from '@/assets/images/king_b.svg';
+import Icon_wq from '@/assets/images/queen_w.svg';
+import Icon_bq from '@/assets/images/queen_b.svg';
+import Icon_wb from '@/assets/images/bishop_w.svg';
+import Icon_bb from '@/assets/images/bishop_b.svg';
+import Icon_wn from '@/assets/images/knight_w.svg';
+import Icon_bn from '@/assets/images/knight_b.svg';
+import Icon_wr from '@/assets/images/rook_w.svg';
+import Icon_br from '@/assets/images/rook_b.svg';
+import Icon_wp from '@/assets/images/pawn_w.svg';
+import Icon_bp from '@/assets/images/pawn_b.svg';
+import Icon_Dice1 from '@/assets/images/dice-1.svg';
+import Icon_Dice2 from '@/assets/images/dice-2.svg';
+import Icon_Dice3 from '@/assets/images/dice-3.svg';
+import Icon_Dice4 from '@/assets/images/dice-4.svg';
+import Icon_Dice5 from '@/assets/images/dice-5.svg';
+import Icon_Dice6 from '@/assets/images/dice-6.svg';
 
 import {
   Chess,
@@ -185,7 +185,6 @@ export const diceSVGs: { [key: string]: any } = {
 export const playerIconSVGs = {
   w: pieceSVGs.Icon_wp,
   b: pieceSVGs.Icon_bp,
-  favi: Icon_favi,
 };
 
 export const allColors: Color[] = [WHITE, BLACK];
@@ -272,7 +271,7 @@ const defaultInitSettings: Settings = {
 
 let initSettings: Settings;
 
-export const DebugOn = window.location.search.includes('debugOn=true');
+export const DebugOn = true; // window.location.search.includes('debugOn=true');
 
 export let settings: Settings;
 
@@ -353,6 +352,7 @@ export const resetBoard = (
   setNewCurrentGameSettings: () => void,
   setNewCurrentBoardData: (data: SetCurrentBoardData, setState: boolean) => void
 ): void => {
+  console.log('start resetBoard. settings:', settings);
   // If we're currently in a game with an online friend, close the web socket
   // connection:
   if (isGameAgainstOnlineFriend(currentGameSettings)) onlineGameApi_close();
@@ -382,6 +382,7 @@ export const resetBoard = (
   // close the chess AI engine socket if we have one running currently:
   if (chessAiEngine_socket) chessAiEngineApi_closeChessAiEngine_socket();
   // If we need the chess aI engine (1-player game) set it up:
+  console.log('start resetBoard. settings:', settings);
   if (isGameAgainstAI(currentGameSettings) && settings.AIPlayerIsSmart)
     chessAiEngineApi_initChessAiEngine();
 };

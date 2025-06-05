@@ -31,6 +31,14 @@ export const Styles = StyleSheet.create({
     marginLeft: 0,
     marginRight: 0,
   },
+  rainbowColoredBorder: {
+    padding: 5,
+    borderRadius: 15,
+    marginTop: 15,
+    marginBottom: 15,
+    marginLeft: 0,
+    marginRight: 0,
+  },
   flex: {
     display: 'flex',
     flexDirection: 'row',

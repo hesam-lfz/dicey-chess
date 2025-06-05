@@ -158,6 +158,25 @@ export function CurrentGameContextProvider({ children }: Props) {
 
   // Read any pre-existing user session stored in local storage:
   useEffect(() => {
+    if (!gameInitDone) {
+      gameInitDone = true;
+      // At page refresh or each time a setting is changed, we want to reset/reload the current
+      // game settings and reset the board:
+      // Load initial settings:
+      if (DebugOn) console.log('load settings...');
+      loadSettings(currentGameSettings, setNewCurrentGameSettings);
+      if (DebugOn) console.log(currentGameSettings);
+
+      // FIXME: This needs to be somewhere else??
+      // Reset the board:
+      if (DebugOn) console.log('reset board...');
+      resetBoard(
+        currentGameSettings,
+        setNewCurrentGameSettings,
+        setNewCurrentBoardData
+      );
+    }
+
     const u = readUser();
     setUser(u);
     setToken(readToken());
@@ -208,25 +227,6 @@ export function CurrentGameContextProvider({ children }: Props) {
     setToken(undefined);
     removeAuth();
     storageApi_handleSignInOut();
-  }
-
-  if (!gameInitDone) {
-    gameInitDone = true;
-    // At page refresh or each time a setting is changed, we want to reset/reload the current
-    // game settings and reset the board:
-    // Load initial settings:
-    if (DebugOn) console.log('load settings...');
-    loadSettings(currentGameSettings, setNewCurrentGameSettings);
-    if (DebugOn) console.log(currentGameSettings);
-
-    // FIXME: This needs to be somewhere else??
-    // Reset the board:
-    if (DebugOn) console.log('reset board...');
-    resetBoard(
-      currentGameSettings,
-      setNewCurrentGameSettings,
-      setNewCurrentBoardData
-    );
   }
 
   return (
