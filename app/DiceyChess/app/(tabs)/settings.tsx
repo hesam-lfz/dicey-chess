@@ -78,6 +78,14 @@ export default function SettingsTabScreen() {
   const [AIGameAffectsPlayerRank, setAIGameAffectsPlayerRank] =
     useState<boolean>(settings.AIGameAffectsPlayerRank);
 
+  console.log(
+    'onePlayer',
+    onePlayer,
+    settings.onePlayerMode,
+    'opponentIsAI',
+    opponentIsAI,
+    settings.opponentIsAI
+  );
   const playVsFriendOnlineToggleSwitchRef = useRef<null | any>(null);
   const inviteFormUsernameRef = useRef<null | HTMLInputElement>(null);
   const inviteFormFriendUsernameRef = useRef<null | HTMLInputElement>(null);

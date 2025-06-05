@@ -37,8 +37,8 @@ export const ToggleSwitch = forwardRef(
     }));
 
     const onChange = useCallback(
-      (e: any) => {
-        const newChecked = e.target.checked;
+      (newChecked: any) => {
+        console.log(newChecked);
         setChecked(newChecked);
         containerOnChange(newChecked);
       },

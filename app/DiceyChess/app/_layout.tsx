@@ -18,7 +18,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    Sono: require('../assets/fonts/Sono-Regular.ttf'),
+    Sono: require('@/assets/fonts/Sono-Regular.ttf'),
   });
 
   useEffect(() => {

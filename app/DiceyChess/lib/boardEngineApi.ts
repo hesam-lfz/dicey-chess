@@ -83,6 +83,7 @@ export type Settings = {
 
 // Settings specific for a given game:
 export type CurrentGameSettings = {
+  settingsRetrieved: boolean;
   // Will set to true when AI engine API cannot be used due to network failures/restrictions:
   chessAiEngine_fallbackActivated: boolean;
   gameId: number;
@@ -320,6 +321,7 @@ export const resetSettings = (
     currentGameSettings,
     setNewCurrentGameSettings
   );
+  currentGameSettings.settingsRetrieved ||= true;
   if (DebugOn) console.log('done resetSettings', settings, currentGameSettings);
 };
 
