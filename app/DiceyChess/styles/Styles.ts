@@ -57,6 +57,10 @@ export const Styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
   },
+  headerLogoName: {
+    textDecorationColor: 'green',
+    fontSize: 22,
+  },
   text: {
     fontFamily: 'Sono',
   },

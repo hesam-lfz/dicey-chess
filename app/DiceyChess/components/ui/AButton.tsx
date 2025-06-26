@@ -3,12 +3,12 @@ import { ThemedView } from '@/components/ThemedView';
 import { Styles } from '@/styles/Styles';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export type ButtonProps = {
+export type AButtonProps = {
   title: string;
   onPress: () => void;
 };
 
-export const AButton = ({ title, onPress }: ButtonProps) => {
+export const AButton = ({ title, onPress }: AButtonProps) => {
   return (
     <ThemedView
       style={{

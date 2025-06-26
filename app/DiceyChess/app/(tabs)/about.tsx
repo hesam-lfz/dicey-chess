@@ -1,7 +1,8 @@
 import { ScrollView } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+// import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Styles } from '@/styles/Styles';
+import { GradientText } from '@/components/ui/GradientText';
 
 export default function AboutTabScreen() {
   return (
@@ -18,11 +19,12 @@ export default function AboutTabScreen() {
             ...Styles.flexCol,
             ...Styles.flexAlignCenter,
           }}>
-          <ThemedText
-            type="title"
-            style={{ ...Styles.headerText, ...Styles.text }}>
-            About
-          </ThemedText>
+          <ThemedView
+            style={{
+              ...Styles.rainbowColored,
+            }}>
+            <GradientText title="GradientText" />
+          </ThemedView>
         </ThemedView>
       </ThemedView>
     </ScrollView>
